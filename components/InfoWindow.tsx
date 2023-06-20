@@ -2,7 +2,7 @@ import { Box, Flex, Image, Text } from "@chakra-ui/react";
 import { InfoWindow } from "@react-google-maps/api";
 import React from "react";
 import { GLocation, PullUp } from "../types";
-// import { useSession } from "next-auth/client";
+
 
 const MyInfoWindow = ({ activeData, clusterCenter }: { activeData: PullUp[], clusterCenter: GLocation }) => {
   const options = {
@@ -14,7 +14,7 @@ const MyInfoWindow = ({ activeData, clusterCenter }: { activeData: PullUp[], clu
   const hasOneItem = activeData.length && activeData.length == 1
   // console.log("infowindow fired")
   // console.log(activeData, hasOneItem)
-  // const [session, loading] = useSession()
+  
   return (
 
     hasOneItem ? <SingleInfoContent data={activeData} options={options} /> : <MultipleInfoContent data={activeData} options={options} />

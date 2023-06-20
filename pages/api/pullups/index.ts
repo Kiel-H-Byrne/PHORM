@@ -1,5 +1,7 @@
-import { getPullUps, getPullupsNearBy, insertPullUp } from "../../../db/index";
-import { connectToDatabase } from "../../../db/mongodb";
+// import { getPullUps, getPullupsNearBy, insertPullUp } from "../../../db/index";
+// import { connectToDatabase } from "../../../db/mongodb";
+
+import { getPullUps, getPullupsNearBy, insertPullUp } from "@/db/pullup";
 
 const maxAge = 1 * 24 * 60 * 60;
 
@@ -51,5 +53,3 @@ const pullupHandler = async (req: any, res: any) => {
 // handler.post(async (req: Request | any, res: Response | any) => {
 //
 // });
-
-export default pullupHandler;

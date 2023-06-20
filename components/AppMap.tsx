@@ -1,4 +1,4 @@
-import { memo, useState } from "react";
+import { useState } from "react";
 
 import { GoogleMap, GoogleMapProps, LoadScript, MarkerClusterer } from "@react-google-maps/api";
 import { Libraries } from "@react-google-maps/api/dist/utils/make-load-script-url";
@@ -97,15 +97,15 @@ interface IAppMap {
   mapInstance: GoogleMapProps & any;
 }
 
-const AppMap = memo(({
+const AppMap = ({
   clientLocation,
   setMapInstance,
   mapInstance,
 }: IAppMap) => {
   const { isOpen: isDrawerOpen, onOpen: toggleDrawer, onClose: setDrawerClose } = useDisclosure()
   const { isOpen: isWindowOpen, onToggle: toggleWindow, onClose: setWindowClose } = useDisclosure()
-  const [infoWindowPosition, setInfoWindowPosition] = useState(null as GLocation);
-  const [activeData, setActiveData] = useState(null as PullUp[]);
+  const [infoWindowPosition, setInfoWindowPosition] = useState({} as GLocation);
+  const [activeData, setActiveData] = useState([] as PullUp[]);
   // console.log(activeData)
   const toast = useToast();
   activeData && toast.closeAll()
@@ -156,7 +156,7 @@ const AppMap = memo(({
     // Important! Always set the container height explicitly via mapContainerClassName
     <LoadScript
       id="script-loader"
-      googleMapsApiKey={process.env.GOOGLE_API_KEY}
+      googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? ''}
       language="en"
       region="us"
       libraries={LIBRARIES}
@@ -295,6 +295,6 @@ const AppMap = memo(({
       </GoogleMap>
     </LoadScript>
   );
-});
+};
 
 export default AppMap;
