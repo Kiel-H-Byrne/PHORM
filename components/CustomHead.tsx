@@ -1,4 +1,3 @@
-import React from "react";
 import Head from "next/head";
 
 interface Props {
@@ -89,8 +88,6 @@ export const CustomHead = ({ title }: Props) => {
         href="/img/icons/safari-pinned-tab.svg"
         color="#9BA17B"
       />
-<link href="https://unpkg.com/video.js/dist/video-js.min.css" rel="stylesheet" />
-<script src="https://unpkg.com/video.js/dist/video.min.js" />
 
     </Head>
   );

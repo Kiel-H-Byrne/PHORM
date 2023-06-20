@@ -1,10 +1,10 @@
 import { Button, Center, Icon, IconButton, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Text, useDisclosure } from '@chakra-ui/react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { signIn, useSession } from 'next-auth/react';
+import { useEffect, useState } from 'react';
+import { BiMapPin, BiMessageAltAdd } from 'react-icons/bi';
+import { MdMyLocation } from 'react-icons/md';
 import { GLocation } from '../types';
 import { findClosestMarker, targetClient } from '../util/helpers';
-import { MdMyLocation } from 'react-icons/md'
-import { BiMapPin, BiMessageAltAdd } from 'react-icons/bi';
-import { signIn, useSession } from 'next-auth/client';
 import { PullUpForm } from './PullUpForm';
 
 interface Props {
@@ -20,7 +20,7 @@ export const LocateMeButton = (props: Props) => {
   const [geoWatchId, setGeoWatchId] = useState(0);
   const [clientMarker, setClientMarker] = useState(null);
   const [toggleDisplay, setToggleDisplay] = useState(false);
-  const [session, loading] = useSession();
+  const { data: session, status } = useSession()
   const { mapInstance, setClientLocation, clientLocation } = props;
   useEffect(() => {
     //pan map to new center every new lat/long
@@ -147,7 +147,7 @@ export const LocateMeButton = (props: Props) => {
       <Modal isOpen={isOpen} onClose={onClose} closeOnOverlayClick={false}>
         <ModalOverlay />
         <ModalContent>
-          {!loading && session ? (
+          {status=="authenticated" && session ? (
             <>
               <ModalHeader>
                 <Text fontSize="2xl">Pull Up!</Text>

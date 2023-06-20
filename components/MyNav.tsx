@@ -12,7 +12,6 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import Link from "next/link";
-import React from "react";
 import { MyAvatar } from "./MyAvatar";
 
 interface Props {}
@@ -40,9 +39,7 @@ export const MyNav = (props: Props) => {
             <DrawerBody>
               {NAV_LINKS.map(({ label, path }) => (
                 <Link key={label} href={path}>
-                  <a>
                     <Box bg="blue.500">{label}</Box>
-                  </a>
                 </Link>
               ))}
             </DrawerBody>
@@ -57,11 +54,9 @@ export const MyNav = (props: Props) => {
       >
         {NAV_LINKS.map(({ label, path }) => (
           <Link key={label} href={path}>
-            <a>
               <Box bg="blue.500" padding="3" borderRadius="sm">
                 {label}
               </Box>
-            </a>
           </Link>
         ))}
         <Box position="absolute" right="0" paddingInline="3">

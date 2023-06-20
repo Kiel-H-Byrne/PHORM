@@ -1,38 +1,42 @@
-# here
 
-🎉 Congratulations, your project was successfully generated with [Create Next Stack](https://www.create-next-stack.com/)!
+<!--- These are examples. See https://shields.io for others or to customize this set of shields. You might want to include dependencies, project status and license info here --->
+![Vercel Deploy](https://vercelbadge.vercel.app/api/kiel-h-byrne/PHORM)
+![Github License](https://img.shields.io/github/license/kiel-h-byrne/PHORM)
+![Node Version](https://img.shields.io/node/v/canary)
+![W3C Validation](https://img.shields.io/w3c-validation/default?targetUrl=https%3A%2F%2FPHORM.kielbyrne.com)
 
-To get started, run:
+![GitHub repo size](https://img.shields.io/github/repo-size/kiel-h-byrne/PHORM)
+![Github code size](https://img.shields.io/github/languages/code-size/kiel-h-byrne/PHORM)
+![Github Languages](https://img.shields.io/github/languages/count/kiel-h-byrne/PHORM)
+![Github Top Language](https://img.shields.io/github/languages/top/kiel-h-byrne/PHORM)
 
-```bash
-yarn dev
-```
+![GitHub Issues](https://img.shields.io/github/issues-raw/kiel-h-byrne/PHORM)
+![GitHub contributors](https://img.shields.io/github/contributors/kiel-h-byrne/PHORM)
+![Github Last Commit](https://img.shields.io/github/last-commit/kiel-h-byrne/PHORM)
+<!--
 
-## Final Steps
+![Github Commit Activity](https://img.shields.io/github/commit-activity/m/kiel-h-byrne/PHORM)
+![GitHub stars](https://img.shields.io/github/stars/kiel-h-byrne/PHORM?style=social)
+![GitHub forks](https://img.shields.io/github/forks/kiel-h-byrne/PHORM?style=social)
+![Github Manifest Version](https://img.shields.io/github/manifest-json/v/kiel-h-byrne/PHORM)
 
-There are a few final steps that we were not able to perform automatically. We have provided a complete list for you below. You should take care of these before you can start developing your project. You can delete each item from the list as you go along.
+-->
+# PHORM: Prince Hall's Online Registry of Merchants
+Discover and Support Local Businesses Rooted in Prince Hall Freemasonry
+---
 
-### To do:
+<img width="80%" src="https://github.com/Kiel-H-Byrne/PHORM/assets/955269/30253b62-c6c5-4297-a369-c3d5133ee8a8" />
 
-- Integrate Vercel with your repository host for continuous deployments at https://vercel.com/new
+===
 
-## Scripts
+### MVP:
+create businesses,
+claim biz
+map displays message & locations
+map displays your location (search/display messages)
+users & profile data
 
-The table below provides names and descriptions of the npm scripts available in this project.
-
-Each script is run using `yarn <script-name>`. For example: `yarn dev`.
-
-| Name            | Description                                                                                                                                                                                                                                     |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `prepare`       | The [`prepare` life cycle script](https://docs.npmjs.com/cli/v7/using-npm/scripts#life-cycle-scripts) is used to set up Git pre-commit hooks when people install dependencies, eg. using `npm install`. This script should not be run manually. |
-| `test`          | Runs tests                                                                                                                                                                                                                                      |
-| `dev`           | Runs the Next.js development server.                                                                                                                                                                                                            |
-| `build`         | Generates a production build.                                                                                                                                                                                                                   |
-| `start`         | Runs the Next.js production server built using `build` script.                                                                                                                                                                                  |
-| `lint`          | Runs [ESLint](https://eslint.org/) to catch linting errors in the source code.                                                                                                                                                                  |
-| `format`        | Formats all source code in the project.                                                                                                                                                                                                         |
-| `format:check`  | Checks the formatting of all code in the project.                                                                                                                                                                                               |
-| `deploy:vercel` | Deploy a preview deployment to Vercel                                                                                                                                                                                                           |
+                                                                                                          |
 
 ## Technologies
 

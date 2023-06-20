@@ -1,7 +1,7 @@
-import NextAuth from 'next-auth'
+import NextAuth from 'next-auth';
 //@ts-ignore
 import { Profile, Session } from 'next-auth/adapters';
-import Providers from 'next-auth/providers'
+import Providers from 'next-auth/react';
 
 export default NextAuth({
   providers: [

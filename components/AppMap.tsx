@@ -1,18 +1,16 @@
-import React, { useState, memo } from "react";
+import { memo, useState } from "react";
 
 import { GoogleMap, GoogleMapProps, LoadScript, MarkerClusterer } from "@react-google-maps/api";
 import { Libraries } from "@react-google-maps/api/dist/utils/make-load-script-url";
 
-import MyMarker from "./MyMarker";
-import MyInfoWindow from "./InfoWindow";
-import { GEOCENTER, MAP_STYLES } from "../util/constants";
-import { AspectRatio, Box, Button, Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerFooter, DrawerHeader, DrawerOverlay, Flex, Image, Tab, TabList, TabPanel, TabPanels, Tabs, Text, useDisclosure, useToast } from "@chakra-ui/react";
-import { GLocation, PullUp } from "../types";
+import { Box, Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerHeader, DrawerOverlay, Flex, Tab, TabList, TabPanel, TabPanels, Tabs, Text, useDisclosure, useToast } from "@chakra-ui/react";
 import useSWR from "swr";
+import { GLocation, PullUp } from "../types";
+import { GEOCENTER, MAP_STYLES } from "../util/constants";
 import fetcher from "../util/fetch";
+import MyInfoWindow from "./InfoWindow";
 import { InteractiveUserName } from "./InteractiveUserName";
-import { RenderMedia } from "./RenderMedia";
-import { useCallback } from "react";
+import MyMarker from "./MyMarker";
 const LIBRARIES: Libraries = ["places", "visualization", "geometry", "localContext"];
 
 const clusterStyles = [
@@ -273,9 +271,6 @@ const AppMap = memo(({
                         return (
                           <TabPanel key={i} p={0} bgColor="goldenrod" boxShadow="xl">
                             <Flex direction="column">
-                              {media && <Box paddingBlock={1}><RenderMedia media={media} options={{
-                                title: message.substr(0, 11),
-                              }} /></Box>}
                               <Box p={1}><Text as="h2">{message}</Text>
                                 {/* <InteractiveUserName userName={userName} uid={uid} /> */}
                                 <Text fontWeight="semibold" fontSize=".7rem" color="gray.400">@{userName} </Text>
@@ -287,7 +282,6 @@ const AppMap = memo(({
                   </Tabs>
                   :
                   (<> <Box>
-                    {activeData[0].media && <RenderMedia media={activeData[0].media} options={{ title: activeData[0].message.substr(0, 11) }} />}
                   </Box>
                     {activeData[0].message}
                     <InteractiveUserName userName={activeData[0].userName} uid={activeData[0].uid} /></>)

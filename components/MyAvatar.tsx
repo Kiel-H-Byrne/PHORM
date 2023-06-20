@@ -1,5 +1,4 @@
-import * as React from "react";
-import { useSession, signIn, signOut } from "next-auth/client";
+import { CheckCircleIcon } from "@chakra-ui/icons";
 import {
   Avatar,
   Button,
@@ -13,11 +12,11 @@ import {
   PopoverHeader,
   PopoverTrigger,
 } from "@chakra-ui/react";
-import { CheckCircleIcon } from "@chakra-ui/icons";
+import { signIn, signOut, useSession } from "next-auth/react";
 
 export const MyAvatar = () => {
-  const [session, loading] = useSession();
-  return session?.user && !loading ? (
+  const { data: session, status } = useSession()
+  return status === "authenticated" ? (
     <Popover placement="top-start">
       <PopoverTrigger>
         <Avatar
@@ -43,7 +42,8 @@ export const MyAvatar = () => {
         </PopoverBody>
       </PopoverContent>
     </Popover>
-  ) : (
+  ) : status === "loading" ? <>Loading...</>
+  :(
     <Button leftIcon={<CheckCircleIcon />} onClick={() => signIn()}>
       Login
     </Button>

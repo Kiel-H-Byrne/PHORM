@@ -1,9 +1,8 @@
-import React from "react";
+import { Box, Flex, Image, Text } from "@chakra-ui/react";
 import { InfoWindow } from "@react-google-maps/api";
+import React from "react";
 import { GLocation, PullUp } from "../types";
-import { Box, Flex, Image, Progress, Tab, TabList, TabPanel, TabPanels, Tabs, Text } from "@chakra-ui/react";
 // import { useSession } from "next-auth/client";
-import { RenderMedia } from "./RenderMedia";
 
 const MyInfoWindow = ({ activeData, clusterCenter }: { activeData: PullUp[], clusterCenter: GLocation }) => {
   const options = {
@@ -33,10 +32,7 @@ const SingleInfoContent = ({ data, options }: { data: PullUp[], options: any }) 
       options={options}
     >
       <Flex width="xs" direction="column">
-        {media && <RenderMedia media={media} options={{
-          title: message.substr(0, 11),
-          thumbOnly: true
-        }} />}
+
         <Text as="h2">{message}</Text>
         <Text fontWeight="light" fontSize=".7rem" color="gray.300">{userName} </Text>
       </Flex>
