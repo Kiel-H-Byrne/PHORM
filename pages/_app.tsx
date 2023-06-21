@@ -3,7 +3,7 @@ import { SessionProvider } from "next-auth/react";
 import type { AppProps /*, AppContext */ } from "next/app";
 import Head from "next/head";
 import { SWRConfig } from "swr";
-import { BRAND_THEME } from '../util/constants';
+import { BRAND_THEME } from "../util/constants";
 import fetcher from "../util/fetch";
 
 const swr_config_options = {
@@ -12,9 +12,7 @@ const swr_config_options = {
   fetcher: fetcher,
 };
 
-const theme = extendTheme(
-  BRAND_THEME
-)
+const theme = extendTheme(BRAND_THEME);
 export default function MyApp({ Component, pageProps }: AppProps) {
   return (
     <SessionProvider session={pageProps.session}>
@@ -23,7 +21,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
           <title>Top 5 Plays</title>
         </Head>
         <SWRConfig value={swr_config_options}>
-        <Component {...pageProps} />
+          <Component {...pageProps} />
         </SWRConfig>
       </ChakraProvider>
     </SessionProvider>

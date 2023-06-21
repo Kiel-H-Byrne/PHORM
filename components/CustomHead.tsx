@@ -1,11 +1,10 @@
 import Head from "next/head";
 
 interface Props {
-  title: string
+  title: string;
 }
 
 export const CustomHead = ({ title }: Props) => {
-
   return (
     <Head>
       <title>{title}</title>
@@ -23,34 +22,38 @@ export const CustomHead = ({ title }: Props) => {
       <meta name="mobile-web-app-capable" content="yes" />
       <meta name="apple-mobile-web-app-capable" content="yes" />
       <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-      <meta name="apple-mobile-web-app-title" content="This Weeks Plays" />
+      <meta name="apple-mobile-web-app-title" content="PHORM" />
 
-      <meta property="og:title" content="This Weeks Plays" />
+      <meta property="og:title" content="PHORM: " />
       <meta property="og:type" content="website" />
       <meta
         property="og:image"
-        content="https://thisweeksplays.kielbyrne.com/img/Logo_TWPx1024.jpg"
+        content="https://phorm.kielbyrne.com/img/Logo_TWPx1024.jpg"
       />
       <meta
         property="og:image:secure_url"
-        content="https://thisweeksplays.kielbyrne.com/img/Logo_TWPx1024.jpg"
+        content="https://phorm.kielbyrne.com/img/Logo_TWPx1024.jpg"
       />
       <meta property="og:image:type" content="image/jpeg" />
       <meta property="og:image:width" content="1024" />
       <meta property="og:image:height" content="1024" />
-      <meta property="og:image:alt" content="The TWP.com Logo" />
-      <meta property="og:url" content="https://thisweeksplays.kielbyrne.com" />
+      <meta property="og:image:alt" content="The PHORM.com Logo" />
+      <meta property="og:url" content="https://phorm.kielbyrne.com" />
       <meta
         property="og:description"
         content="Real Investment Decisions by Real People"
       />
       <meta property="og:determiner" content="the" />
       <meta property="og:locale" content="en_US" />
-      <meta property="og:site_name" content="This Weeks Plays" />
-      <meta property="fb:app_id" content="235091633613282" />
+      <meta property="og:site_name" content="PHORM" />
+      {/* <meta property="fb:app_id" content="235091633613282" />
       <meta
         name="google-site-verification"
         content="OJEUZfTeTwEUiclFV1wP8-_pr29LuzIbx1ldaX5jdK4"
+      /> */}
+      <meta
+        name="google-signin-client_id"
+        content={process.env.NEXT_PUBLIC_GOOGLE_ID}
       />
 
       <meta name="theme-color" content="#9BA17B" />
@@ -88,7 +91,6 @@ export const CustomHead = ({ title }: Props) => {
         href="/img/icons/safari-pinned-tab.svg"
         color="#9BA17B"
       />
-
     </Head>
   );
 };

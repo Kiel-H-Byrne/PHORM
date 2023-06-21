@@ -11,6 +11,13 @@ export default NextAuth({
     GoogleProvider({
       clientId: process.env.NEXT_PUBLIC_GOOGLE_ID!,
       clientSecret: process.env.NEXT_PUBLIC_GOOGLE_SECRET!,
+      authorization: {
+        params: {
+          access_type: "offline",
+          response_type: "code",
+          prompt: "consent"
+      }
+    }
       // scope:
       //   "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile",
     }),
@@ -49,20 +56,17 @@ export default NextAuth({
     //   server: process.env.MAIL_SERVER,
     //   from: '<no-reply@thehilmar.com>'
     // }),
-    // Providers.Facebook({})
-    // Providers.Reddit({})
-    // Providers.Twitter({})
-    // Providers.Instagram({})
   ],
-  // SQL or MongoDB database (or leave empty)
-  // database: process.env.MONGODB_URI,
+  session: {
+    strategy: 'database',
+  },
   adapter: FirestoreAdapter(
     {
     credential: cert({
       projectId: process.env.NEXT_PUBLIC_FSDB_PROJECT_ID!,
       clientEmail: process.env.NEXT_PUBLIC_FIREBASE_CLIENT_EMAIL!,
       privateKey:  process.env.NEXT_PUBLIC_FSDB_PRIVATE_KEY!,
-    }),
+    })!,
   }
   ),
   debug: true,
