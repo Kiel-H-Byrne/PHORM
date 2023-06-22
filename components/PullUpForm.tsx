@@ -3,8 +3,8 @@ import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { mutate } from "swr";
 // import axios from "axios";
-import { Accordion, AccordionButton, AccordionItem, AccordionPanel, Box, Button, CircularProgress, Flex, Text, Textarea } from "@chakra-ui/react";
-import { signin, useSession } from "next-auth/react";
+import { Accordion, AccordionButton, AccordionItem, AccordionPanel, Box, Button, CircularProgress, Flex } from "@chakra-ui/react";
+import { signIn, useSession } from "next-auth/react";
 import { GLocation } from "../types";
 
 interface Props {
@@ -15,11 +15,11 @@ interface Props {
 }
 
 export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
-  const [session, loading] = useSession();
+  const { data: session, status } = useSession();
   const [allowRecord, setAllowRecord] = useState(false);
   const formRef = useRef(null);
 
-  const { handleSubmit, register, errors } = useForm();
+  const { handleSubmit, register, formState } = useForm();
 
 
 
@@ -44,7 +44,6 @@ export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
         lat: locationData.lat,
       },
       timestamp: new Date().toISOString(),
-      ...(mediaInfo && mediaInfo),
     };
 
     mutate(apiUri, submit_data, false);
@@ -55,7 +54,7 @@ export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
 
   return (
     <Box marginInline="3">
-      {!loading ? (
+      {status==="loading" ? (
         <form onSubmit={handleSubmit(onSubmit)} encType="multipart/form-data" ref={formRef}>
           <Accordion defaultIndex={[0]} allowMultiple>
             <AccordionItem>
@@ -63,7 +62,6 @@ export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
                 <Flex m={"0 auto"}>COMMENT</Flex>
               </AccordionButton>
               <AccordionPanel>
-                <Textarea rows={2} id="message" name="message" ref={register({ minLength: 5, required: true })} />
               </AccordionPanel>
             </AccordionItem>
             <AccordionItem>
@@ -75,17 +73,11 @@ export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
               </AccordionPanel>
             </AccordionItem>
           </Accordion>
-          {errors.message && (
-            <Text as="p" color="red" textAlign="center">
-              {errors.message.type === "minLength"
-                ? "Let's say a bit more..."
-                : "Cannot be blank"}
-            </Text>
-          )}
+
           {session ? (
             <Button type="submit">Post</Button>
           ) : (
-            <Button onClick={() => signin()}>Login to Pull Up!</Button>
+            <Button onClick={() => signIn()}>Login to Pull Up!</Button>
           )}
         </form>
       ) : (

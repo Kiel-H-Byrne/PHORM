@@ -1,14 +1,11 @@
-import React, { useEffect, useRef } from "react";
-import { Layout, LocateMeButton } from "../components";
-import { MAP_STYLES } from "../util/constants";
+import { GLocation } from "@/types";
+import { GEOCENTER } from "@/util/constants";
 import { useState } from "react";
-import AppMap from "../components/AppMap";
-
-const mapCenter = { lat: -34.397, lng: 150.644 };
-
+import { Layout, LocateMeButton } from "../components";
+import AppMap from "../components/AppMap0";
 const IndexPage = () => {
-  const [clientLocation, setClientLocation] = useState(null);
-  const [mapInstance, setMapInstance] = useState(null);
+  const [clientLocation, setClientLocation] = useState(GEOCENTER as GLocation);
+  const [mapInstance, setMapInstance] = useState({} as google.maps.Map);
 
   return (
     <>

@@ -18,7 +18,7 @@ export const LocateMeButton = (props: Props) => {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [closestListing, setClosestListing] = useState(null);
   const [geoWatchId, setGeoWatchId] = useState(0);
-  const [clientMarker, setClientMarker] = useState(null);
+  const [clientMarker, setClientMarker] = useState({} as google.maps.Marker);
   const [toggleDisplay, setToggleDisplay] = useState(false);
   const { data: session, status } = useSession()
   const { mapInstance, setClientLocation, clientLocation } = props;
@@ -151,7 +151,7 @@ export const LocateMeButton = (props: Props) => {
             <>
               <ModalHeader>
                 <Text fontSize="2xl">Pull Up!</Text>
-                <Text fontSize="xx-small" fontColor="grey">
+                <Text fontSize="xx-small" color="grey">
                   <Icon as={BiMapPin} /> @{clientLocation?.lat},
                   {clientLocation?.lng}
                 </Text>
@@ -161,8 +161,8 @@ export const LocateMeButton = (props: Props) => {
                 <PullUpForm
                   onClose={onClose}
                   locationData={clientLocation}
-                  uid={session.id as string}
-                  userName={session.user.name}
+                  uid={ ''}
+                  userName={session?.user?.name?? ''}
                 />
               </ModalBody>
             </>

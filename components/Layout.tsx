@@ -1,5 +1,5 @@
-import React, { ReactNode } from "react";
-import { CustomHead, MyFooter} from "./";
+import { ReactNode } from "react";
+import { CustomHead, MyFooter } from "./";
 import { MyNav } from "./MyNav";
 
 type Props = {

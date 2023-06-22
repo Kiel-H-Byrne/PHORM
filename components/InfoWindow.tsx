@@ -47,13 +47,12 @@ const MultipleInfoContent = ({ data, options }: { data: PullUp[], options: any }
       options={options}
     >
       <Box>
-        {data.map(el => {
-          const { media, message, userName } = el;
+        {data.map(({ media, message, userName }) => {
           return (
-            <Flex width="xs" direction="column">
+            <Flex key={userName} width="xs" direction="column">
               <Flex maxHeight="100px" direction="row" marginBlock={1} border="1px solid red" borderRadius={7}>
                 {media && <Box>
-                  <Image maxH="100px" src={media.thumbnailUri} title={message.substr(0, 11)} borderRadius={7} />
+                  <Image maxH="100px" src={media.thumbnailUri} title={message.substr(0, 11)} borderRadius={7} alt="Thumbnail"/>
                 </Box>
                 }
                 <Box p={2}>

@@ -1,5 +1,5 @@
 import { Box } from "@chakra-ui/react";
-import React, { useState } from "react";
+import { useState } from "react";
 import useSWR from "swr";
 import { GLocation, PullUp } from "../types";
 import fetcher from "../util/fetch";
@@ -13,25 +13,26 @@ const InfoWindow = () => <Box width="container.sm">InfoWIndow Content</Box>;
 
 export const MarkersLayer = (props: Props) => {
   const { mapInstance, clientLocation } = props;
-  const [infoContent, setInfoContent] = useState('')
-
+  const [infoContent, setInfoContent] = useState("");
+  //make api call using user's location
+  const uri = `api/pullups?lat=${clientLocation.lat}&lng=${clientLocation.lng}`;
+  const { data, error } = useSWR(uri, fetcher);
   const infoWindow = new (window as any).google.maps.InfoWindow({
     content: infoContent,
     // content: '<div id="infoWindow" />',
     // maxWidth:
-    position: {lat: 0, lng: 0}
-  })
+    position: { lat: 0, lng: 0 },
+  });
 
   const updateInfoWindow = (content: string, marker: google.maps.Marker) => {
     // infoWindow.setContent(content)
-    setInfoContent(content)
+    setInfoContent(content);
     infoWindow.open({
       anchor: marker,
       map: mapInstance,
       shouldFocus: true,
-      
-    })
-      // position: {...clientLocation, lat: clientLocation.lat-.05},
+    });
+    // position: {...clientLocation, lat: clientLocation.lat-.05},
     // }));
     // infoWindow.addListener("domready", () => {
     //   render(<InfoWindow />, document.getElementById("infoWindow"));
@@ -42,10 +43,6 @@ export const MarkersLayer = (props: Props) => {
   if (!clientLocation) {
     return null;
   } else {
-    //make api call using user's location
-    const uri = `api/pullups?lat=${clientLocation.lat}&lng=${clientLocation.lng}`;
-
-    const { data, error } = useSWR(uri, fetcher);
     data &&
       data.pullups.forEach((el: PullUp) => {
         const marker = new (window as any).google.maps.Marker({

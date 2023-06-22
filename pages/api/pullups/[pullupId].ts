@@ -3,7 +3,7 @@ import { connectToDatabase } from "../../../db/mongodb";
 import { MAX_AGE } from '../../../util/constants';
 
 
-export default async (req: any, res: any) => {
+const PullupFn = async (req: any, res: any) => {
   const db = await connectToDatabase();
   const {
     //@ts-ignore
@@ -44,3 +44,5 @@ export default async (req: any, res: any) => {
       res.status(405).end(`Method ${method} Not Allowed`);
   }
 };
+
+export default PullupFn
