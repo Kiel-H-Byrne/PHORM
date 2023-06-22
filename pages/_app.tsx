@@ -16,14 +16,14 @@ const theme = extendTheme(BRAND_THEME);
 export default function MyApp({ Component, pageProps }: AppProps) {
   return (
     <SessionProvider session={pageProps.session}>
-      <ChakraProvider theme={theme}>
-        <Head>
-          <title>Top 5 Plays</title>
-        </Head>
-        <SWRConfig value={swr_config_options}>
-          <Component {...pageProps} />
-        </SWRConfig>
-      </ChakraProvider>
+        <ChakraProvider theme={theme}>
+          <Head>
+            <title>Top 5 Plays</title>
+          </Head>
+          <SWRConfig value={swr_config_options}>
+            <Component {...pageProps} />
+          </SWRConfig>
+        </ChakraProvider>
     </SessionProvider>
   );
 }

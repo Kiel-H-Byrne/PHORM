@@ -230,5 +230,4 @@ export const MAP_STYLES = {
   ],
 };
 
-// export const GEOCENTER = { lat: 39.8283, lng: -98.5795 };
-export const GEOCENTER = { lat: 38.9072, lng: -77.0369 };
+export const GEOCENTER = { lat: 38.91657, lng: -77.02631 };

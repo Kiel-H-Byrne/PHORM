@@ -1,7 +1,7 @@
 import { Box } from "@chakra-ui/react";
 import { useState } from "react";
 import useSWR from "swr";
-import { GLocation, PullUp } from "../types";
+import { GLocation, IListing } from "../types";
 import fetcher from "../util/fetch";
 
 interface Props {
@@ -44,7 +44,7 @@ export const MarkersLayer = (props: Props) => {
     return null;
   } else {
     data &&
-      data.pullups.forEach((el: PullUp) => {
+      data.pullups.forEach((el: IListing) => {
         const marker = new (window as any).google.maps.Marker({
           position: el.location,
           map: mapInstance,

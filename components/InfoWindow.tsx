@@ -1,10 +1,10 @@
 import { Box, Flex, Image, Text } from "@chakra-ui/react";
 import { InfoWindow } from "@react-google-maps/api";
 import React from "react";
-import { GLocation, PullUp } from "../types";
+import { GLocation, IListing } from "../types";
 
 
-const MyInfoWindow = ({ activeData, clusterCenter }: { activeData: PullUp[], clusterCenter: GLocation }) => {
+const MyInfoWindow = ({ activeData, clusterCenter }: { activeData: IListing[], clusterCenter: GLocation }) => {
   const options = {
     pixelOffset: { height: -40, width: 0, equals: undefined },
     disableAutoPan: true,
@@ -24,7 +24,7 @@ const MyInfoWindow = ({ activeData, clusterCenter }: { activeData: PullUp[], clu
 
 export default React.memo(MyInfoWindow);
 
-const SingleInfoContent = ({ data, options }: { data: PullUp[], options: any }) => {
+const SingleInfoContent = ({ data, options }: { data: IListing[], options: any }) => {
   const { location, userName, media, message } = data[0];
   return (
     <InfoWindow
@@ -39,7 +39,7 @@ const SingleInfoContent = ({ data, options }: { data: PullUp[], options: any }) 
     </InfoWindow>);
 }
 
-const MultipleInfoContent = ({ data, options }: { data: PullUp[], options: any }) => {
+const MultipleInfoContent = ({ data, options }: { data: IListing[], options: any }) => {
   const { position }: { position: GLocation } = options;
   return (
     <InfoWindow

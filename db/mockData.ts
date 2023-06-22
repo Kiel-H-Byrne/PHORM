@@ -1,6 +1,6 @@
-import { PullUp } from "../types";
+import { IListing } from "../types";
 
-export const mockShouts: PullUp[] = [{
+export const mockShouts: IListing[] = [{
   _id: "gibberish001",
   pid: "",
   uid: "ugibberish001",

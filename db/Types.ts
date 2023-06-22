@@ -1,39 +1,15 @@
-export interface Claim {
+import { z } from "zod";
+import { ListingsSchema } from "./schemas";
+
+export interface IClaim {
   ownerId?: string;
   ownerName?: string;
   ownerPhone?: string;
   ownerProof?: Date;
 }
 
-export interface Listing {
-  _id: any; //ObjectId type from mongoDB
-  name: string;
-  address: string;
-  street?: string;
-  city: string;
-  state?: string;
-  zip?: string;
-  country?: string;
-  phone?: string;
-  url?: string;
-  claims: Claim[];
-  claimsCount?: Number;
-  location?: string;
-  verifiers?: [String];
-  verifierCount?: Number;
-  deverifiers?: [String];
-  deverifierCount?: Number;
-  description?: string;
-  image?: { url: string };
-  google_id?: string;
-  places_details?: Object;
-  yelp_id?: string;
-  email?: string;
-  categories?: string[];
-  social?: string;
-  creator: Date;
-  submitted: Date;
-}
+export type IListing = z.infer<typeof ListingsSchema>
+
 export type Category = "a" | "b" | "c";
 export type Libraries = ("drawing" | "geometry" | "localContext" | "places" | "visualization")[];
 

@@ -2,27 +2,19 @@ import { AddIcon, CloseIcon, HamburgerIcon } from "@chakra-ui/icons";
 import {
   Box,
   Button,
-  Drawer,
-  DrawerBody,
-  DrawerCloseButton,
-  DrawerContent,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerOverlay,
   Flex,
   HStack,
   Heading,
   IconButton,
   Link,
   Menu,
-  MenuButton,
   Stack,
   useColorModeValue,
   useDisclosure
 } from "@chakra-ui/react";
-import { signIn, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import React from "react";
-import AddListingForm from "./AddListingForm";
+import { AddListingDrawer } from "./AddListingDrawer";
 import { MyAvatar } from "./MyAvatar";
 
 const NAV_LINKS = [
@@ -46,13 +38,15 @@ const NavLink = ({ path, label }: { path: string; label: string }) => (
   </Link>
 );
 
-const AvatarDropdown = () => <Box pb={4} display={{ md: "none" }}>
-  <Stack as={"nav"} spacing={4}>
-    {NAV_LINKS.map(({ path, label }) => (
-      <NavLink key={label} path={path} label={label} />
-    ))}
-  </Stack>
-</Box>;
+const AvatarDropdown = () => (
+  <Box pb={4} display={{ md: "none" }}>
+    <Stack as={"nav"} spacing={4}>
+      {NAV_LINKS.map(({ path, label }) => (
+        <NavLink key={label} path={path} label={label} />
+      ))}
+    </Stack>
+  </Box>
+);
 export function MyNav() {
   const {
     isOpen: dropdownIsOpen,
@@ -79,7 +73,7 @@ export function MyNav() {
             onClick={dropdownIsOpen ? onDropdownClose : onDropdownOpen}
           />
           <HStack spacing={8} alignItems={"center"}>
-            <Heading color={"royalblue"} >P.H.O.R.M</Heading>
+            <Heading color={"royalblue"}>P.H.O.R.M</Heading>
             <HStack
               as={"nav"}
               spacing={4}
@@ -94,7 +88,13 @@ export function MyNav() {
             <Button
               variant={"solid"}
               colorScheme={"teal"}
-              onClick={() => signIn()}
+              onClick={
+                () =>
+                  //logged in? add form else signIn
+                  // status === "authenticated" ?
+                  onDrawerOpen()
+                // : signIn()
+              }
               size={"sm"}
               mr={4}
               leftIcon={<AddIcon />}
@@ -102,47 +102,18 @@ export function MyNav() {
               Add Business
             </Button>
             <Menu>
-              <MenuButton
-                as={Button}
-                rounded={"full"}
-                variant={"link"}
-                cursor={"pointer"}
-                minW={0}
-              >
-                <MyAvatar />
-              </MenuButton>
+              <MyAvatar />
             </Menu>
           </Flex>
         </Flex>
-
-        {dropdownIsOpen ? (
-          <AvatarDropdown />
-        ) : null}
+        {dropdownIsOpen ? <AvatarDropdown /> : null}
       </Box>
-      <Drawer
-        isOpen={drawerIsOpen}
-        placement={"left"}
-        initialFocusRef={firstField}
-        onClose={onDrawerClose}
-      >
-        <DrawerOverlay />
-        <DrawerContent>
-          <DrawerCloseButton />
-          <DrawerHeader borderBottomWidth="1px" m={"auto"}>
-Add Your Business          </DrawerHeader>
-
-          <DrawerBody>
-            <AddListingForm />
-          </DrawerBody>
-
-          <DrawerFooter borderTopWidth="1px">
-            <Button variant="outline" mr={3} onClick={onDrawerClose}>
-              Cancel
-            </Button>
-            <Button colorScheme="blue">Submit</Button>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
+      <AddListingDrawer
+        drawerIsOpen={drawerIsOpen}
+        firstField={firstField}
+        onDrawerClose={onDrawerClose}
+      />
     </>
   );
 }
+

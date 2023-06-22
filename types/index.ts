@@ -1,6 +1,6 @@
 export interface GLocation { lat: number, lng: number }
 
-export interface PullUp {
+export interface IListing {
   _id: any;
   pid: string;
   uid: string;

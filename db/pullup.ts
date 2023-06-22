@@ -1,5 +1,5 @@
 import { Db } from "mongodb";
-import { GLocation, PullUp } from "../types";
+import { GLocation, IListing } from "../types";
 
 //@ts-ignore
 export async function getPullUps(
@@ -46,16 +46,16 @@ export async function getPullupsNearBy(
     .toArray();
 }
 
-export async function findPullUpById(db: Db, pullupId: string) {
+export async function findPullUpById(db: Db, listingId: string) {
   return db
     .collection("pullups")
     .findOne({
-      _id: pullupId,
+      _id: listingId,
     })
-    .then((pullup) => pullup || "No PullUp Found for id: " + pullupId);
+    .then((pullup) => pullup || "No PullUp Found for id: " + listingId);
 }
 
-export async function insertPullUp(db: Db, data: PullUp) {
+export async function insertPullUp(db: Db, data: IListing) {
   return db
     .collection("pullups")
     .insertOne({

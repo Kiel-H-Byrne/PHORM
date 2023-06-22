@@ -1,19 +1,16 @@
 // import * as firebase from "firebase/app"
 // import "firebase/firestore"
 
-import { collection, doc, getDoc, setDoc } from "firebase/firestore"
-import { fsdb } from "./firebase"
+import { collection, doc, endAt, getDoc, getDocs, orderBy, query, setDoc, startAt } from "firebase/firestore";
+import { distanceBetween, geohashForLocation, geohashQueryBounds } from "geofire-common";
+import { appFsdb } from "./firebase";
 
-// import * as ACTIONS from "./../Actions/actionConstants";
-//UID
-// import uuidv4 from "uuid/v4";
-const postsRef = collection(fsdb, "POSTS")
-const docRef = doc(postsRef, new Date().getDate().toString())
+const listingsRef = collection(appFsdb, "LISTINGS");
 
 // const watchCollection = function(collection, ...filters) {
 
 //   switch(collection) {
-//     case "POSTS": { collection = postsCollection; break }
+//     case "listingS": { collection = listingsCollection; break }
 //     default: return
 //   }
 //   collection
@@ -26,25 +23,25 @@ const docRef = doc(postsRef, new Date().getDate().toString())
 //     .forEach(change => {
 //       if (change.type === "added") {
 //         let data = change.doc.data();
-//         console.log("New post", change.doc.data())
+//         console.log("New listing", change.doc.data())
 //         let doc = {}
 //         doc[change.doc.id] = data;
-//         dispatch({type: ACTIONS.POSTS_API_RESULT, payload: doc})
+//         dispatch({type: ACTIONS.listingS_API_RESULT, payload: doc})
 //       }
 //       if (change.type === "modified") {
-//         console.log("Modified post", change.doc.data())
+//         console.log("Modified listing", change.doc.data())
 //         let data = change.doc.data();
 
-//         //update state (state.posts.byId & state.posts.allIds)
-//         // console.log(state.posts.byId)
+//         //update state (state.listings.byId & state.listings.allIds)
+//         // console.log(state.listings.byId)
 //         console.log(data)
-//         // dispatch({type: ACTIONS.POSTS_API_RESULT, payload: {...state.posts.byId, data}})
+//         // dispatch({type: ACTIONS.listingS_API_RESULT, payload: {...state.listings.byId, data}})
 //       }
 //       if (change.type === "removed") {
 //         let data = change.doc.data();
-//         console.log("Deleted post", change.doc.data()._id)
-//         // dispatch({type: ACTIONS.POSTS_API_RESULT, payload: data})
-//         //remove postID from users, services
+//         console.log("Deleted listing", change.doc.data()._id)
+//         // dispatch({type: ACTIONS.listingS_API_RESULT, payload: data})
+//         //remove listingID from users, services
 //       }
 //     });
 //   });
@@ -58,7 +55,7 @@ const docRef = doc(postsRef, new Date().getDate().toString())
 // const watchDocument = function(collection, id) {
 //   console.log("i'm Watching")
 //   switch(collection) {
-//     case "POSTS": { collection = postsCollection; break }
+//     case "listingS": { collection = listingsCollection; break }
 //     case "SERVICES": { collection = servicesCollection; break }
 //     case "GIFTS": { collection = giftsCollection; break }
 //     default: return
@@ -73,7 +70,7 @@ const docRef = doc(postsRef, new Date().getDate().toString())
 //     //update state with this data...
 //     doc[docSnapshot.id] = docSnapshot.data();
 //     console.log(doc)
-//     dispatch({type: ACTIONS.POSTS_API_RESULT, payload: doc})
+//     dispatch({type: ACTIONS.listingS_API_RESULT, payload: doc})
 //   });
 // };
 
@@ -83,41 +80,83 @@ const docRef = doc(postsRef, new Date().getDate().toString())
 //     .onSnapshot(function () {});
 // }
 
-// == POSTS == //
+// == LISTINGS == //
 
-const postCreate = async function(data) {
-  console.log("submitting to db...", data)
+const listingCreate = async function (data) {
+  console.log("submitting to db...", data);
+  const geoHash = geohashForLocation([data.lat, data.lng])
+  console.log(geoHash)
+  const docRef = doc(listingsRef);
+  console.log(docRef);
+  await setDoc(docRef, {...data, geoHash}, { merge: true });
+};
 
-  await setDoc(docRef, data, { merge: true })
-}
+const listingsFetch = async function (query) {
+  const docRef = doc(listingsRef, query);
+  const docSnap = await getDoc(docRef);
+  if (docSnap.exists()) {
+    return docSnap.data();
+  }
+  return [];
+};
 
-const postsFetch = async function(query) {
-  const docRef = doc(postsRef, query)
-  const docSnap = await getDoc(docRef)
-  return docSnap.exists() && docSnap.data()
-}
+const getListingsWithinRadius = async (
+  radiusInM: number,
+  center: [number, number]
+) => {
+  const bounds = geohashQueryBounds(
+    center,
+    radiusInM
+  );
+  const promises = [];
+  for (const bound of bounds) {
+    const q = query(
+      collection(appFsdb, "listings"),
+      orderBy("geoHash"),
+      startAt(bound[0]),
+      endAt(bound[1]),
+    );
+    promises.push(getDocs(q));
+  }
 
-const postsDelete = function(uid) {}
+  const snapShots = await Promise.all(promises);
+  const listings = snapShots
+    .flatMap((snapShot) => snapShot.docs)
+    .map((doc) => doc.data());
 
-// export const getMyPosts = (uid, dispatch) => {
+    const filteredListings = listings.filter(({lat,lng}) => {
+      const distanceInM = distanceBetween(
+        [lat, lng],
+        center
+      );
+      return distanceInM <= radiusInM;
+    });
+    
+  return listings;
+};
+
+const listingsDelete = function (uid) {};
+
+// export const getMylistings = (uid, dispatch) => {
 //   // eslint-disable-next-line
-//   let postsRef;
+//   let listingsRef;
 
-//   return Object.keys(myPostIds).forEach(postId => {
-//     return (postsRef = fsdb
-//       .collection("POSTS")
-//       .doc(`${postId}`)
+//   return Object.keys(mylistingIds).forEach(listingId => {
+//     return (listingsRef = fsdb
+//       .collection("listingS")
+//       .doc(`${listingId}`)
 //       .get()
 //       .then(doc => {
 //         dispatch({
-//           type: UPDATE_MY_POSTS,
+//           type: UPDATE_MY_listingS,
 //           payload: doc.data()
 //         });
 
-//         //Watching dposts
-//         watchMyPosts({ uid: uid, dispatch, postId });
+//         //Watching dlistings
+//         watchMylistings({ uid: uid, dispatch, listingId });
 //       }));
 //   });
 // };
 
-export { postCreate, postsDelete, postsFetch }
+export { getListingsWithinRadius, listingCreate, listingsDelete, listingsFetch };
+
