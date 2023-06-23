@@ -1,12 +1,13 @@
 // import { getPullUps, getPullupsNearBy, insertPullUp } from "../../../db/index";
 // import { connectToDatabase } from "../../../db/mongodb";
 
-import { getListingsWithinRadius, listingsFetch } from "@/db/fsdb";
-import { insertPullUp } from "@/db/pullup";
+import { IListing } from "@/db/Types";
+import { getListingsWithinRadius, listingCreate, listingsFetch } from "@/db/fsdb";
+import { NextRequest } from "next/server";
 
 const maxAge = 1 * 24 * 60 * 60;
 
-const handler = async (req: any, res: any) => {
+const handler = async (req: NextRequest, res: any) => {
   
   const {
     query: { by, limit, lat, lng },
@@ -19,19 +20,21 @@ const handler = async (req: any, res: any) => {
           ? await getListingsWithinRadius(
             15, [Number(lat),Number(lng)] ,
           ) : await listingsFetch("xWhZXPJoQxo1zvoQxFvJ");
-
+            if (listings.length == 0) {
+              console.log("NO LISTINGS")
+            }
       res.send(listings);
       break;
     case "POST":
       // if (!req.user) {
       //   return res.status(401).send('unauthenticated');
       // }
-
+      console.log("received POST" )
       if (!req.body)
-        return res.status(400).send("You must write something");
-
-      const pullup = await insertPullUp(db, req.body.data);
-      return res.json({ pullup });
+      return res.status(400).send("You must write something");
+      const listing = await listingCreate( JSON.parse(req.body) as IListing);
+      console.log(listing)
+      return res.json({ listing : req.body});
       break;
     default:
       res.setHeader("Allow", ["GET", "POST"]);

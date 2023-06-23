@@ -1,399 +1,162 @@
-import { ListingsSchema, Schema } from "@/db/schemas";
-import {
-  Box,
-  Button,
-  ButtonGroup,
-  Flex,
-  Form,
-  FormControl,
-  FormHelperText,
-  FormLabel,
-  GridItem,
-  Heading,
-  Input,
-  InputGroup,
-  InputLeftAddon,
-  InputRightElement,
-  Progress,
-  Select,
-  SimpleGrid,
-  Textarea,
-  useToast,
-} from "@chakra-ui/react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { progress } from "framer-motion";
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
+import { IListing } from "@/db/Types";
+import { ListingsSchema } from "@/db/schemas";
+import { Box, Button, FormLabel, Input, useToast } from "@chakra-ui/react";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { geohashForLocation } from "geofire-common";
+import { useEffect } from "react";
+import { Form, useForm } from "react-hook-form";
 
-const Form1 = () => {
-  const [show, setShow] = React.useState(false);
-  const handleClick = () => setShow(!show);
+export const AddListingForm = () => {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
+    control,
+    setValue
   } = useForm({
-    resolver: zodResolver(Schema),
+        resolver: zodResolver(ListingsSchema),
+        mode: 'all'
+        // defaultValues: {
+        //   street: "33 Compass Lane",
+        //   name: "The Square Club",
+        //   city: "Luxe",
+        //   state: "XX",
+        //   zip: 12345
+        // }
   });
+  const getPlaceDetails =  async (address:string) => {
+    //  const if all fields filled, make address, pass to geo, create lat/long
+    const     geocoder = new google.maps.Geocoder();
+    const locationDetails = await geocoder.geocode( { 'address': address}, function(results, status) {
+      if (status == 'OK' && results) {
+        // map.setCenter(results[0].geometry.location);
+        // var marker = new google.maps.Marker({
+        //     map: map,
+        //     position: results[0].geometry.location
+        // });
+      } else {
+        alert('Geocode was not successful for the following reason: ' + status);
+      }})
+      const {geometry: {location}, place_id  } = locationDetails.results[0]
+      const {lat, lng} = location
+      const geoHash = geohashForLocation([lat(),lng()])
+      return {lat:lat(), lng:lng(), geoHash, place_id}
+  }
+  const submitData = async ({data}: {data: IListing}) => {
+    //date data, transform, then send.
+    const {city, state, zip, street} = data
+    const address = `${street} ${city} ${state} ${zip} `
+    const details = await getPlaceDetails(address)
+    //combine
+    const submitData = {...data, ...details}
+    fetch("/api/listings", { method: 'POST', body: JSON.stringify(submitData) })
+  };
+useEffect(() => {
+console.log(errors)
+},[errors])
+  const handleErrors = (data: Object) => {
+    console.log("errors");
+    console.log(errors);
+    if (errors.zip) {
+      console.log(errors.zip.message as string)
+    }
+  };
 
+const useHandleSuccess = () => { 
+  reset();
+  useToast({colorScheme: 'green', status: "success", title: "Form Submitted", description: `Successfully submitted form.`})
+ }
+
+
+const alertToast = useToast({colorScheme: 'red', status: "error", title: "Form Error", description: `Form Error`})
   return (
-    <>
-      <Heading w="100%" textAlign={"center"} fontWeight="normal" mb="2%">
-        User Registration
-      </Heading>
-      <Flex>
-        <FormControl mr="5%">
-          <FormLabel htmlFor="first-name" fontWeight={"normal"}>
-            First name
-          </FormLabel>
-          <Input id="first-name" placeholder="First name" />
-        </FormControl>
-
-        <FormControl>
-          <FormLabel htmlFor="last-name" fontWeight={"normal"}>
-            Last name
-          </FormLabel>
-          <Input id="last-name" placeholder="First name" />
-        </FormControl>
-      </Flex>
-      <FormControl mt="2%">
-        <FormLabel htmlFor="email" fontWeight={"normal"}>
-          Email address
-        </FormLabel>
-        <Input id="email" type="email" />
-        <FormHelperText>We'll never share your email.</FormHelperText>
-      </FormControl>
-
-      <FormControl>
-        <FormLabel htmlFor="password" fontWeight={"normal"} mt="2%">
-          Password
-        </FormLabel>
-        <InputGroup size="md">
-          <Input
-            pr="4.5rem"
-            type={show ? "text" : "password"}
-            placeholder="Enter password"
-          />
-          <InputRightElement width="4.5rem">
-            <Button h="1.75rem" size="sm" onClick={handleClick}>
-              {show ? "Hide" : "Show"}
-            </Button>
-          </InputRightElement>
-        </InputGroup>
-      </FormControl>
-    </>
-  );
-};
-
-const Form2 = () => {
-  return (
-    <>
-      <Heading w="100%" textAlign={"center"} fontWeight="normal" mb="2%">
-        User Details
-      </Heading>
-      <FormControl as={GridItem} colSpan={[6, 3]}>
-        <FormLabel
-          htmlFor="country"
-          fontSize="sm"
-          fontWeight="md"
-          color="gray.700"
-          _dark={{
-            color: "gray.50",
-          }}
-        >
-          Country / Region
-        </FormLabel>
-        <Select
-          id="country"
-          name="country"
-          autoComplete="country"
-          placeholder="Select option"
-          focusBorderColor="brand.400"
-          shadow="sm"
-          size="sm"
-          w="full"
-          rounded="md"
-        >
-          <option>United States</option>
-          <option>Canada</option>
-          <option>Mexico</option>
-        </Select>
-      </FormControl>
-
-      <FormControl as={GridItem} colSpan={6}>
-        <FormLabel
-          htmlFor="street_address"
-          fontSize="sm"
-          fontWeight="md"
-          color="gray.700"
-          _dark={{
-            color: "gray.50",
-          }}
-          mt="2%"
-        >
-          Street address
-        </FormLabel>
-        <Input
-          type="text"
-          name="street_address"
-          id="street_address"
-          autoComplete="street-address"
-          focusBorderColor="brand.400"
-          shadow="sm"
-          size="sm"
-          w="full"
-          rounded="md"
-        />
-      </FormControl>
-
-      <FormControl as={GridItem} colSpan={[6, 6, null, 2]}>
-        <FormLabel
-          htmlFor="city"
-          fontSize="sm"
-          fontWeight="md"
-          color="gray.700"
-          _dark={{
-            color: "gray.50",
-          }}
-          mt="2%"
-        >
-          City
-        </FormLabel>
-        <Input
-          type="text"
-          name="city"
-          id="city"
-          autoComplete="city"
-          focusBorderColor="brand.400"
-          shadow="sm"
-          size="sm"
-          w="full"
-          rounded="md"
-        />
-      </FormControl>
-
-      <FormControl as={GridItem} colSpan={[6, 3, null, 2]}>
-        <FormLabel
-          htmlFor="state"
-          fontSize="sm"
-          fontWeight="md"
-          color="gray.700"
-          _dark={{
-            color: "gray.50",
-          }}
-          mt="2%"
-        >
-          State / Province
-        </FormLabel>
-        <Input
-          type="text"
-          name="state"
-          id="state"
-          autoComplete="state"
-          focusBorderColor="brand.400"
-          shadow="sm"
-          size="sm"
-          w="full"
-          rounded="md"
-        />
-      </FormControl>
-
-      <FormControl as={GridItem} colSpan={[6, 3, null, 2]}>
-        <FormLabel
-          htmlFor="postal_code"
-          fontSize="sm"
-          fontWeight="md"
-          color="gray.700"
-          _dark={{
-            color: "gray.50",
-          }}
-          mt="2%"
-        >
-          ZIP / Postal
-        </FormLabel>
-        <Input
-          type="text"
-          name="postal_code"
-          id="postal_code"
-          autoComplete="postal-code"
-          focusBorderColor="brand.400"
-          shadow="sm"
-          size="sm"
-          w="full"
-          rounded="md"
-        />
-      </FormControl>
-    </>
-  );
-};
-
-const Form3 = () => {
-  return (
-    <>
-      <Heading w="100%" textAlign={"center"} fontWeight="normal">
-        Social Handles
-      </Heading>
-      <SimpleGrid columns={1} spacing={6}>
-        <FormControl as={GridItem} colSpan={[3, 2]}>
-          <FormLabel
-            fontSize="sm"
-            fontWeight="md"
-            color="gray.700"
-            _dark={{
-              color: "gray.50",
-            }}
-          >
-            Website
-          </FormLabel>
-          <InputGroup size="sm">
-            <InputLeftAddon
-              bg="gray.50"
-              _dark={{
-                bg: "gray.800",
-              }}
-              color="gray.500"
-              rounded="md"
-            >
-              http://
-            </InputLeftAddon>
-            <Input
-              type="tel"
-              placeholder="www.example.com"
-              focusBorderColor="brand.400"
-              rounded="md"
-            />
-          </InputGroup>
-        </FormControl>
-
-        <FormControl id="email" mt={1}>
-          <FormLabel
-            fontSize="sm"
-            fontWeight="md"
-            color="gray.700"
-            _dark={{
-              color: "gray.50",
-            }}
-          >
-            About
-          </FormLabel>
-          <Textarea
-            placeholder="you@example.com"
-            rows={3}
-            shadow="sm"
-            focusBorderColor="brand.400"
-            fontSize={{
-              sm: "sm",
-            }}
-          />
-          <FormHelperText>
-            Brief description for your profile. URLs are hyperlinked.
-          </FormHelperText>
-        </FormControl>
-      </SimpleGrid>
-    </>
-  );
-};
-
-export default function AddListingForm() {
-  const toast = useToast();
-  const [step, setStep] = useState(1);
-  const [progress, setProgress] = useState(33.33);
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
-    resolver: zodResolver(ListingsSchema),
-  });
-  return (
-      <Box
-        borderWidth="1px"
-        rounded="lg"
-        shadow="1px 1px 3px rgba(0,0,0,0.3)"
-        maxWidth={800}
-        p={6}
-        m="10px auto"
+    <Box
+      borderWidth="1px"
+      rounded="lg"
+      shadow="1px 1px 3px rgba(0,0,0,0.3)"
+      maxWidth={800}
+      p={6}
+      m="10px auto"
+    >
+      <Form
+        // action="/api/listings"
+        onSubmit={submitData}
+        // headers={{'Content-Type': 'application/json'}}
+        encType={'application/json'}
+        onSuccess={() => { useHandleSuccess}}
+        onError={alertToast}
+        control={control}
       >
-        <Form onSubmit={handleSubmit((d) => console.log(d))}>
-          <FormLabel htmlFor="name"> Name</FormLabel>
-          <Input id="name" {...register("name")} />
-          <FormLabel htmlFor="name"> Street</FormLabel>
-          <Input id="street" {...register("street")} />
-          <FormLabel htmlFor="city"> City</FormLabel>
-          <Input id="city" {...register("city")} />
-          <FormLabel htmlFor="zip"> Zip</FormLabel>
-          <Input id="zip" {...register("zip")} />
-          <FormLabel htmlFor="state"> State</FormLabel>
-          <Input id="state" {...register("state")} />
-        </Form>
-      </Box>
-  );
-}
+        <FormLabel htmlFor="name"> Name</FormLabel>
+        {errors.name && (
+          <span>{errors.name.message as string as string}</span>
+        )}
 
-function MultiStepForm() {
-  return (
-    <div>
-      <Progress
-        hasStripe
-        value={progress}
-        mb="5%"
-        mx="5%"
-        isAnimated
-      ></Progress>
-      {step === 1 ? <Form1 /> : step === 2 ? <Form2 /> : <Form3 />}
-      <ButtonGroup mt="5%" w="100%">
-        <Flex w="100%" justifyContent="space-between">
-          <Flex>
-            <Button
-              onClick={() => {
-                setStep(step - 1);
-                setProgress(progress - 33.33);
-              }}
-              isDisabled={step === 1}
-              colorScheme="teal"
-              variant="solid"
-              w="7rem"
-              mr="5%"
-            >
-              Back
-            </Button>
-            <Button
-              w="7rem"
-              isDisabled={step === 3}
-              onClick={() => {
-                setStep(step + 1);
-                if (step === 3) {
-                  setProgress(100);
-                } else {
-                  setProgress(progress + 33.33);
-                }
-              }}
-              colorScheme="teal"
-              variant="outline"
-            >
-              Next
-            </Button>
-          </Flex>
-          {step === 3 ? (
-            <Button
-              w="7rem"
-              colorScheme="red"
-              variant="solid"
-              onClick={() => {
-                toast({
-                  title: "Account created.",
-                  description: "We've created your account for you.",
-                  status: "success",
-                  duration: 3000,
-                  isClosable: true,
-                });
-              }}
-            >
-              Submit
-            </Button>
-          ) : null}
-        </Flex>
-      </ButtonGroup>
-    </div>
+        <Input
+          id="name"
+          autoComplete={"true"}
+          {...register("name")}
+          aria-invalid={errors.name ? "true" : "false"}
+        />
+        <FormLabel htmlFor="street"> Street</FormLabel>
+        {errors.street && (
+          <span>{errors.street.message as string}</span>
+        )}
+
+        <Input
+          id="street"
+          {...register("street")}
+          aria-invalid={errors.street ? "true" : "false"}
+        />
+        <FormLabel htmlFor="city"> City</FormLabel>
+        {errors.city && (
+          <span>{errors.city.message as string}</span>
+        )}
+
+        <Input
+          id="city"
+          {...register("city")}
+          aria-invalid={errors.city ? "true" : "false"}
+        />
+        <FormLabel htmlFor="zip"> Zip</FormLabel>
+        {errors.zip && (
+          <span>{errors.zip.message as string}</span>
+        )}
+
+        <Input
+          id="zip"
+          type="number"
+          {...register("zip", {
+            valueAsNumber: true,
+          })}
+          aria-invalid={errors.zip ? "true" : "false"}
+        />
+        <FormLabel htmlFor="state"> State</FormLabel>
+        {errors.state && (
+          <span>{errors.state.message as string}</span>
+        )}
+
+        <Input
+          id="state"
+          maxLength={2}
+          autoComplete={"true"}
+          {...register("state")}
+          aria-invalid={errors.state ? "true" : "false"}
+        />
+
+        <Box justifyContent={"space-around"}>
+                <Button type="reset" colorScheme="blue" variant={"outline"}>
+          Reset
+        </Button>
+        <Button type="submit" colorScheme="blue" 
+        // isDisabled={Object.keys(errors).length > 0}
+         >
+          Submit
+        </Button>
+        </Box>
+      </Form>
+    </Box>
+
   );
 }

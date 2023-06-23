@@ -1,3 +1,5 @@
+import { Libraries } from "@/db/Types";
+
 export const MAX_AGE = 1 * 24 * 60 * 60;
 
 export enum BRAND_COLORS {
@@ -228,6 +230,349 @@ export const MAP_STYLES = {
       stylers: [{ color: "#ffffff" }],
     },
   ],
+  darkGray:[
+    {
+      featureType: "administrative",
+      elementType: "labels.text.fill",
+      stylers: [
+        {
+          color: "#C3BBAE",
+        },
+      ],
+    },
+    {
+      featureType: "administrative",
+      elementType: "labels.text.stroke",
+      stylers: [
+        {
+          color: "#565250",
+        },
+      ],
+    },
+    {
+      featureType: "administrative.country",
+      elementType: "labels.text.stroke",
+      stylers: [
+        {
+          color: "#5C5A6F",
+        },
+      ],
+    },
+    {
+      featureType: "administrative.locality",
+      elementType: "labels.text.fill",
+      stylers: [
+        {
+          color: "#FFFAF3",
+        },
+      ],
+    },
+    {
+      featureType: "administrative.locality",
+      elementType: "labels.text.stroke",
+      stylers: [
+        {
+          color: "#696969",
+        },
+      ],
+    },
+    {
+      featureType: "administrative.neighborhood",
+      elementType: "labels.text.stroke",
+      stylers: [
+        {
+          color: "#696969",
+        },
+      ],
+    },
+    {
+      featureType: "landscape",
+      elementType: "all",
+      stylers: [
+        {
+          color: "#FBB03B",
+        },
+        {
+          weight: 2,
+        },
+      ],
+    },
+    {
+      featureType: "landscape",
+      elementType: "geometry.fill",
+      stylers: [
+        {
+          color: "#565250",
+        },
+        {
+          visibility: "on",
+        },
+      ],
+    },
+    {
+      featureType: "poi.park",
+      elementType: "geometry.fill",
+      stylers: [
+        {
+          hue: "#003300",
+        },
+        {
+          saturation: -80,
+        },
+        {
+          lightness: -5,
+        },
+        {
+          gamma: 0.3,
+        },
+        {
+          visibility: "simplified",
+        },
+      ],
+    },
+    {
+      featureType: "poi",
+      elementType: "all",
+      stylers: [
+        {
+          visibility: "on",
+        },
+      ],
+    },
+    {
+      featureType: "poi.business",
+      elementType: "geometry",
+      stylers: [
+        {
+          saturation: -10,
+        },
+        {
+          visibility: "on",
+        },
+      ],
+    },
+    {
+      featureType: "poi.business",
+      elementType: "labels",
+      stylers: [
+        {
+          visibility: "off",
+        },
+      ],
+    },
+    {
+      featureType: "road",
+      elementType: "all",
+      stylers: [
+        {
+          saturation: -60,
+        },
+        {
+          lightness: -45,
+        },
+      ],
+    },
+    {
+      featureType: "road",
+      elementType: "labels.text.fill",
+      stylers: [
+        {
+          color: "#FBB03B",
+        },
+      ],
+    },
+    {
+      featureType: "road",
+      elementType: "labels.text.stroke",
+      stylers: [
+        {
+          weight: 4,
+        },
+        {
+          color: "#484848",
+        },
+      ],
+    },
+    {
+      featureType: "road",
+      elementType: "labels.icon",
+      stylers: [
+        {
+          visibility: "off",
+        },
+      ],
+    },
+    {
+      featureType: "road.highway",
+      elementType: "all",
+      stylers: [
+        {
+          visibility: "simplified",
+        },
+        {
+          color: "#323232",
+        },
+      ],
+    },
+    {
+      featureType: "road.highway",
+      elementType: "labels",
+      stylers: [
+        {
+          visibility: "off",
+        },
+      ],
+    },
+    {
+      featureType: "road.arterial",
+      elementType: "labels.icon",
+      stylers: [
+        {
+          visibility: "off",
+        },
+      ],
+    },
+    {
+      featureType: "transit",
+      elementType: "all",
+      stylers: [
+        {
+          visibility: "off",
+        },
+      ],
+    },
+    {
+      featureType: "transit.station.bus",
+      elementType: "all",
+      stylers: [
+        {
+          visibility: "off",
+        },
+      ],
+    },
+    {
+      featureType: "transit.station.bus",
+      elementType: "geometry",
+      stylers: [
+        {
+          visibility: "off",
+        },
+      ],
+    },
+    {
+      featureType: "transit.station.bus",
+      elementType: "labels",
+      stylers: [
+        {
+          visibility: "off",
+        },
+        {
+          hue: "#ff0000",
+        },
+      ],
+    },
+    {
+      featureType: "transit.station.bus",
+      elementType: "labels.icon",
+      stylers: [
+        {
+          visibility: "off",
+        },
+        {
+          hue: "#ff2300",
+        },
+      ],
+    },
+    {
+      featureType: "transit.station.rail",
+      elementType: "geometry",
+      stylers: [
+        {
+          visibility: "on",
+        },
+      ],
+    },
+    {
+      featureType: "transit.station.rail",
+      elementType: "labels",
+      stylers: [
+        {
+          visibility: "on",
+        },
+      ],
+    },
+    {
+      featureType: "transit.station.rail",
+      elementType: "labels.icon",
+      stylers: [
+        {
+          visibility: "on",
+        },
+      ],
+    },
+    {
+      featureType: "water",
+      elementType: "all",
+      stylers: [
+        {
+          color: "#ffffff",
+        },
+        {
+          visibility: "on",
+        },
+      ],
+    },
+  ]
 };
 
 export const GEOCENTER = { lat: 38.91657, lng: -77.02631 };
+
+export const LIBRARIES: Libraries = [
+  "places",
+  "visualization",
+  "geometry",
+  "localContext",
+];
+
+const clusterStyles = [
+  {
+    url: "img/map/m1.png",
+    height: 53,
+    width: 53,
+    anchor: [26, 26],
+    textColor: "#000",
+    textSize: 11,
+  },
+  {
+    url: "img/map/m2.png",
+    height: 56,
+    width: 56,
+    anchor: [28, 28],
+    textColor: "#000",
+    textSize: 11,
+  },
+  {
+    url: "img/map/m3.png",
+    height: 66,
+    width: 66,
+    anchor: [33, 33],
+    textColor: "#000",
+    textSize: 11,
+  },
+  {
+    url: "img/map/m4.png",
+    height: 78,
+    width: 78,
+    anchor: [39, 39],
+    textColor: "#000",
+    textSize: 11,
+  },
+  {
+    url: "img/map/m5.png",
+    height: 90,
+    width: 90,
+    anchor: [45, 45],
+    textColor: "#000",
+    textSize: 11,
+  },
+];

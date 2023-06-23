@@ -1,9 +1,10 @@
-import React, { useEffect } from "react";
+import React from "react";
 
-import { Marker, MarkerProps } from "@react-google-maps/api";
+import { Marker } from "@react-google-maps/api";
+import { IListing } from "../types";
 
 interface IMyMarker {
-  data: any;
+  data: IListing;
   clusterer: any;
   activeData: any;
   setActiveData: any;
@@ -20,12 +21,11 @@ const MyMarker = ({
   toggleWindow,
   toggleDrawer,
 }: IMyMarker) => {
-  let loc;
-  const { location, _id } = data;
+  const { lat,lng, place_id } = data;
   // location ? (loc = location.split(",")) : (loc = "50.60982,-1.34987");
   // let locObj = { lat: parseFloat(loc[0]), lng: parseFloat(loc[1]) };
   let image = {
-    url: "img/orange_marker_sm.png",
+    url: "/img/orange_marker_sm.png",
   };
 
   const handleMouseOverMarker = () => {
@@ -39,9 +39,9 @@ const MyMarker = ({
     toggleDrawer();
   };
   return (
-    <div className="App-marker" key={_id}>
+    <div className="App-marker" key={place_id}>
       <Marker
-        position={location}
+        position={{lat,lng}}
         clusterer={clusterer}
         icon={image}
         onMouseOver={handleMouseOverMarker}

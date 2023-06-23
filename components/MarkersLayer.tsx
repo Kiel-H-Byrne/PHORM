@@ -15,7 +15,7 @@ export const MarkersLayer = (props: Props) => {
   const { mapInstance, clientLocation } = props;
   const [infoContent, setInfoContent] = useState("");
   //make api call using user's location
-  const uri = `api/pullups?lat=${clientLocation.lat}&lng=${clientLocation.lng}`;
+  const uri = `api/listings?lat=${clientLocation.lat}&lng=${clientLocation.lng}`;
   const { data, error } = useSWR(uri, fetcher);
   const infoWindow = new (window as any).google.maps.InfoWindow({
     content: infoContent,

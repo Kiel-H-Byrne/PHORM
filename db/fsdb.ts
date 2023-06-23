@@ -2,10 +2,11 @@
 // import "firebase/firestore"
 
 import { collection, doc, endAt, getDoc, getDocs, orderBy, query, setDoc, startAt } from "firebase/firestore";
-import { distanceBetween, geohashForLocation, geohashQueryBounds } from "geofire-common";
+import { distanceBetween, geohashQueryBounds } from "geofire-common";
+import { IListing } from "./Types";
 import { appFsdb } from "./firebase";
 
-const listingsRef = collection(appFsdb, "LISTINGS");
+const listingsRef = collection(appFsdb, "listings");
 
 // const watchCollection = function(collection, ...filters) {
 
@@ -82,13 +83,9 @@ const listingsRef = collection(appFsdb, "LISTINGS");
 
 // == LISTINGS == //
 
-const listingCreate = async function (data) {
-  console.log("submitting to db...", data);
-  const geoHash = geohashForLocation([data.lat, data.lng])
-  console.log(geoHash)
+const listingCreate = async function (data: IListing) {
   const docRef = doc(listingsRef);
-  console.log(docRef);
-  await setDoc(docRef, {...data, geoHash}, { merge: true });
+  return await setDoc(docRef, {...data}, { merge: true });
 };
 
 const listingsFetch = async function (query) {

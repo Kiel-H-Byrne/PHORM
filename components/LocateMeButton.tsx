@@ -1,19 +1,15 @@
-import { Button, Center, Icon, IconButton, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Text, useDisclosure } from '@chakra-ui/react';
+import { Button, Center, Icon, IconButton, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Text, useDisclosure, useToast } from '@chakra-ui/react';
 import { signIn, useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import { BiMapPin, BiMessageAltAdd } from 'react-icons/bi';
 import { MdMyLocation } from 'react-icons/md';
-import { GLocation } from '../types';
+import { GLocation, ILocateMe } from '../types';
 import { findClosestMarker, targetClient } from '../util/helpers';
 import { PullUpForm } from './PullUpForm';
 
-interface Props {
-  mapInstance: google.maps.Map | google.maps.StreetViewPanorama;
-  setClientLocation: any //a usestate fxn returning {latlng};
-  clientLocation: GLocation
-}
 
-export const LocateMeButton = (props: Props) => {
+
+export const LocateMeButton = (props: ILocateMe) => {
   // const [clientLocation, setClientLocation] = useState(null); //hoisted 
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [closestListing, setClosestListing] = useState(null);
@@ -31,14 +27,17 @@ export const LocateMeButton = (props: Props) => {
       }
     };
   }, [geoWatchId, clientLocation]);
+const searchingToast =  useToast({colorScheme: 'yellow', status: "info", title: "User Location:", description: `Searching...`})
+
   const handleClick = () => {
-    const googleWindow: typeof google = (window as any).google;
+    // const googleWindow: typeof google = (window as any).google;
     //when clicked, find users location. keep finding every x minutes or as position changes. if position doesn't change after x minutes. turn off
     //zoom to position
     //calculate closest listing(s)
     //when user clicks again, turn tracking off.
     let oldMarker: google.maps.Marker;
-    if (!geoWatchId && !clientLocation) {
+    if (!geoWatchId || !clientLocation) {
+    searchingToast()
       const location = window.navigator && window.navigator.geolocation;
       if (location) {
         const watchId = location.watchPosition(
@@ -48,17 +47,17 @@ export const LocateMeButton = (props: Props) => {
               lng: position.coords.longitude,
             };
 
-            if (!clientMarker) {
-              let marker = new googleWindow.maps.Marker({
-                position: new googleWindow.maps.LatLng(positionObject),
+            if (Object.keys(clientMarker).length == 0) {
+              let marker = new google.maps.Marker({
+                position: new google.maps.LatLng(positionObject),
                 map: mapInstance,
                 icon: { url: "/img/orange_dot_sm_2.png" },
                 title: "My Location",
                 // animation: googleWindow.maps.Animation.BOUNCE,
               });
-              const clientRadius = new googleWindow.maps.Circle({
+              const clientRadius = new google.maps.Circle({
                 map: mapInstance as google.maps.Map,
-                center: new googleWindow.maps.LatLng(positionObject),
+                center: new google.maps.LatLng(positionObject),
                 radius: 2 * 1609.34,
                 strokeColor: "#FF7733",
                 strokeOpacity: 0.2,

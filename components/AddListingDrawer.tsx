@@ -8,7 +8,7 @@ import {
   DrawerHeader,
   DrawerOverlay
 } from "@chakra-ui/react";
-import AddListingForm from "./AddListingForm";
+import { AddListingForm } from "./AddListingForm";
 
 export function AddListingDrawer({
   drawerIsOpen, firstField, onDrawerClose,
@@ -39,7 +39,7 @@ export function AddListingDrawer({
           <Button variant="outline" mr={3} onClick={onDrawerClose}>
             Cancel
           </Button>
-          <Button colorScheme="blue">Submit</Button>
+          {/* <Button colorScheme="blue" onClick={(e) => handleSubmit(submitData, handleErrors)}>Submit</Button> */}
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
