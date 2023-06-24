@@ -54,7 +54,7 @@ export function AboutModal() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   useEffect(() => {
     onOpen();
-  }, []);
+  }, [onOpen]);
 
   return (
     <Modal

@@ -3,7 +3,7 @@ import { memo, useState } from "react";
 import {
   GoogleMap,
   MarkerClusterer,
-  useJsApiLoader
+  useJsApiLoader,
 } from "@react-google-maps/api";
 
 import fetcher from "@/util/fetch";
@@ -31,7 +31,6 @@ import { GEOCENTER, MAP_STYLES } from "../util/constants";
 import MyInfoWindow from "./InfoWindow";
 import { InteractiveUserName } from "./InteractiveUserName";
 import MyMarker from "./MyMarker";
-
 
 const clusterStyles = [
   {
@@ -111,15 +110,12 @@ const defaultProps = {
   },
 };
 
-
-
 const AppMap = ({ clientLocation, setMapInstance, mapInstance }: IAppMap) => {
   let { center, zoom, options } = defaultProps;
   const uri = clientLocation
     ? `api/listings?lat=${clientLocation.lat}&lng=${clientLocation.lng}`
-    : 'api/listings';
+    : "api/listings";
 
-    
   const {
     isOpen: isDrawerOpen,
     onOpen: toggleDrawer,
@@ -133,7 +129,10 @@ const AppMap = ({ clientLocation, setMapInstance, mapInstance }: IAppMap) => {
   const [infoWindowPosition, setInfoWindowPosition] = useState({} as GLocation);
   const [activeData, setActiveData] = useState([] as IListing[]);
 
-const { data: fetchData, error } = SWR(uri, fetcher, { loadingTimeout: 1000, errorRetryCount: 2 });
+  const { data: fetchData, error } = SWR(uri, fetcher, {
+    loadingTimeout: 1000,
+    errorRetryCount: 2,
+  });
 
   // console.log(fetchData, error)
   const toast = useToast();
@@ -141,16 +140,16 @@ const { data: fetchData, error } = SWR(uri, fetcher, { loadingTimeout: 1000, err
   // const uri = clientLocation ? `api/fetchData?lat=${getTruncated(clientLocation.lat)}&lng=${getTruncated(clientLocation.lng)}` : null;
   //clusterer needs to return one element?
   const checkForOverlaps = (data: IListing[]) => {
-    const result: { [key: string]: IListing[] } = data.reduce( (r, a) => {
+    const result: { [key: string]: IListing[] } = data.reduce((r, a) => {
       if (a.lng && a.lat) {
-        const locString = `{lng: ${a.lng
-        .toString()
-        .slice(0, -3)}, lat: ${a.lat.toString().slice(0, -3)}}`;
-      r[locString] = r[locString] || [];
-      r[locString].push(a);
-      return r;
-    }
-    return {}
+        const locString = `{lng: ${a.lng.toString().slice(0, -3)}, lat: ${a.lat
+          .toString()
+          .slice(0, -3)}}`;
+        r[locString] = r[locString] || [];
+        r[locString].push(a);
+        return r;
+      }
+      return {};
     }, Object.create(null) as { [key: string]: IListing[] });
     // console.log(result)
     const dupes = Object.values(result).find((el) => el.length > 1);
@@ -181,10 +180,10 @@ const { data: fetchData, error } = SWR(uri, fetcher, { loadingTimeout: 1000, err
       toggleWindow();
     }
   };
-  const {isLoaded} = useJsApiLoader({
-    id: 'google-map-script',
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY!
-  })
+  const { isLoaded } = useJsApiLoader({
+    id: "google-map-script",
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY!,
+  });
   return (
     // Important! Always set the container height explicitly via mapContainerClassName
     // <LoadScript
@@ -195,19 +194,26 @@ const { data: fetchData, error } = SWR(uri, fetcher, { loadingTimeout: 1000, err
     //   libraries={LIBRARIES}
     // >
     <>
-{isLoaded ? (
-      <GoogleMap
-        onLoad={(map) => {
-          // const bounds = new window.google.maps.LatLngBounds();
-          setMapInstance(map);
-        }}
-        id="GMap"
-        // mapContainerClassName={style.map}
-        center={clientLocation || center}
-        zoom={clientLocation ? 16 : zoom}
-        options={options}
-      >
-        {/* {fetchData && (
+      {isLoaded ? (
+        <GoogleMap
+          onLoad={(map) => {
+            // const bounds = new window.google.maps.LatLngBounds();
+            setMapInstance(map);
+          }}
+          id="GMap"
+          // mapContainerClassName={style.map}
+          mapContainerStyle={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            bottom: 0,
+            right: 0,
+          }}
+          center={clientLocation || center}
+          zoom={clientLocation ? 16 : zoom}
+          options={options}
+        >
+          {/* {fetchData && (
           <MapAutoComplete
             fetchData={fetchData}
             categories={categories}
@@ -216,149 +222,149 @@ const { data: fetchData, error } = SWR(uri, fetcher, { loadingTimeout: 1000, err
             setSelectedCategories={setSelectedCategories}
           />
         )} */}
-        {clientLocation &&
-          !fetchData &&
-          toast({ title: "Searching...", status: "info" })}
-        {clientLocation &&
-          fetchData &&
-          fetchData.length == 0 &&
-          toast({ title: "No Results", status: "info" })}
-        {clientLocation && fetchData && fetchData.length !== 0 && (
-          <MarkerClusterer
-            styles={clusterStyles}
-            averageCenter
-            enableRetinaIcons
-            onClick={onClick}
-            onMouseOver={handleMouseOver}
-            onMouseOut={handleMouseOut}
-            // onClick={(event) =>{console.log(event.getMarkers())}}
-            gridSize={2}
-            minimumClusterSize={2}
-          >
-            {(clusterer) =>
-              fetchData.map((markerData: IListing) => {
-                //return marker if element categories array includes value from selected_categories\\
+          {clientLocation &&
+            !fetchData &&
+            toast({ title: "Searching...", status: "info" })}
+          {clientLocation &&
+            fetchData &&
+            fetchData.length == 0 &&
+            toast({ title: "No Results", status: "info" })}
+          {clientLocation && fetchData && fetchData.length !== 0 && (
+            <MarkerClusterer
+              styles={clusterStyles}
+              averageCenter
+              enableRetinaIcons
+              onClick={onClick}
+              onMouseOver={handleMouseOver}
+              onMouseOut={handleMouseOut}
+              // onClick={(event) =>{console.log(event.getMarkers())}}
+              gridSize={2}
+              minimumClusterSize={2}
+            >
+              {(clusterer) =>
+                fetchData.map((markerData: IListing) => {
+                  //return marker if element categories array includes value from selected_categories\\
 
-                // if ( //if closeby
-                // pullup.categories &&
-                // pullup.categories.some((el) => selectedCategories.has(el))
-                // && mapInstance.containsLocation(fetchData.location)
-                // ) {yav
-                // if (pullup.location) {
-                //   const [lat, lng] = pullup.location.split(",");
+                  // if ( //if closeby
+                  // pullup.categories &&
+                  // pullup.categories.some((el) => selectedCategories.has(el))
+                  // && mapInstance.containsLocation(fetchData.location)
+                  // ) {yav
+                  // if (pullup.location) {
+                  //   const [lat, lng] = pullup.location.split(",");
 
-                //   let isInside = new window.google.maps.LatLngBounds().contains(
-                //     { lat: +lat, lng: +lng }
-                //   );
-                //   // console.log(isInside);
-                // }
-                return (
-                  // return (
-                  //   pullup.categories
-                  //     ? pullup.categories.some((el) =>
-                  //         selected_categories.includes(el)
-                  //       )
-                  //     : false
-                  // ) ? (
+                  //   let isInside = new window.google.maps.LatLngBounds().contains(
+                  //     { lat: +lat, lng: +lng }
+                  //   );
+                  //   // console.log(isInside);
+                  // }
+                  return (
+                    // return (
+                    //   pullup.categories
+                    //     ? pullup.categories.some((el) =>
+                    //         selected_categories.includes(el)
+                    //       )
+                    //     : false
+                    // ) ? (
 
-                  <MyMarker
-                    key={`${markerData.lat}${markerData.lng}`}
-                    //what data can i set on marker?
-                    data={markerData}
-                    // label={}
-                    // title={}
-                    clusterer={clusterer}
-                    activeData={activeData}
-                    setActiveData={setActiveData}
-                    setWindowClose={setWindowClose}
-                    toggleWindow={toggleWindow}
-                    toggleDrawer={toggleDrawer}
-                  />
-                );
-                // }
-              })
-            }
-          </MarkerClusterer>
-        )}
-        {activeData && isWindowOpen && (
-          <MyInfoWindow
-            activeData={activeData}
-            clusterCenter={infoWindowPosition}
-          />
-        )}
-
-        {activeData && isDrawerOpen && (
-          <Drawer
-            // activeData={activeData}
-            isOpen={isDrawerOpen}
-            placement="left"
-            onClose={setDrawerClose}
-            // mapInstance={mapInstance}
-          >
-            <DrawerOverlay />
-            <DrawerContent>
-              <DrawerCloseButton />
-              <DrawerHeader>Info</DrawerHeader>
-              <DrawerBody p={0}>
-                {activeData.length > 1 ? (
-                  <Tabs isFitted variant="enclosed">
-                    <TabList>
-                      {activeData.map((el, i) => (
-                        <Tab key={i}>
-                          <Text fontSize="sm" fontWeight="semibold">
-                            {" "}
-                            @userName -{" "}
-                            {/* {new Date(el.timestamp).toLocaleDateString()}{" "} */}
-                          </Text>
-                        </Tab>
-                      ))}
-                    </TabList>
-                    <TabPanels>
-                      {activeData.map((el, i) => {
-                        const { name, place_id } = el;
-                        return (
-                          <TabPanel
-                            key={i}
-                            p={0}
-                            bgColor="goldenrod"
-                            boxShadow="xl"
-                          >
-                            <Flex direction="column">
-                              <Box p={1}>
-                                <Text as="h2">{name}</Text>
-                                {/* <InteractiveUserName userName={userName} uid={uid} /> */}
-                                <Text
-                                  fontWeight="semibold"
-                                  fontSize=".7rem"
-                                  color="gray.400"
-                                >
-                                  @{place_id}
-                                </Text>
-                              </Box>
-                            </Flex>
-                          </TabPanel>
-                        );
-                      })}
-                    </TabPanels>
-                  </Tabs>
-                ) : (
-                  <>
-                    {activeData[0].place_id}
-                    <InteractiveUserName
-                      userName={activeData[0].name!}
-                      uid={activeData[0].place_id!}
+                    <MyMarker
+                      key={`${markerData.lat}${markerData.lng}`}
+                      //what data can i set on marker?
+                      data={markerData}
+                      // label={}
+                      // title={}
+                      clusterer={clusterer}
+                      activeData={activeData}
+                      setActiveData={setActiveData}
+                      setWindowClose={setWindowClose}
+                      toggleWindow={toggleWindow}
+                      toggleDrawer={toggleDrawer}
                     />
-                  </>
-                )}
-              </DrawerBody>
-            </DrawerContent>
-          </Drawer>
-        )}
+                  );
+                  // }
+                })
+              }
+            </MarkerClusterer>
+          )}
+          {activeData && isWindowOpen && (
+            <MyInfoWindow
+              activeData={activeData}
+              clusterCenter={infoWindowPosition}
+            />
+          )}
 
-        {/* <HeatmapLayer map={this.state.map && this.state.map} data={data.map(x => {x.location})} /> */}
-      </GoogleMap>
-) : null}
-</>
+          {activeData && isDrawerOpen && (
+            <Drawer
+              // activeData={activeData}
+              isOpen={isDrawerOpen}
+              placement="left"
+              onClose={setDrawerClose}
+              // mapInstance={mapInstance}
+            >
+              <DrawerOverlay />
+              <DrawerContent>
+                <DrawerCloseButton />
+                <DrawerHeader>Info</DrawerHeader>
+                <DrawerBody p={0}>
+                  {activeData.length > 1 ? (
+                    <Tabs isFitted variant="enclosed">
+                      <TabList>
+                        {activeData.map((el, i) => (
+                          <Tab key={i}>
+                            <Text fontSize="sm" fontWeight="semibold">
+                              {" "}
+                              @userName -{" "}
+                              {/* {new Date(el.timestamp).toLocaleDateString()}{" "} */}
+                            </Text>
+                          </Tab>
+                        ))}
+                      </TabList>
+                      <TabPanels>
+                        {activeData.map((el, i) => {
+                          const { name, place_id } = el;
+                          return (
+                            <TabPanel
+                              key={i}
+                              p={0}
+                              bgColor="goldenrod"
+                              boxShadow="xl"
+                            >
+                              <Flex direction="column">
+                                <Box p={1}>
+                                  <Text as="h2">{name}</Text>
+                                  {/* <InteractiveUserName userName={userName} uid={uid} /> */}
+                                  <Text
+                                    fontWeight="semibold"
+                                    fontSize=".7rem"
+                                    color="gray.400"
+                                  >
+                                    @{place_id}
+                                  </Text>
+                                </Box>
+                              </Flex>
+                            </TabPanel>
+                          );
+                        })}
+                      </TabPanels>
+                    </Tabs>
+                  ) : (
+                    <>
+                      {activeData[0].place_id}
+                      <InteractiveUserName
+                        userName={activeData[0].name!}
+                        uid={activeData[0].place_id!}
+                      />
+                    </>
+                  )}
+                </DrawerBody>
+              </DrawerContent>
+            </Drawer>
+          )}
+
+          {/* <HeatmapLayer map={this.state.map && this.state.map} data={data.map(x => {x.location})} /> */}
+        </GoogleMap>
+      ) : null}
+    </>
     // </LoadScript>
   );
 };
