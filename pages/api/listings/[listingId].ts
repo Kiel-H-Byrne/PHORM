@@ -31,7 +31,7 @@ const handler = async (req: any, res: any) => {
         if (!req.body)
           return res.status(400).send("You must write something");
         // const pullup = await insertPullUp(db, req.body.data);
-        return res.json({ pullup });
+        return res.json({ listing: "" });
       break;
     default:
       res.setHeader("Allow", ["GET", "POST"]);

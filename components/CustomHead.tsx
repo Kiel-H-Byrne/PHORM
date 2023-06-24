@@ -53,8 +53,10 @@ export const CustomHead = ({ title }: Props) => {
       /> */}
       <meta
         name="google-signin-client_id"
-        content={process.env.NEXT_PUBLIC_GOOGLE_ID}
+        content={process.env.NEXT_PUBLIC_TEST_client_id}
       />
+      <meta name="google-signin-cookiepolicy" content="single_host_origin" />
+      <meta name="google-signin-scope" content="profile email" />
 
       <meta name="theme-color" content="#9BA17B" />
       <meta name="msapplication-config" content="/browserconfig.xml" />

@@ -26,17 +26,18 @@ export default React.memo(MyInfoWindow);
 
 const SingleInfoContent = ({ data, options }: { data: IListing[], options: any }) => {
   const { lat,lng,name, } = data[0];
-  return (
-    <InfoWindow
+  if (lat && lng) {
+    return (
+      <InfoWindow
       position={{lat,lng}}
       options={options}
-    >
+      >
       <Flex width="xs" direction="column">
 
         <Text as="h2">{name}</Text>
         <Text fontWeight="light" fontSize=".7rem" color="gray.300">---Description--- </Text>
       </Flex>
-    </InfoWindow>);
+    </InfoWindow>)}
 }
 
 const MultipleInfoContent = ({ data, options }: { data: IListing[], options: any }) => {

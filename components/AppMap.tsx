@@ -141,13 +141,16 @@ const { data: fetchData, error } = SWR(uri, fetcher, { loadingTimeout: 1000, err
   // const uri = clientLocation ? `api/fetchData?lat=${getTruncated(clientLocation.lat)}&lng=${getTruncated(clientLocation.lng)}` : null;
   //clusterer needs to return one element?
   const checkForOverlaps = (data: IListing[]) => {
-    const result: { [key: string]: IListing[] } = data.reduce(function (r, a) {
-      const locString = `{lng: ${a.location.lng
+    const result: { [key: string]: IListing[] } = data.reduce( (r, a) => {
+      if (a.lng && a.lat) {
+        const locString = `{lng: ${a.lng
         .toString()
-        .slice(0, -3)}, lat: ${a.location.lat.toString().slice(0, -3)}}`;
+        .slice(0, -3)}, lat: ${a.lat.toString().slice(0, -3)}}`;
       r[locString] = r[locString] || [];
       r[locString].push(a);
       return r;
+    }
+    return {}
     }, Object.create(null) as { [key: string]: IListing[] });
     // console.log(result)
     const dupes = Object.values(result).find((el) => el.length > 1);
@@ -304,15 +307,15 @@ const { data: fetchData, error } = SWR(uri, fetcher, { loadingTimeout: 1000, err
                         <Tab key={i}>
                           <Text fontSize="sm" fontWeight="semibold">
                             {" "}
-                            @{el.userName} -{" "}
-                            {new Date(el.timestamp).toLocaleDateString()}{" "}
+                            @userName -{" "}
+                            {/* {new Date(el.timestamp).toLocaleDateString()}{" "} */}
                           </Text>
                         </Tab>
                       ))}
                     </TabList>
                     <TabPanels>
                       {activeData.map((el, i) => {
-                        const { media, message, userName } = el;
+                        const { name, place_id } = el;
                         return (
                           <TabPanel
                             key={i}
@@ -322,14 +325,14 @@ const { data: fetchData, error } = SWR(uri, fetcher, { loadingTimeout: 1000, err
                           >
                             <Flex direction="column">
                               <Box p={1}>
-                                <Text as="h2">{message}</Text>
+                                <Text as="h2">{name}</Text>
                                 {/* <InteractiveUserName userName={userName} uid={uid} /> */}
                                 <Text
                                   fontWeight="semibold"
                                   fontSize=".7rem"
                                   color="gray.400"
                                 >
-                                  @{userName}
+                                  @{place_id}
                                 </Text>
                               </Box>
                             </Flex>
@@ -340,10 +343,10 @@ const { data: fetchData, error } = SWR(uri, fetcher, { loadingTimeout: 1000, err
                   </Tabs>
                 ) : (
                   <>
-                    {activeData[0].message}
+                    {activeData[0].place_id}
                     <InteractiveUserName
-                      userName={activeData[0].userName}
-                      uid={activeData[0].uid}
+                      userName={activeData[0].name!}
+                      uid={activeData[0].place_id!}
                     />
                   </>
                 )}

@@ -15,6 +15,7 @@ import {
   Select,
   SimpleGrid,
   Textarea,
+  useToast
 } from "@chakra-ui/react";
 import React, { useState } from "react";
 const Form1 = () => {
@@ -46,7 +47,6 @@ const Form1 = () => {
           Email address
         </FormLabel>
         <Input id="email" type="email" />
-        <FormHelperText>We'll never share your email.</FormHelperText>
       </FormControl>
 
       <FormControl>
@@ -278,9 +278,17 @@ const Form3 = () => {
     </>
   );
 };
+
 function MultiStepForm() {
   const [step, setStep] = useState(1);
   const [progress, setProgress] = useState(33.33);
+  const toast = useToast({
+    title: "Account created.",
+    description: "We've created your account for you.",
+    status: "success",
+    duration: 3000,
+    isClosable: true,
+  })
   return (
     <div>
       <Progress
@@ -329,15 +337,7 @@ function MultiStepForm() {
               w="7rem"
               colorScheme="red"
               variant="solid"
-              onClick={() => {
-                toast({
-                  title: "Account created.",
-                  description: "We've created your account for you.",
-                  status: "success",
-                  duration: 3000,
-                  isClosable: true,
-                });
-              }}
+              onClick={() => toast()}
             >
               Submit
             </Button>
@@ -347,3 +347,5 @@ function MultiStepForm() {
     </div>
   );
 }
+
+export default MultiStepForm

@@ -46,14 +46,14 @@ export const MarkersLayer = (props: Props) => {
     data &&
       data.pullups.forEach((el: IListing) => {
         const marker = new (window as any).google.maps.Marker({
-          position: el.location,
+          position: {lat: el.lat, lng: el.lng},
           map: mapInstance,
           // title: el.title
           // icon:
         });
-        marker.addListener("click", () => {
-          updateInfoWindow(el.message, marker);
-        });
+        // marker.addListener("click", () => {
+        //   updateInfoWindow(el.message, marker);
+        // });
       });
     //display on map
     return <div></div>;

@@ -1,11 +1,8 @@
 // 608da9f19a70cb0805c59923
 
 import { NextApiRequest, NextApiResponse } from 'next';
-import { findUserById } from '../../../db/index';
-import { connectToDatabase } from '../../../db/mongodb'
 
 export default async function userHandler(req: NextApiRequest, res: NextApiResponse) {
-  const db = await connectToDatabase();
   const {
     query: { userId },
     method,
@@ -14,9 +11,10 @@ export default async function userHandler(req: NextApiRequest, res: NextApiRespo
     case 'GET':
       // Get data from your database
       try {
-        const user = await findUserById(db, userId as string);
+        // const user = await findUserById(db, userId as string);
+        const user = {}
         res.status(200).json(user)
-      } catch (error) {
+      } catch (error: any) {
         res.status(404).send({"error": error.message})
       }
       break

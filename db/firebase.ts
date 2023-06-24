@@ -1,6 +1,6 @@
 import { getApps, initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
 import { initializeFirestore } from "firebase/firestore";
-
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FSDB_KEY,
   authDomain: process.env.NEXT_PUBLIC_FSDB_AUTH_URI,

@@ -41,7 +41,7 @@ const MyMarker = ({
   return (
     <div className="App-marker" key={place_id}>
       <Marker
-        position={{lat,lng}}
+        position={{lat: lat!,lng: lng!}}
         clusterer={clusterer}
         icon={image}
         onMouseOver={handleMouseOverMarker}

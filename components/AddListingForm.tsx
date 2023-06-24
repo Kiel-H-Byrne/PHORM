@@ -1,8 +1,8 @@
 import { ListingsSchema } from "@/db/schemas";
-import { Box, Button, FormLabel, Input, useRef, useToast } from "@chakra-ui/react";
+import { Box, Button, FormLabel, Input, useToast } from "@chakra-ui/react";
 import { zodResolver } from '@hookform/resolvers/zod';
 import { geohashForLocation } from "geofire-common";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Form, useForm } from "react-hook-form";
 import { IListing } from "../types";
 
@@ -70,7 +70,7 @@ const useHandleSuccess = () => {
   useToast({colorScheme: 'green', status: "success", title: "Form Submitted", description: `Successfully submitted form.`})
  }
 
-const formRef = useRef(null)
+const formRef = useRef()
 
 const alertToast = useToast({colorScheme: 'red', status: "error", title: "Form Error", description: `Form Error`})
   return (
@@ -84,12 +84,11 @@ const alertToast = useToast({colorScheme: 'red', status: "error", title: "Form E
     >
       <Form
         // action="/api/listings"
-        ref={formRef}
         onSubmit={submitData}
         // headers={{'Content-Type': 'application/json'}}
         encType={'application/json'}
-        onSuccess={() => { useHandleSuccess}}
-        onError={alertToast}
+        onSuccess={() =>  useHandleSuccess}
+        onError={() => alertToast()}
         control={control}
       >
         <FormLabel htmlFor="name"> Name</FormLabel>

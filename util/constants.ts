@@ -1,4 +1,4 @@
-import { Libraries } from "@/db/Types";
+import { Libraries } from "../types";
 
 export const MAX_AGE = 1 * 24 * 60 * 60;
 

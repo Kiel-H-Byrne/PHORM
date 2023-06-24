@@ -1,13 +1,12 @@
 // import { getPullUps, getPullupsNearBy, insertPullUp } from "../../../db/index";
 // import { connectToDatabase } from "../../../db/mongodb";
 
-import { IListing } from "@/db/Types";
 import { getListingsWithinRadius, listingCreate, listingsFetch } from "@/db/fsdb";
-import { NextRequest } from "next/server";
+import { IListing } from "../../../types";
 
 const maxAge = 1 * 24 * 60 * 60;
 
-const handler = async (req: NextRequest, res: any) => {
+const handler = async (req: any, res: any) => {
   
   const {
     query: { by, limit, lat, lng },

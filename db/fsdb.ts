@@ -3,7 +3,7 @@
 
 import { collection, doc, endAt, getDoc, getDocs, orderBy, query, setDoc, startAt } from "firebase/firestore";
 import { distanceBetween, geohashQueryBounds } from "geofire-common";
-import { IListing } from "./Types";
+import { IListing } from "../types";
 import { appFsdb } from "./firebase";
 
 const listingsRef = collection(appFsdb, "listings");
@@ -88,7 +88,7 @@ const listingCreate = async function (data: IListing) {
   return await setDoc(docRef, {...data}, { merge: true });
 };
 
-const listingsFetch = async function (query) {
+const listingsFetch = async function (query: any) {
   const docRef = doc(listingsRef, query);
   const docSnap = await getDoc(docRef);
   if (docSnap.exists()) {
@@ -132,7 +132,7 @@ const getListingsWithinRadius = async (
   return listings;
 };
 
-const listingsDelete = function (uid) {};
+const listingsDelete = function (uid: string) {};
 
 // export const getMylistings = (uid, dispatch) => {
 //   // eslint-disable-next-line

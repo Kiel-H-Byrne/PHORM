@@ -5,7 +5,6 @@ import { BiMapPin, BiMessageAltAdd } from 'react-icons/bi';
 import { MdMyLocation } from 'react-icons/md';
 import { GLocation, ILocateMe } from '../types';
 import { findClosestMarker, targetClient } from '../util/helpers';
-import { PullUpForm } from './PullUpForm';
 
 
 
@@ -157,12 +156,13 @@ const searchingToast =  useToast({colorScheme: 'yellow', status: "info", title: 
               </ModalHeader>
               <ModalCloseButton />
               <ModalBody>
-                <PullUpForm
+                {/* <PullUpForm
                   onClose={onClose}
-                  locationData={clientLocation}
+                  locationData={clientLocation!}
                   uid={ ''}
                   userName={session?.user?.name?? ''}
-                />
+                /> */}
+                {/* <ListingForm />*/}
               </ModalBody>
             </>
           ) : (

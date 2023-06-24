@@ -1,4 +1,3 @@
-import { Listing } from "@/db/Types";
 import {
   Button,
   Container,
@@ -9,20 +8,20 @@ import {
 } from "@chakra-ui/react";
 import { Dispatch, SetStateAction } from "react";
 import { MdDirections } from "react-icons/md";
-import ListingImage from "./ListingImage";
+import { IListing } from '../types';
 
 interface ISideDrawer {
-  activeListing: Listing;
+  activeListing: IListing;
   isOpen: boolean;
   mapInstance: any;
   setOpen: Dispatch<SetStateAction<boolean>>;
 }
 
-const SideGrid = ({ activeListing }) => {
-  const { url, name, image, description, phone, address } = activeListing;
+const SideGrid = ({activeListing}: { activeListing: IListing }) => {
+  const { name, /*url, image, description, phone, address*/ } = activeListing;
   return (
-    <Container direction="column">
-      <a
+    <Container >
+      {/* <a
         href={url}
         title="Listing Image"
         rel="noopener noreferrer"
@@ -34,15 +33,15 @@ const SideGrid = ({ activeListing }) => {
           url={url}
           className="listing-image"
         />
-      </a>
+      </a> */}
       <Divider />
       <Grid>
         <article className="card-title">
           <Text variant="h3">{name}</Text>
-          <Text variant="overline">{description}</Text>
+          {/* <Text variant="overline">{description}</Text> */}
           <address className="card-content">
-            <a href={`tel:${phone}`}>{phone}</a>
-            <Text variant="body1">{address}</Text>
+            {/* <a href={`tel:${phone}`}>{phone}</a> */}
+            {/* <Text variant="body1">{address}</Text> */}
           </address>
         </article>
         <div>Hours if</div>
@@ -67,13 +66,13 @@ const SideDrawer = ({
   setOpen,
   mapInstance,
 }: ISideDrawer) => {
-  const toggleDrawer = (event) => {
-    if (
-      event.type === "keydown" &&
-      (event.key === "Tab" || event.key === "Shift")
-    ) {
-      return;
-    }
+  const toggleDrawer = () => {
+    // if (
+    //   event.type === "keydown" &&
+    //   (event.key === "Tab" || event.key === "Shift")
+    // ) {
+    //   return;
+    // }
     setOpen((prevOpen) => !prevOpen);
   };
   /*
@@ -92,7 +91,7 @@ _id: "3Nh99P2JxxCpBGm5v"
 */
 
   return (
-    <Drawer anchor="left" open={isOpen} onClose={toggleDrawer}>
+    <Drawer placement="left" isOpen={isOpen} onClose={toggleDrawer}>
       {/* <SideList activeListing={activeListing} mapInstance={mapInstance} /> */}
       {/* <LegacyDrawer activeListing={activeListing} /> */}
       <SideGrid activeListing={activeListing} />
@@ -100,11 +99,11 @@ _id: "3Nh99P2JxxCpBGm5v"
   );
 };
 
-const sliderPhoto = (photo) => {};
-const openHours = () => true;
-const verifyUI = () => {};
-const authUser = () => true;
-const isOwner = () => false;
+// const sliderPhoto = (photo) => {};
+// const openHours = () => true;
+// const verifyUI = () => {};
+// const authUser = () => true;
+// const isOwner = () => false;
 
 export default SideDrawer;
 
