@@ -1,6 +1,5 @@
 import { FirestoreAdapter } from "@auth/firebase-adapter";
 
-import { cert } from "firebase-admin/app";
 import NextAuth, { Profile, Session } from 'next-auth';
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from 'next-auth/providers/google';
@@ -12,6 +11,7 @@ export default NextAuth({
       clientId: process.env.NEXT_PUBLIC_GOOGLE_ID!,
       clientSecret: process.env.NEXT_PUBLIC_GOOGLE_SECRET!,
       authorization: {
+        url: "momb-1b026.firebaseapp.com",
         params: {
           access_type: "offline",
           response_type: "code",
@@ -61,13 +61,13 @@ export default NextAuth({
     strategy: 'database',
   },
   adapter: FirestoreAdapter(
-    {
-    credential: cert({
-      projectId: process.env.NEXT_PUBLIC_FSDB_PROJECT_ID!,
-      clientEmail: process.env.NEXT_PUBLIC_FIREBASE_CLIENT_EMAIL!,
-      privateKey:  process.env.NEXT_PUBLIC_FSDB_PRIVATE_KEY!,
-    })!,
-  }
+  //   {
+  //   credential: cert({
+  //     projectId: process.env.NEXT_PUBLIC_FSDB_PROJECT_ID!,
+  //     clientEmail: process.env.NEXT_PUBLIC_FIREBASE_CLIENT_EMAIL!,
+  //     privateKey:  process.env.NEXT_PUBLIC_FSDB_PRIVATE_KEY!,
+  //   }),
+  // }
   ),
   debug: true,
   callbacks: {

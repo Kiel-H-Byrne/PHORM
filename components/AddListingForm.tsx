@@ -1,10 +1,10 @@
-import { IListing } from "@/db/Types";
 import { ListingsSchema } from "@/db/schemas";
-import { Box, Button, FormLabel, Input, useToast } from "@chakra-ui/react";
+import { Box, Button, FormLabel, Input, useRef, useToast } from "@chakra-ui/react";
 import { zodResolver } from '@hookform/resolvers/zod';
 import { geohashForLocation } from "geofire-common";
 import { useEffect } from "react";
 import { Form, useForm } from "react-hook-form";
+import { IListing } from "../types";
 
 export const AddListingForm = () => {
   const {
@@ -53,7 +53,9 @@ export const AddListingForm = () => {
     fetch("/api/listings", { method: 'POST', body: JSON.stringify(submitData) })
   };
 useEffect(() => {
-console.log(errors)
+if (Object.keys(errors).length !== 0) {
+  console.warn(errors)
+}
 },[errors])
   const handleErrors = (data: Object) => {
     console.log("errors");
@@ -68,6 +70,7 @@ const useHandleSuccess = () => {
   useToast({colorScheme: 'green', status: "success", title: "Form Submitted", description: `Successfully submitted form.`})
  }
 
+const formRef = useRef(null)
 
 const alertToast = useToast({colorScheme: 'red', status: "error", title: "Form Error", description: `Form Error`})
   return (
@@ -81,6 +84,7 @@ const alertToast = useToast({colorScheme: 'red', status: "error", title: "Form E
     >
       <Form
         // action="/api/listings"
+        ref={formRef}
         onSubmit={submitData}
         // headers={{'Content-Type': 'application/json'}}
         encType={'application/json'}

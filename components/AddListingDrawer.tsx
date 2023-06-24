@@ -17,6 +17,14 @@ export function AddListingDrawer({
   firstField: undefined;
   onDrawerClose: () => void;
 }) {
+
+  // const handleSubmit () => {
+  //   if (formRef.current) {
+	// 		formRef.current.dispatchEvent(
+	// 			new Event('submit', { cancelable: true, bubbles: true })
+	// 		)
+	// 	}
+  // }
   return (
     <Drawer
       isOpen={drawerIsOpen}
@@ -39,7 +47,7 @@ export function AddListingDrawer({
           <Button variant="outline" mr={3} onClick={onDrawerClose}>
             Cancel
           </Button>
-          {/* <Button colorScheme="blue" onClick={(e) => handleSubmit(submitData, handleErrors)}>Submit</Button> */}
+          {/* <Button colorScheme="blue" onClick={handleSubmit}>Submit</Button> */}
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
