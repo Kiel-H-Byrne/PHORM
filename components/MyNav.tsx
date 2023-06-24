@@ -14,6 +14,7 @@ import {
 } from "@chakra-ui/react";
 import { useSession } from "next-auth/react";
 import React from "react";
+import { AboutModal } from "./AboutModal";
 import { AddListingDrawer } from "./AddListingDrawer";
 import { MyAvatar } from "./MyAvatar";
 
@@ -41,6 +42,7 @@ const NavLink = ({ path, label }: { path: string; label: string }) => (
 const AvatarDropdown = () => (
   <Box pb={4} display={{ md: "none" }}>
     <Stack as={"nav"} spacing={4}>
+    <Heading color={"royalblue"}>P.H.O.R.M</Heading>
       {NAV_LINKS.map(({ path, label }) => (
         <NavLink key={label} path={path} label={label} />
       ))}
@@ -73,12 +75,12 @@ export function MyNav() {
             onClick={dropdownIsOpen ? onDropdownClose : onDropdownOpen}
           />
           <HStack spacing={8} alignItems={"center"}>
-            <Heading color={"royalblue"}>P.H.O.R.M</Heading>
             <HStack
               as={"nav"}
               spacing={4}
               display={{ base: "none", md: "flex" }}
             >
+              <Heading color={"royalblue"}>P.H.O.R.M</Heading>
               {NAV_LINKS.map(({ path, label }) => (
                 <NavLink key={label} path={path} label={label} />
               ))}
@@ -113,6 +115,7 @@ export function MyNav() {
         firstField={firstField}
         onDrawerClose={onDrawerClose}
       />
+<AboutModal />
     </>
   );
 }
