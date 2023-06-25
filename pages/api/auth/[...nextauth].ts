@@ -61,6 +61,7 @@ export default NextAuth({
   session: {
     strategy: 'database',
   },
+  //@ts-ignore
   adapter: FirestoreAdapter({
     credential: cert({
       projectId: process.env.NEXT_PUBLIC_FSDB_PROJECT_ID!,

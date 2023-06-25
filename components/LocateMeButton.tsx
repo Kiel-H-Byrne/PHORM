@@ -19,16 +19,15 @@ import { BiMapPin, BiMessageAltAdd } from "react-icons/bi";
 import { MdMyLocation } from "react-icons/md";
 import { GLocation, ILocateMe } from "../types";
 import {
-  findClosestMarker,
   milesToMeters,
-  targetClient,
+  targetClient
 } from "../util/helpers";
 import AddListingForm from "./AddListingForm";
 
 const LocateMeButton = (props: ILocateMe) => {
   // const [clientLocation, setClientLocation] = useState(null); //hoisted
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [closestListing, setClosestListing] = useState(null);
+  const [closestMarker, setClosestMarker] = useState({} as google.maps.Marker);
   const [geoWatchId, setGeoWatchId] = useState(0);
   const [clientMarker, setClientMarker] = useState({} as google.maps.Marker);
   const [toggleDisplay, setToggleDisplay] = useState(false);
@@ -97,19 +96,20 @@ const LocateMeButton = (props: ILocateMe) => {
             setClientLocation(positionObject);
             targetClient(mapInstance, positionObject);
 
-            if (!closestListing) {
-              setClosestListing(findClosestMarker([], positionObject));
+            if (!closestMarker) {
+              //where are all the markers coming from?
+              // setClosestListing(findClosestMarker(fetchData, positionObject));
             } else {
               // IN order to change the marker background i need the marker. in the old app an array of markers were stored in redux state
-              if (oldMarker !== closestListing) {
+              if (oldMarker !== closestMarker) {
                 // set old marker icon
                 //   url: "img/map/orange_marker_sm.png",
                 // console.log("change color of marker")
-                console.log("changing markers..." + closestListing);
+                console.log("changing markers..." + closestMarker);
               } else {
                 // set closest marker icon
                 //   url: "img/map/red_marker_sm.png",
-                oldMarker = closestListing;
+                oldMarker = closestMarker;
               }
             }
           },
@@ -138,7 +138,7 @@ const LocateMeButton = (props: ILocateMe) => {
   }, [
     clientLocation,
     clientMarker,
-    closestListing,
+    closestMarker,
     geoWatchId,
     mapInstance,
     searchingToast,

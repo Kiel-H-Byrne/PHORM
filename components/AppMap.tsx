@@ -199,7 +199,7 @@ const AppMap = ({ client_location, setMapInstance, mapInstance }: IAppMap) => {
         toggleWindow();
       }
     },
-    [checkForOverlaps, fetchData, mapInstance, toggleWindow]
+    [ fetchData, toggleWindow]
   );
   const handleMouseOut = useCallback(() => {
     if (infoWindowPosition) {

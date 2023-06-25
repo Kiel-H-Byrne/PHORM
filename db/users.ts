@@ -1,5 +1,5 @@
+import { IUser } from '@/types';
 import { collection, doc, getDoc, getDocs, query, updateDoc, where } from 'firebase/firestore';
-import { insertUser } from './_user';
 import { appFsdb } from './firebase';
 
 const findUserById = async (userId: string) => {
@@ -21,17 +21,11 @@ const findUserByEmail = async (email: string) => {
   return null;
 };
 
-const updateUserById = async (userId: string, newData) => {
+const updateUserById = async (userId: string, newData: Partial<IUser>) => {
   const userRef = doc(usersRef, userId);
   await updateDoc(userRef, newData);
 };
-/**
- * Not needed because new users are created with next-auth & firebase adapter
- */
-// const insertUser = async (userData) => {
-//   const newUserRef = await addDoc(usersRef, userData);
-//   return newUserRef.id;
-// };
+
 
 const getUsers = async () => {
   const querySnapshot = await getDocs(usersRef);
@@ -40,6 +34,6 @@ const getUsers = async () => {
 };
 
 export {
-  findUserByEmail, findUserById, getUsers, insertUser, updateUserById
+  findUserByEmail, findUserById, getUsers, updateUserById
 };
 
