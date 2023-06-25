@@ -1,3 +1,4 @@
+import { SessionProvider } from "next-auth/react";
 import { ReactNode, memo } from "react";
 import { CustomHead, MyFooter, MyNav } from "./";
 
@@ -11,12 +12,12 @@ const Layout = ({ children, title }: Props) => {
   // const [show, setShow] = useState(true);
 
   return (
-    <>
+    <SessionProvider>
       <CustomHead title={title || "Pull Up App"} />
       <MyNav />
       {children}
       <MyFooter />
-    </>
+    </SessionProvider>
   );
 };
 

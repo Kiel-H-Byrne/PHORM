@@ -1,4 +1,4 @@
-import { GLocation } from "../types";
+import { GLocation, IListing } from "../types";
 
 export const targetClient = function (map: any, pos: any) {
   // SET CENTER,
@@ -13,23 +13,23 @@ export const toPositionObj = (location: string | undefined) => {
     let latLng = location.split(",");
     let lat = Number(latLng[0]);
     let lng = Number(latLng[1]);
-    let pos = new (window as any).google.maps.LatLng({ lat: lat, lng: lng });
+    let pos = new google.maps.LatLng({ lat: lat, lng: lng });
     return pos;
   }
 };
 
 export const findClosestMarker = function (
-  markers: any[], //Listing[],
+  markers: IListing[],
   location: GLocation
 ) {
   // marker {position: latlngObj, map: mapinstnace, icon: iconurl}
-  let distances = [""];
+  let distances: number[] = [];
   let closest = -1;
-  const start = new (window as any).google.maps.LatLng(location);
+  const start = new google.maps.LatLng(location);
   for (let i = 0; i < markers.length; i++) {
-    if (markers[i].location) {
-      let d = (window as any).google.maps.geometry.spherical.computeDistanceBetween(
-        toPositionObj(markers[i].location),
+    if (markers[i].lat && markers[i].lng) {
+      let d = google.maps.geometry.spherical.computeDistanceBetween(
+        {lat: markers[i].lat!, lng: markers[i].lng!},
         start
       );
       distances[i] = d;

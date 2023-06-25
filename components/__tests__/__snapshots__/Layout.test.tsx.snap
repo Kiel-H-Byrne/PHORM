@@ -1,0 +1,109 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders homepage unchanged 1`] = `
+<div
+  aria-hidden="true"
+  data-aria-hidden="true"
+>
+  <div
+    class="css-f62z01"
+  >
+    <div
+      class="css-q4hjtx"
+    >
+      <button
+        aria-label="Open Menu"
+        class="chakra-button css-1s5iq1h"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="chakra-icon css-onkibi"
+          focusable="false"
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M 3 5 A 1.0001 1.0001 0 1 0 3 7 L 21 7 A 1.0001 1.0001 0 1 0 21 5 L 3 5 z M 3 11 A 1.0001 1.0001 0 1 0 3 13 L 21 13 A 1.0001 1.0001 0 1 0 21 11 L 3 11 z M 3 17 A 1.0001 1.0001 0 1 0 3 19 L 21 19 A 1.0001 1.0001 0 1 0 21 17 L 3 17 z"
+            fill="currentColor"
+          />
+        </svg>
+      </button>
+      <div
+        class="chakra-stack css-chgbhg"
+      >
+        <nav
+          class="chakra-stack css-1eq794"
+        >
+          <h2
+            class="chakra-heading css-1b8zte3"
+          >
+            P.H.O.R.M
+          </h2>
+          <a
+            class="chakra-link css-1hol3b3"
+            href="/"
+          >
+            Home
+          </a>
+          <a
+            class="chakra-link css-1hol3b3"
+            href="/about"
+          >
+            About
+          </a>
+          <a
+            class="chakra-link css-1hol3b3"
+            href="/owners"
+          >
+            Owners
+          </a>
+          <a
+            class="chakra-link css-1hol3b3"
+            href="/list"
+          >
+            List View
+          </a>
+        </nav>
+      </div>
+      <div
+        class="css-70qvj9"
+      >
+        <button
+          class="chakra-button css-czglya"
+          type="button"
+        >
+          <span
+            class="chakra-button__icon css-1wh2kri"
+          >
+            <svg
+              aria-hidden="true"
+              class="chakra-icon css-onkibi"
+              focusable="false"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M0,12a1.5,1.5,0,0,0,1.5,1.5h8.75a.25.25,0,0,1,.25.25V22.5a1.5,1.5,0,0,0,3,0V13.75a.25.25,0,0,1,.25-.25H22.5a1.5,1.5,0,0,0,0-3H13.75a.25.25,0,0,1-.25-.25V1.5a1.5,1.5,0,0,0-3,0v8.75a.25.25,0,0,1-.25.25H1.5A1.5,1.5,0,0,0,0,12Z"
+                fill="currentColor"
+              />
+            </svg>
+          </span>
+          Register Business 
+        </button>
+        Loading...
+      </div>
+    </div>
+  </div>
+  <div>
+    Rendered!
+  </div>
+  <footer
+    class="css-1uhq8pw"
+  >
+    <div
+      class="css-1nuqoda"
+    >
+      © Copyright TenK Solutions, LLC. All Rights Reserved
+    </div>
+  </footer>
+</div>
+`;

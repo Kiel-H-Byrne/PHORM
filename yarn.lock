@@ -2690,6 +2690,11 @@
     teeny-request "^8.0.0"
     uuid "^8.0.0"
 
+"@googlemaps/jest-mocks@^2.19.1":
+  version "2.19.1"
+  resolved "https://registry.yarnpkg.com/@googlemaps/jest-mocks/-/jest-mocks-2.19.1.tgz#d67cf6c5f7921174ab75230f73d500cdecfc5818"
+  integrity sha512-8bJZilvNSPZJzZknWku5bVkndo9brzoJRAG9bi1fIP1l+XLgvTX3IRw1z163JJ6vNIJLbpon47rq2Uccf68e0g==
+
 "@googlemaps/js-api-loader@1.15.1":
   version "1.15.1"
   resolved "https://registry.yarnpkg.com/@googlemaps/js-api-loader/-/js-api-loader-1.15.1.tgz#7d5f1d55a4ec5c99b1d8f0708f3a46b83a71384c"
@@ -11794,6 +11799,11 @@ whatwg-encoding@^2.0.0:
   integrity sha512-p41ogyeMUrw3jWclHWTQg1k05DSVXPLcVxRTYsXUk+ZooOCZLcoYgPZ/HL/D/N+uQPOtcp1me1WhBEaX02mhWg==
   dependencies:
     iconv-lite "0.6.3"
+
+whatwg-fetch@^3.6.2:
+  version "3.6.2"
+  resolved "https://registry.yarnpkg.com/whatwg-fetch/-/whatwg-fetch-3.6.2.tgz#dced24f37f2624ed0281725d51d0e2e3fe677f8c"
+  integrity sha512-bJlen0FcuU/0EMLrdbJ7zOnW6ITZLrZMIarMUVmdKtsGvZna8vxKYaexICWPfZ8qwf9fzNq+UEIZrnSaApt6RA==
 
 whatwg-mimetype@^3.0.0:
   version "3.0.0"

@@ -7,7 +7,9 @@ const createJestConfig = nextJest({
 });
 const customJestConfig = {
   moduleDirectories: ["node_modules", "<rootDir>/"],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testEnvironment: "jest-environment-jsdom",
+  testPathIgnorePatterns: ["<rootDir>/.next/", "<rootDir>/node_modules/"],
   globals: {
     fetch,
   },

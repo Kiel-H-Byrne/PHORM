@@ -57,7 +57,7 @@ export default NextAuth({
     // }),
   ],
   session: {
-    strategy: 'database',
+    strategy: 'jwt',
   },
   // adapter: FirestoreAdapter({
   //   credential: cert({

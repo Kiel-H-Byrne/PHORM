@@ -31,7 +31,7 @@ import { CLUSTER_STYLE, GEOCENTER, MAP_STYLES } from "../util/constants";
 import { MyInfoWindow, MyMarker } from "./";
 import { InteractiveUserName } from "./InteractiveUserName";
 
-const default_props = {
+export const default_props = {
   center: GEOCENTER,
   zoom: 11, //vs 11
   options: {
