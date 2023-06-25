@@ -10,6 +10,7 @@ import {
   Text,
   useDisclosure
 } from "@chakra-ui/react";
+import { useSession } from "next-auth/react";
 import { memo, useEffect } from "react";
 import { FaDraftingCompass, FaFistRaised, FaGem } from "react-icons/fa";
 import { FeatureCard } from "./";
@@ -40,7 +41,7 @@ function AboutModal() {
   );
 
   const { isOpen, onOpen, onClose } = useDisclosure();
-  
+  const {status} = useSession()
   useEffect(() => {
     onOpen();
   }, [onOpen]);
@@ -48,7 +49,7 @@ function AboutModal() {
   return (
     <Modal
       isCentered
-      isOpen={isOpen}
+      isOpen={isOpen && status === "unauthenticated"}
       onClose={onClose}
       size={{ base: "xs", md: "3xl" }}
     >
