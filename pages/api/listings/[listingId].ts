@@ -1,4 +1,4 @@
-import { listingsFetch } from '@/db/fsdb';
+import { listingsFetch } from '@/db/listings';
 import { MAX_AGE } from '../../../util/constants';
 
 

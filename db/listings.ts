@@ -8,7 +8,6 @@ import { appFsdb } from "./firebase";
 
 const listingsRef = collection(appFsdb, "listings");
 
-
 // == LISTINGS == //
 
 const listingCreate = async function (data: IListing) {
@@ -21,7 +20,7 @@ const listingsFetchAll = async function () {
     const querySnapshot = await getDocs(listingsRef);
     const listings: IListing[] = [];
     querySnapshot.forEach((doc) => {
-      listings.push(doc.data());
+      listings.push(doc.data() as IListing);
     });
     return listings;
   
@@ -94,4 +93,6 @@ const listingsDelete = function (uid: string) {};
 // };
 
 export { getListingsWithinRadius, listingCreate, listingsDelete, listingsFetch, listingsFetchAll };
+
+
 

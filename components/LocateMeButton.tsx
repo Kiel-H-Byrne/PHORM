@@ -23,6 +23,7 @@ import {
   milesToMeters,
   targetClient,
 } from "../util/helpers";
+import AddListingForm from "./AddListingForm";
 
 const LocateMeButton = (props: ILocateMe) => {
   // const [clientLocation, setClientLocation] = useState(null); //hoisted
@@ -149,7 +150,6 @@ const LocateMeButton = (props: ILocateMe) => {
     handleClick();
     onOpen();
   }, [handleClick, onOpen]);
-
   return (
     <>
       <IconButton
@@ -196,7 +196,7 @@ const LocateMeButton = (props: ILocateMe) => {
                   uid={ ''}
                   userName={session?.user?.name?? ''}
                 /> */}
-                {/* <ListingForm />*/}
+                <AddListingForm onDrawerClose={onClose}  />
               </ModalBody>
             </>
           ) : (

@@ -1,6 +1,7 @@
+import { STATE_ABBREVIATIONS } from "@/util/constants";
 import { GoogleMapProps } from "@react-google-maps/api";
 import { z } from "zod";
-import { ListingsSchema } from "../db/schemas";
+import { ListingsSchema, UserSchema } from "../db/schemas";
 
 export interface IClaim {
   ownerId?: string;
@@ -10,6 +11,7 @@ export interface IClaim {
 }
 
 export type IListing = z.infer<typeof ListingsSchema>
+export type IUser = z.infer<typeof UserSchema>
 
 export type Category = "a" | "b" | "c";
 export type Libraries = ("drawing" | "geometry" | "localContext" | "places" | "visualization")[];
@@ -25,3 +27,4 @@ export interface ILocateMe {
     clientLocation: GLocation | null
 }
 export interface GLocation { lat: number, lng: number }
+export const StatesEnum = z.enum(STATE_ABBREVIATIONS)

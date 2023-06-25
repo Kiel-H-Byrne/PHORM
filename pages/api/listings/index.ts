@@ -1,7 +1,7 @@
 // import { getPullUps, getPullupsNearBy, insertPullUp } from "../../../db/index";
 // import { connectToDatabase } from "../../../db/mongodb";
 
-import { listingCreate, listingsFetchAll } from "@/db/fsdb";
+import { listingCreate, listingsFetchAll } from "@/db/listings";
 import { MAX_AGE } from "@/util/constants";
 import { IListing } from "../../../types";
 

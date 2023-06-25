@@ -12,7 +12,6 @@ import {
   useColorModeValue,
   useDisclosure,
 } from "@chakra-ui/react";
-import { useSession } from "next-auth/react";
 import { memo, useRef } from "react";
 import { AboutModal, AddListingDrawer, MyAvatar } from "./";
 
@@ -60,8 +59,6 @@ const MyNav = () => {
   } = useDisclosure();
   const firstField = useRef().current;
 
-  const { data: session, status } = useSession();
-  console.log(session, status)
   return (
     <>
       <Box
