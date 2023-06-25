@@ -44,3 +44,4 @@ export const findClosestMarker = function (
 
 export const getTruncated = (float: number) => Math.trunc(float);
 
+export const milesToMeters = (radius: number) => radius * 1609.34

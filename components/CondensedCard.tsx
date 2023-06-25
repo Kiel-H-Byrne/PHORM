@@ -1,4 +1,5 @@
 import { Card, CardBody, CardFooter, Text } from '@chakra-ui/react';
+import { memo } from 'react';
 import { IListing } from '../types';
 
 interface Props {
@@ -17,7 +18,7 @@ const CondensedCard = ({activeListing}:Props) => {
           </div>
         )} */}
         <CardBody>
-          <Text pb={3}  as="h6">
+          <Text pb={3} as="h6">
             {name}
           </Text>
           {/* {description && (
@@ -30,4 +31,4 @@ const CondensedCard = ({activeListing}:Props) => {
     </Card>
   );
 };
-export default CondensedCard
+export default memo(CondensedCard)

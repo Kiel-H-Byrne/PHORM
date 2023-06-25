@@ -15,7 +15,7 @@ export type Category = "a" | "b" | "c";
 export type Libraries = ("drawing" | "geometry" | "localContext" | "places" | "visualization")[];
 
 export interface IAppMap {
-  clientLocation: GLocation | null;
+  client_location: GLocation | null;
   setMapInstance: any;
   mapInstance: GoogleMapProps & any;
 }

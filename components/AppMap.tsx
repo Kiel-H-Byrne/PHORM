@@ -1,10 +1,4 @@
-import { memo, useState } from "react";
-
-import {
-  GoogleMap,
-  MarkerClusterer,
-  useJsApiLoader,
-} from "@react-google-maps/api";
+import { memo, useCallback, useState } from "react";
 
 import fetcher from "@/util/fetch";
 import {
@@ -25,57 +19,19 @@ import {
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
+import {
+  GoogleMap,
+  MarkerClusterer,
+  useJsApiLoader,
+} from "@react-google-maps/api";
+import { Clusterer } from "@react-google-maps/marker-clusterer";
 import SWR from "swr";
 import { GLocation, IAppMap, IListing } from "../types";
-import { GEOCENTER, MAP_STYLES } from "../util/constants";
-import MyInfoWindow from "./InfoWindow";
+import { CLUSTER_STYLE, GEOCENTER, MAP_STYLES } from "../util/constants";
+import { MyInfoWindow, MyMarker } from "./";
 import { InteractiveUserName } from "./InteractiveUserName";
-import MyMarker from "./MyMarker";
 
-const clusterStyles = [
-  {
-    url: "img/m1.png",
-    height: 53,
-    width: 53,
-    anchor: [26, 26],
-    textColor: "#000",
-    textSize: 11,
-  },
-  {
-    url: "img/m2.png",
-    height: 56,
-    width: 56,
-    anchor: [28, 28],
-    textColor: "#000",
-    textSize: 11,
-  },
-  {
-    url: "img/m3.png",
-    height: 66,
-    width: 66,
-    anchor: [33, 33],
-    textColor: "#000",
-    textSize: 11,
-  },
-  {
-    url: "img/m4.png",
-    height: 78,
-    width: 78,
-    anchor: [39, 39],
-    textColor: "#000",
-    textSize: 11,
-  },
-  {
-    url: "img/m5.png",
-    height: 90,
-    width: 90,
-    anchor: [45, 45],
-    textColor: "#000",
-    textSize: 11,
-  },
-];
-
-const defaultProps = {
+const default_props = {
   center: GEOCENTER,
   zoom: 11, //vs 11
   options: {
@@ -110,10 +66,10 @@ const defaultProps = {
   },
 };
 
-const AppMap = ({ clientLocation, setMapInstance, mapInstance }: IAppMap) => {
-  let { center, zoom, options } = defaultProps;
-  const uri = clientLocation
-    ? `api/listings?lat=${clientLocation.lat}&lng=${clientLocation.lng}`
+const AppMap = ({ client_location, setMapInstance, mapInstance }: IAppMap) => {
+  let { center, zoom, options } = default_props;
+  const uri = client_location
+    ? `api/listings?lat=${client_location.lat}&lng=${client_location.lng}`
     : "api/listings";
 
   const {
@@ -134,12 +90,56 @@ const AppMap = ({ clientLocation, setMapInstance, mapInstance }: IAppMap) => {
     errorRetryCount: 2,
   });
 
-  // console.log(fetchData, error)
   const toast = useToast();
-  // activeData && toast.closeAll();
-  // const uri = clientLocation ? `api/fetchData?lat=${getTruncated(clientLocation.lat)}&lng=${getTruncated(clientLocation.lng)}` : null;
+
+  const useRenderMarkers: (clusterer: Clusterer) => React.ReactElement =
+    useCallback(
+      (clusterer) =>
+        fetchData.map((markerData: IListing) => {
+          //return marker if element categories array includes value from selected_categories\\
+          // if ( //if closeby
+          // pullup.categories &&
+          // pullup.categories.some((el) => selectedCategories.has(el))
+          // && mapInstance.containsLocation(fetchData.location)
+          // ) {yav
+          // if (pullup.location) {
+          //   const [lat, lng] = pullup.location.split(",");
+
+          //   let isInside = new window.google.maps.LatLngBounds().contains(
+          //     { lat: +lat, lng: +lng }
+          //   );
+          //   // console.log(isInside);
+          // }
+          return (
+            // return (
+            //   pullup.categories
+            //     ? pullup.categories.some((el) =>
+            //         selected_categories.includes(el)
+            //       )
+            //     : false
+            // ) ? (
+
+            <MyMarker
+              key={`${markerData.lat}${markerData.lng}`}
+              //what data can i set on marker?
+              data={markerData}
+              // label={}
+              // title={}
+              clusterer={clusterer}
+              activeData={activeData}
+              setActiveData={setActiveData}
+              setWindowClose={setWindowClose}
+              toggleWindow={toggleWindow}
+              toggleDrawer={toggleDrawer}
+            />
+          );
+          // }
+        }),
+      [fetchData, activeData, setWindowClose, toggleDrawer, toggleWindow]
+    );
+
   //clusterer needs to return one element?
-  const checkForOverlaps = (data: IListing[]) => {
+  const checkForOverlaps = useCallback((data: IListing[]) => {
     const result: { [key: string]: IListing[] } = data.reduce((r, a) => {
       if (a.lng && a.lat) {
         const locString = `{lng: ${a.lng.toString().slice(0, -3)}, lat: ${a.lat
@@ -154,32 +154,39 @@ const AppMap = ({ clientLocation, setMapInstance, mapInstance }: IAppMap) => {
     // console.log(result)
     const dupes = Object.values(result).find((el) => el.length > 1);
     return dupes;
-  };
-  const onClick = (e: any) => {
-    //if map zoom is max, and still have cluster, make infowindow with multiple fetchData...
-    // (tab through cards of pins that sit on top of each other)
-    toggleDrawer();
-  };
+  }, []);
 
-  const handleMouseOver = (e: any) => {
-    if (mapInstance.zoom == mapInstance.maxZoom) {
-      //there may be potential for this to not work as expected if multiple groups of markers closeby instead of one?
-      const dupes = checkForOverlaps(fetchData);
-      // e.markerclusterer.markers.length //length should equal fetchData length with close centers (within 5 sig dig)
-      const clusterCenter = e.markerClusterer.clusters[0].center;
-      // const clusterCenter = JSON.parse(JSON.stringify(e.markerClusterer.clusters[0].center));
-      setInfoWindowPosition(clusterCenter);
-      // console.log(JSON.stringify(dupes[0].location))
-      dupes && setActiveData(dupes);
-      dupes && toggleWindow();
-    }
-  };
-  const handleMouseOut = () => {
+  const onClick = useCallback(
+    (e: any) => {
+      //if map zoom is max, and still have cluster, make infowindow with multiple fetchData...
+      // (tab through cards of pins that sit on top of each other)
+      toggleDrawer();
+    },
+    [toggleDrawer]
+  );
+
+  const handleMouseOver = useCallback(
+    (e: any) => {
+      if (fetchData && (mapInstance.zoom == mapInstance.maxZoom)) {
+        //there may be potential for this to not work as expected if multiple groups of markers closeby instead of one?
+        const dupes = checkForOverlaps(fetchData);
+        // e.markerclusterer.markers.length //length should equal fetchData length with close centers (within 5 sig dig)
+        const clusterCenter = e.markerClusterer.clusters[0].center;
+        // const clusterCenter = JSON.parse(JSON.stringify(e.markerClusterer.clusters[0].center));
+        setInfoWindowPosition(clusterCenter);
+        // console.log(JSON.stringify(dupes[0].location))
+        dupes && setActiveData(dupes);
+        dupes && toggleWindow();
+      }
+    },
+    [checkForOverlaps, fetchData, mapInstance, toggleWindow]
+  );
+  const handleMouseOut = useCallback(() => {
     if (infoWindowPosition) {
       // setWindowPosition(null)
       toggleWindow();
     }
-  };
+  }, [toggleWindow, infoWindowPosition]);
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY!,
@@ -209,8 +216,8 @@ const AppMap = ({ clientLocation, setMapInstance, mapInstance }: IAppMap) => {
             bottom: 0,
             right: 0,
           }}
-          center={clientLocation || center}
-          zoom={clientLocation ? 16 : zoom}
+          center={client_location || center}
+          zoom={client_location ? 16 : zoom}
           options={options}
         >
           {/* {fetchData && (
@@ -222,16 +229,13 @@ const AppMap = ({ clientLocation, setMapInstance, mapInstance }: IAppMap) => {
             setSelectedCategories={setSelectedCategories}
           />
         )} */}
-          {clientLocation &&
-            !fetchData &&
-            toast({ title: "Searching...", status: "info" })}
-          {clientLocation &&
-            fetchData &&
+          {!fetchData && toast({ title: "Searching Area...", status: "info" })}
+          {fetchData &&
             fetchData.length == 0 &&
             toast({ title: "No Results", status: "info" })}
-          {clientLocation && fetchData && fetchData.length !== 0 && (
+          {fetchData && fetchData.length !== 0 && (
             <MarkerClusterer
-              styles={clusterStyles}
+              styles={CLUSTER_STYLE}
               averageCenter
               enableRetinaIcons
               onClick={onClick}
@@ -241,49 +245,7 @@ const AppMap = ({ clientLocation, setMapInstance, mapInstance }: IAppMap) => {
               gridSize={2}
               minimumClusterSize={2}
             >
-              {(clusterer) =>
-                fetchData.map((markerData: IListing) => {
-                  //return marker if element categories array includes value from selected_categories\\
-
-                  // if ( //if closeby
-                  // pullup.categories &&
-                  // pullup.categories.some((el) => selectedCategories.has(el))
-                  // && mapInstance.containsLocation(fetchData.location)
-                  // ) {yav
-                  // if (pullup.location) {
-                  //   const [lat, lng] = pullup.location.split(",");
-
-                  //   let isInside = new window.google.maps.LatLngBounds().contains(
-                  //     { lat: +lat, lng: +lng }
-                  //   );
-                  //   // console.log(isInside);
-                  // }
-                  return (
-                    // return (
-                    //   pullup.categories
-                    //     ? pullup.categories.some((el) =>
-                    //         selected_categories.includes(el)
-                    //       )
-                    //     : false
-                    // ) ? (
-
-                    <MyMarker
-                      key={`${markerData.lat}${markerData.lng}`}
-                      //what data can i set on marker?
-                      data={markerData}
-                      // label={}
-                      // title={}
-                      clusterer={clusterer}
-                      activeData={activeData}
-                      setActiveData={setActiveData}
-                      setWindowClose={setWindowClose}
-                      toggleWindow={toggleWindow}
-                      toggleDrawer={toggleDrawer}
-                    />
-                  );
-                  // }
-                })
-              }
+              {useRenderMarkers}
             </MarkerClusterer>
           )}
           {activeData && isWindowOpen && (

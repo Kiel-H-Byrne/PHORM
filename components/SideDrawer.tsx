@@ -4,17 +4,17 @@ import {
   Divider,
   Drawer,
   Grid,
-  Text,
+  Text
 } from "@chakra-ui/react";
-import { Dispatch, SetStateAction } from "react";
 import { MdDirections } from "react-icons/md";
 import { IListing } from '../types';
 
 interface ISideDrawer {
   activeListing: IListing;
   isOpen: boolean;
+  onClose: () => void;
   mapInstance: any;
-  setOpen: Dispatch<SetStateAction<boolean>>;
+  onOpen: () => void
 }
 
 const SideGrid = ({activeListing}: { activeListing: IListing }) => {
@@ -63,18 +63,10 @@ const SideGrid = ({activeListing}: { activeListing: IListing }) => {
 const SideDrawer = ({
   activeListing,
   isOpen,
-  setOpen,
+  onClose,
   mapInstance,
 }: ISideDrawer) => {
-  const toggleDrawer = () => {
-    // if (
-    //   event.type === "keydown" &&
-    //   (event.key === "Tab" || event.key === "Shift")
-    // ) {
-    //   return;
-    // }
-    setOpen((prevOpen) => !prevOpen);
-  };
+
   /*
 address: "2729 Piatt St, Wichita, KS 67219"
 categories: ["Health & Wellness"]
@@ -91,7 +83,7 @@ _id: "3Nh99P2JxxCpBGm5v"
 */
 
   return (
-    <Drawer placement="left" isOpen={isOpen} onClose={toggleDrawer}>
+    <Drawer placement="left" isOpen={isOpen} onClose={onClose}>
       {/* <SideList activeListing={activeListing} mapInstance={mapInstance} /> */}
       {/* <LegacyDrawer activeListing={activeListing} /> */}
       <SideGrid activeListing={activeListing} />

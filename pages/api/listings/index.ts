@@ -1,7 +1,8 @@
 // import { getPullUps, getPullupsNearBy, insertPullUp } from "../../../db/index";
 // import { connectToDatabase } from "../../../db/mongodb";
 
-import { getListingsWithinRadius, listingCreate, listingsFetch } from "@/db/fsdb";
+import { listingCreate, listingsFetchAll } from "@/db/fsdb";
+import { MAX_AGE } from "@/util/constants";
 import { IListing } from "../../../types";
 
 const maxAge = 1 * 24 * 60 * 60;
@@ -15,13 +16,15 @@ const handler = async (req: any, res: any) => {
   switch (method) {
     case "GET":
       const listings =
-        lat && lng
-          ? await getListingsWithinRadius(
-            15, [Number(lat),Number(lng)] ,
-          ) : await listingsFetch("xWhZXPJoQxo1zvoQxFvJ");
+        // lat && lng
+        //   ? await getListingsWithinRadius(
+        //     15, [Number(lat),Number(lng)] ,
+        //   ) : 
+          await listingsFetchAll();
             if (listings.length == 0) {
               console.log("NO LISTINGS")
             }
+      res.setHeader("Cache-Control", `public, max-age=${MAX_AGE}, s-maxage=${2*MAX_AGE}`);
       res.send(listings);
       break;
     case "POST":

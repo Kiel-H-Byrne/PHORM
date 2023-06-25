@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "prepare": "husky install",
-    "test": "echo No tests found.",
+    "test": "jest --watchAll",
+    "test:ci": "jest --ci",
     "format": "prettier --write --ignore-path=.gitignore .",
     "format:check": "prettier --check --ignore-path=.gitignore .",
     "deploy:vercel": "vercel"
@@ -42,9 +43,13 @@
   "devDependencies": {
     "@tanstack/react-query": "^4.0.0",
     "@tanstack/react-query-devtools": "^4.0.0",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^14.0.0",
     "@types/google.maps": "^3.53.4",
     "eslint-config-prettier": "^8.0.0",
     "husky": ">=7",
+    "jest": "^29.5.0",
+    "jest-environment-jsdom": "^29.5.0",
     "lint-staged": ">=10",
     "prettier": "^2.0.0",
     "react-icons": "^4.8.0",

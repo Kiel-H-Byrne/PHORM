@@ -1,9 +1,9 @@
 import { Center, Flex } from "@chakra-ui/react";
-import React from "react";
+import { memo } from "react";
 
 interface Props {}
 
-export const MyFooter = (props: Props) => {
+ const MyFooter = (props: Props) => {
   return (
     <Flex as="footer" position="absolute" bottom={0} left={0} zIndex={1}>
       <Center fontSize={"xs"} {...props}>
@@ -12,3 +12,4 @@ export const MyFooter = (props: Props) => {
     </Flex>
   );
 };
+export default memo(MyFooter)

@@ -8,9 +8,10 @@ import {
   DrawerHeader,
   DrawerOverlay
 } from "@chakra-ui/react";
-import { AddListingForm } from "./AddListingForm";
+import { memo } from "react";
+import { AddListingForm } from "./";
 
-export function AddListingDrawer({
+function AddListingDrawer({
   drawerIsOpen, firstField, onDrawerClose,
 }: {
   drawerIsOpen: boolean;
@@ -40,7 +41,7 @@ export function AddListingDrawer({
         </DrawerHeader>
 
         <DrawerBody>
-          <AddListingForm />
+          <AddListingForm onDrawerClose={onDrawerClose}/>
         </DrawerBody>
 
         <DrawerFooter borderTopWidth="1px">
@@ -53,3 +54,5 @@ export function AddListingDrawer({
     </Drawer>
   );
 }
+
+export default memo(AddListingDrawer)

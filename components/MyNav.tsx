@@ -10,13 +10,11 @@ import {
   Menu,
   Stack,
   useColorModeValue,
-  useDisclosure
+  useDisclosure,
 } from "@chakra-ui/react";
 import { useSession } from "next-auth/react";
-import React from "react";
-import { AboutModal } from "./AboutModal";
-import { AddListingDrawer } from "./AddListingDrawer";
-import { MyAvatar } from "./MyAvatar";
+import { memo, useRef } from "react";
+import { AboutModal, AddListingDrawer, MyAvatar } from "./";
 
 const NAV_LINKS = [
   { path: "/", label: "Home" },
@@ -42,14 +40,14 @@ const NavLink = ({ path, label }: { path: string; label: string }) => (
 const AvatarDropdown = () => (
   <Box pb={4} display={{ md: "none" }}>
     <Stack as={"nav"} spacing={4}>
-    <Heading color={"royalblue"}>P.H.O.R.M</Heading>
+      <Heading color={"royalblue"}>P.H.O.R.M</Heading>
       {NAV_LINKS.map(({ path, label }) => (
         <NavLink key={label} path={path} label={label} />
       ))}
     </Stack>
   </Box>
 );
-export function MyNav() {
+const MyNav = () => {
   const {
     isOpen: dropdownIsOpen,
     onOpen: onDropdownOpen,
@@ -60,12 +58,18 @@ export function MyNav() {
     onOpen: onDrawerOpen,
     onClose: onDrawerClose,
   } = useDisclosure();
-  const firstField = React.useRef().current;
+  const firstField = useRef().current;
 
   const { data: session, status } = useSession();
+  console.log(session, status)
   return (
     <>
-      <Box bg={useColorModeValue("gray.100", "gray.900")} px={4} position={"relative"} zIndex={1}>
+      <Box
+        bg={useColorModeValue("gray.100", "gray.900")}
+        px={4}
+        position={"relative"}
+        zIndex={1}
+      >
         <Flex h={16} alignItems={"center"} justifyContent={"space-between"}>
           <IconButton
             size={"md"}
@@ -101,7 +105,7 @@ export function MyNav() {
               mr={4}
               leftIcon={<AddIcon />}
             >
-              Add Business
+              Register Business {/** Get Listed */}
             </Button>
             <Menu>
               <MyAvatar />
@@ -115,8 +119,9 @@ export function MyNav() {
         firstField={firstField}
         onDrawerClose={onDrawerClose}
       />
-<AboutModal />
+      <AboutModal />
     </>
   );
 }
 
+export default memo(MyNav)

@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Layout, LocateMeButton } from "../components";
-import AppMap from "../components/AppMap";
+import { AppMap, Layout, LocateMeButton } from "../components";
 const IndexPage = () => {
   const [clientLocation, setClientLocation] = useState(null);
   const [mapInstance, setMapInstance] = useState({} as google.maps.Map);
@@ -9,7 +8,7 @@ const IndexPage = () => {
     <>
       <Layout title="Pull Up!">
         <AppMap
-          clientLocation={clientLocation}
+          client_location={clientLocation}
           mapInstance={mapInstance}
           setMapInstance={setMapInstance}
         />

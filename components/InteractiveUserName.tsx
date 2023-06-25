@@ -1,6 +1,6 @@
-import React from "react";
 import {
   Avatar,
+  Box,
   Flex,
   Popover,
   PopoverArrow,
@@ -9,17 +9,16 @@ import {
   PopoverContent,
   PopoverHeader,
   PopoverTrigger,
+  Skeleton,
   Table,
+  Tbody,
+  Td,
   Text,
   Th,
   Thead,
-  Tbody,
   Tr,
-  Skeleton,
-  Box,
-  Td,
 } from "@chakra-ui/react";
-import { fetchUser } from "../util/userHooks";
+import { useFetchUser } from "../util/userHooks";
 
 export const InteractiveUserName = ({
   userName,
@@ -30,7 +29,9 @@ export const InteractiveUserName = ({
   uid: string;
   showAvatar?: boolean;
 }) => {
-  const user = uid ? fetchUser(uid) : null;
+
+  const user = useFetchUser(uid) || null;
+  
   return (
     <Box>
       <Popover placement="auto-end" trigger="hover">

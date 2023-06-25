@@ -8,78 +8,6 @@ import { appFsdb } from "./firebase";
 
 const listingsRef = collection(appFsdb, "listings");
 
-// const watchCollection = function(collection, ...filters) {
-
-//   switch(collection) {
-//     case "listingS": { collection = listingsCollection; break }
-//     default: return
-//   }
-//   collection
-//   // .where(filters[0], == filters[1])
-//   .onSnapshot(function(querySnapshot) {
-//     //update state with this data...
-//     console.log("i'm Watching")
-//     querySnapshot
-//     .docChanges()
-//     .forEach(change => {
-//       if (change.type === "added") {
-//         let data = change.doc.data();
-//         console.log("New listing", change.doc.data())
-//         let doc = {}
-//         doc[change.doc.id] = data;
-//         dispatch({type: ACTIONS.listingS_API_RESULT, payload: doc})
-//       }
-//       if (change.type === "modified") {
-//         console.log("Modified listing", change.doc.data())
-//         let data = change.doc.data();
-
-//         //update state (state.listings.byId & state.listings.allIds)
-//         // console.log(state.listings.byId)
-//         console.log(data)
-//         // dispatch({type: ACTIONS.listingS_API_RESULT, payload: {...state.listings.byId, data}})
-//       }
-//       if (change.type === "removed") {
-//         let data = change.doc.data();
-//         console.log("Deleted listing", change.doc.data()._id)
-//         // dispatch({type: ACTIONS.listingS_API_RESULT, payload: data})
-//         //remove listingID from users, services
-//       }
-//     });
-//   });
-// };
-
-// const unWatchCollection = function(filter){
-//   collection(filter)
-//     .onSnapshot(function () {});
-// }
-
-// const watchDocument = function(collection, id) {
-//   console.log("i'm Watching")
-//   switch(collection) {
-//     case "listingS": { collection = listingsCollection; break }
-//     case "SERVICES": { collection = servicesCollection; break }
-//     case "GIFTS": { collection = giftsCollection; break }
-//     default: return
-//   }
-//   collection
-//   .doc(id)
-//   // .where(filters[0], == filters[1])
-//   .onSnapshot({
-//     includeMetadataChanges: true
-//   },function(docSnapshot) {
-//     let doc = {}
-//     //update state with this data...
-//     doc[docSnapshot.id] = docSnapshot.data();
-//     console.log(doc)
-//     dispatch({type: ACTIONS.listingS_API_RESULT, payload: doc})
-//   });
-// };
-
-// const unWatchDocument = function(filter, id){
-//   collection(filter)
-//     .doc(id)
-//     .onSnapshot(function () {});
-// }
 
 // == LISTINGS == //
 
@@ -88,6 +16,16 @@ const listingCreate = async function (data: IListing) {
   return await setDoc(docRef, {...data}, { merge: true });
 };
 
+const listingsFetchAll = async function () {
+  console.log("Fetching doc", new Date())
+    const querySnapshot = await getDocs(listingsRef);
+    const listings: IListing[] = [];
+    querySnapshot.forEach((doc) => {
+      listings.push(doc.data());
+    });
+    return listings;
+  
+}
 const listingsFetch = async function (query: any) {
   const docRef = doc(listingsRef, query);
   const docSnap = await getDoc(docRef);
@@ -140,7 +78,7 @@ const listingsDelete = function (uid: string) {};
 
 //   return Object.keys(mylistingIds).forEach(listingId => {
 //     return (listingsRef = fsdb
-//       .collection("listingS")
+//       .collection("listings")
 //       .doc(`${listingId}`)
 //       .get()
 //       .then(doc => {
@@ -155,5 +93,5 @@ const listingsDelete = function (uid: string) {};
 //   });
 // };
 
-export { getListingsWithinRadius, listingCreate, listingsDelete, listingsFetch };
+export { getListingsWithinRadius, listingCreate, listingsDelete, listingsFetch, listingsFetchAll };
 

@@ -1,6 +1,5 @@
-import { ReactNode } from "react";
-import { CustomHead, MyFooter } from "./";
-import { MyNav } from "./MyNav";
+import { ReactNode, memo } from "react";
+import { CustomHead, MyFooter, MyNav } from "./";
 
 type Props = {
   children?: ReactNode;
@@ -8,7 +7,7 @@ type Props = {
 };
 
 
-export const Layout = ({ children, title }: Props) => {
+const Layout = ({ children, title }: Props) => {
   // const [show, setShow] = useState(true);
 
   return (
@@ -20,3 +19,5 @@ export const Layout = ({ children, title }: Props) => {
     </>
   );
 };
+
+export default memo(Layout)

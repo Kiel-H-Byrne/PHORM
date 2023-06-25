@@ -1,10 +1,11 @@
 import Head from "next/head";
+import { memo } from "react";
 
 interface Props {
   title: string;
 }
 
-export const CustomHead = ({ title }: Props) => {
+const CustomHead = ({ title }: Props) => {
   return (
     <Head>
       <title>{title}</title>
@@ -96,3 +97,4 @@ export const CustomHead = ({ title }: Props) => {
     </Head>
   );
 };
+export default memo(CustomHead)

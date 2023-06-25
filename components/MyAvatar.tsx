@@ -13,8 +13,9 @@ import {
   PopoverTrigger,
 } from "@chakra-ui/react";
 import { signIn, signOut, useSession } from "next-auth/react";
+import { memo } from "react";
 
-export const MyAvatar = () => {
+const MyAvatar = () => {
   const { data: session, status } = useSession()
   return status === "authenticated" && session.user ? (
     <Popover placement="top-start">
@@ -48,3 +49,5 @@ export const MyAvatar = () => {
     </Button>
   );
 };
+
+export default memo(MyAvatar)
