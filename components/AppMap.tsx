@@ -29,7 +29,6 @@ import SWR from "swr";
 import { GLocation, IAppMap, IListing } from "../types";
 import { CLUSTER_STYLE, GEOCENTER, MAP_STYLES } from "../util/constants";
 import { MyInfoWindow, MyMarker } from "./";
-import { InteractiveUserName } from "./InteractiveUserName";
 
 export const default_props = {
   center: GEOCENTER,
@@ -331,11 +330,12 @@ const AppMap = ({ client_location, setMapInstance, mapInstance }: IAppMap) => {
                     </Tabs>
                   ) : (
                     <>
-                      {activeData[0].place_id}
-                      <InteractiveUserName
-                        userName={activeData[0].name!}
+                      {activeData[0].name}
+                      {/* {activeData[0].address} */}
+                      {/* <InteractiveUserName
+                        userName={activeData[0].name}
                         uid={activeData[0].place_id!}
-                      />
+                      /> */}
                     </>
                   )}
                 </DrawerBody>
