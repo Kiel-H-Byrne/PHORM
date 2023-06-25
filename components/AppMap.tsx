@@ -84,7 +84,6 @@ const AppMap = ({ client_location, setMapInstance, mapInstance }: IAppMap) => {
   } = useDisclosure();
   const [infoWindowPosition, setInfoWindowPosition] = useState({} as GLocation);
   const [activeData, setActiveData] = useState([] as IListing[]);
-
   const { data: fetchData, error } = SWR(uri, fetcher, {
     loadingTimeout: 1000,
     errorRetryCount: 2,
@@ -138,7 +137,6 @@ const AppMap = ({ client_location, setMapInstance, mapInstance }: IAppMap) => {
       [fetchData, activeData, setWindowClose, toggleDrawer, toggleWindow]
     );
 
-  //clusterer needs to return one element?
   const checkForOverlaps = useCallback((data: IListing[]) => {
     const result: { [key: string]: IListing[] } = data.reduce((r, a) => {
       if (a.lng && a.lat) {
@@ -150,11 +148,28 @@ const AppMap = ({ client_location, setMapInstance, mapInstance }: IAppMap) => {
         return r;
       }
       return {};
-    }, Object.create(null) as { [key: string]: IListing[] });
+    }, {} as { [key: string]: IListing[] });
     // console.log(result)
     const dupes = Object.values(result).find((el) => el.length > 1);
     return dupes;
   }, []);
+
+  // const checkForDuplicates = useCallback((data: IListing[]) => {
+  //   const result: { [key: string]: IListing[] } = data.reduce((r, a) => {
+  //     if (a.lng && a.lat) {
+  //       const locString = `{lng: ${a.lng.toString().slice(0, -3)}, lat: ${a.lat
+  //         .toString()
+  //         .slice(0, -3)}}`;
+  //       r[locString] = r[locString] || [];
+  //       r[locString].push(a);
+  //       return r;
+  //     }
+  //     return {};
+  //   }, {} as { [key: string]: IListing[] });
+  //   // console.log(result)
+  //   const dupes = Object.values(result).find((el) => el.length > 1);
+  //   return dupes;
+  // }, []);
 
   const onClick = useCallback(
     (e: any) => {
@@ -166,17 +181,22 @@ const AppMap = ({ client_location, setMapInstance, mapInstance }: IAppMap) => {
   );
 
   const handleMouseOver = useCallback(
+    //this not working as expected.... 
+    // mouseover on marker and on cluster both do same, maybe need two sep handlers
     (e: any) => {
-      if (fetchData && (mapInstance.zoom == mapInstance.maxZoom)) {
+      if (fetchData 
+        // &&  (mapInstance.zoom == mapInstance.maxZoom)
+        ) {
         //there may be potential for this to not work as expected if multiple groups of markers closeby instead of one?
-        const dupes = checkForOverlaps(fetchData);
+        // const dupes = checkForOverlaps(fetchData);
+        const dupes =fetchData;
         // e.markerclusterer.markers.length //length should equal fetchData length with close centers (within 5 sig dig)
         const clusterCenter = e.markerClusterer.clusters[0].center;
         // const clusterCenter = JSON.parse(JSON.stringify(e.markerClusterer.clusters[0].center));
         setInfoWindowPosition(clusterCenter);
         // console.log(JSON.stringify(dupes[0].location))
-        dupes && setActiveData(dupes);
-        dupes && toggleWindow();
+        setActiveData(dupes);
+        toggleWindow();
       }
     },
     [checkForOverlaps, fetchData, mapInstance, toggleWindow]
@@ -251,7 +271,7 @@ const AppMap = ({ client_location, setMapInstance, mapInstance }: IAppMap) => {
           {activeData && isWindowOpen && (
             <MyInfoWindow
               activeData={activeData}
-              clusterCenter={infoWindowPosition}
+              position={infoWindowPosition}
             />
           )}
 

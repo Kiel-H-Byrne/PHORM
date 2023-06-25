@@ -4,13 +4,13 @@ import { MultipleInfoContent, SingleInfoContent } from "./";
 
 const MyInfoWindow = ({
   activeData,
-  clusterCenter,
+  position: clusterCenter,
 }: {
   activeData: IListing[];
-  clusterCenter: GLocation;
+  position: GLocation;
 }) => {
-  const hasOneItem = activeData.length && activeData.length == 1;
-  
+  // const hasNoData = !activeData || activeData.length == 0
+  const hasOneItem = (activeData?.length == 1);
   const options = {
     pixelOffset: { height: -40, width: 0, equals: undefined },
     disableAutoPan: true,
@@ -18,9 +18,8 @@ const MyInfoWindow = ({
       ? { lat: activeData[0].lat, lng: activeData[0].lng }
       : clusterCenter,
   };
-  // const hasNoData = !activeData || activeData.length == 0
   // console.log(activeData, hasOneItem)
-
+// if (!position.lat) return
   return hasOneItem ? (
     <SingleInfoContent data={activeData} options={options} />
   ) : (

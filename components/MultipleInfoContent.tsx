@@ -10,7 +10,6 @@ const MultipleInfoContent = ({
   options: any;
 }) => {
   const { position }: { position: GLocation; } = options;
-  console.log(position);
   return (
     <InfoWindow position={position} options={options}>
       <Box>

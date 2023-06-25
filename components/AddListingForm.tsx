@@ -1,16 +1,19 @@
 import { ListingsSchema } from "@/db/schemas";
-import { Box, Button, FormLabel, Input, useToast } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  FormLabel,
+  Input,
+  Select,
+  useToast,
+} from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { geohashForLocation } from "geofire-common";
 import { memo, useCallback, useEffect, useRef } from "react";
 import { Form, useForm } from "react-hook-form";
-import { IListing } from "../types";
+import { IListing, StatesEnum } from "../types";
 
-const AddListingForm = ({
-  onDrawerClose,
-}: {
-  onDrawerClose: () => void;
-}) => {
+const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
   const {
     register,
     reset,
@@ -127,39 +130,59 @@ const AddListingForm = ({
       m="10px auto"
     >
       <Form
-        // action="/api/listings"
         onSubmit={submitData}
-        // headers={{'Content-Type': 'application/json'}}
         encType={"application/json"}
         onSuccess={() => console.log("Firing at all?")}
         onError={() => alertToast()}
         control={control}
       >
+
+        
         <FormLabel htmlFor="name"> Name</FormLabel>
         {errors.name && <span>{errors.name.message as string as string}</span>}
-
         <Input
           id="name"
           autoComplete={"true"}
           {...register("name")}
           aria-invalid={errors.name ? "true" : "false"}
         />
+
+
         <FormLabel htmlFor="street"> Street</FormLabel>
         {errors.street && <span>{errors.street.message as string}</span>}
-
         <Input
           id="street"
           {...register("street")}
           aria-invalid={errors.street ? "true" : "false"}
         />
+
+
+
         <FormLabel htmlFor="city"> City</FormLabel>
         {errors.city && <span>{errors.city.message as string}</span>}
-
         <Input
           id="city"
           {...register("city")}
           aria-invalid={errors.city ? "true" : "false"}
         />
+        
+        <FormLabel htmlFor="state"> State</FormLabel>
+        {errors.state && <span>{errors.state.message as string}</span>}
+        <Select
+          id="state"
+          maxLength={2}
+          autoComplete={"true"}
+          {...register("state")}
+          aria-invalid={errors.state ? "true" : "false"}
+        >
+          {StatesEnum.options.map((state) => (
+            <option value={state} key={state}>
+              {state}
+            </option>
+          ))}
+        </Select>
+
+
         <FormLabel htmlFor="zip"> Zip</FormLabel>
         {errors.zip && <span>{errors.zip.message as string}</span>}
 
@@ -171,16 +194,8 @@ const AddListingForm = ({
           })}
           aria-invalid={errors.zip ? "true" : "false"}
         />
-        <FormLabel htmlFor="state"> State</FormLabel>
-        {errors.state && <span>{errors.state.message as string}</span>}
+        
 
-        <Input
-          id="state"
-          maxLength={2}
-          autoComplete={"true"}
-          {...register("state")}
-          aria-invalid={errors.state ? "true" : "false"}
-        />
 
         <Box justifyContent={"space-around"}>
           <Button type="reset" colorScheme="blue" variant={"outline"}>
@@ -199,4 +214,4 @@ const AddListingForm = ({
   );
 };
 
-export default memo(AddListingForm)
+export default memo(AddListingForm);
