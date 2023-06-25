@@ -1,4 +1,6 @@
 
+import { FirestoreAdapter } from '@auth/firebase-adapter';
+import { cert } from 'firebase-admin/app';
 import NextAuth from 'next-auth';
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from 'next-auth/providers/google';
@@ -57,15 +59,15 @@ export default NextAuth({
     // }),
   ],
   session: {
-    strategy: 'jwt',
+    strategy: 'database',
   },
-  // adapter: FirestoreAdapter({
-  //   credential: cert({
-  //     projectId: process.env.NEXT_PUBLIC_FSDB_PROJECT_ID!,
-  //     clientEmail: process.env.NEXT_PUBLIC_FIREBASE_CLIENT_EMAIL!,
-  //     privateKey:  process.env.NEXT_PUBLIC_FSDB_PRIVATE_KEY!,
-  //   }),
-  // }),
+  adapter: FirestoreAdapter({
+    credential: cert({
+      projectId: process.env.NEXT_PUBLIC_FSDB_PROJECT_ID!,
+      clientEmail: process.env.NEXT_PUBLIC_FIREBASE_CLIENT_EMAIL!,
+      privateKey:  process.env.NEXT_PUBLIC_FSDB_PRIVATE_KEY!,
+    }),
+  }),
   debug: true,
   // callbacks: {
   //   session: async (session: Session, user: Profile) => {
