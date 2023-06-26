@@ -6,13 +6,12 @@ const IndexPage = () => {
 
   return (
     <>
-      <Layout title="Pull Up!">
+      <Layout title="The P.H.O.R.M">
         <AppMap
           client_location={clientLocation}
           mapInstance={mapInstance}
           setMapInstance={setMapInstance}
         />
-        {/* <MarkerInfo /> */}
         <LocateMeButton
           mapInstance={mapInstance}
           clientLocation={clientLocation}

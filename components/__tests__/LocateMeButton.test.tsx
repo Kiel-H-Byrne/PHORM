@@ -48,7 +48,7 @@ describe("LocateMeButton", () => {
     // ...
   });
 
-  it('should call handleOpen when the "Add PullUp" button is clicked', () => {
+  it('should call handleOpen when the "Add Listing" button is clicked', () => {
     const { getByLabelText } = render(
       <SessionProvider>
         <LocateMeButton
@@ -59,8 +59,8 @@ describe("LocateMeButton", () => {
       </SessionProvider>
     );
 
-    const addPullUpButton = getByLabelText("Add PullUp");
-    fireEvent.click(addPullUpButton);
+    const addListingButton = getByLabelText("Add Listing");
+    fireEvent.click(addListingButton);
 
     // Add your assertions here to check if the necessary functions have been called
     // ...

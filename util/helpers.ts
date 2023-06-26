@@ -62,3 +62,20 @@ export const checkForOverlaps = (data: IListing[]) => {
   const dupes = Object.values(result).find((el) => el.length > 1);
   return dupes;
 };
+
+  const checkForDuplicates = (data: IListing[]) => {
+    const result: { [key: string]: IListing[] } = data.reduce((r, a) => {
+      if (a.lng && a.lat) {
+        const locString = `{lng: ${a.lng.toString().slice(0, -3)}, lat: ${a.lat
+          .toString()
+          .slice(0, -3)}}`;
+        r[locString] = r[locString] || [];
+        r[locString].push(a);
+        return r;
+      }
+      return {};
+    }, {} as { [key: string]: IListing[] });
+    // console.log(result)
+    const dupes = Object.values(result).find((el) => el.length > 1);
+    return dupes;
+  }

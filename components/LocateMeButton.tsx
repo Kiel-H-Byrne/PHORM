@@ -15,7 +15,7 @@ import {
 } from "@chakra-ui/react";
 import { signIn, useSession } from "next-auth/react";
 import { memo, useCallback, useEffect, useState } from "react";
-import { BiMapPin, BiMessageAltAdd } from "react-icons/bi";
+import { BiMessageAltAdd } from "react-icons/bi";
 import { MdMyLocation } from "react-icons/md";
 import { GLocation, ILocateMe } from "../types";
 import {
@@ -171,7 +171,7 @@ const LocateMeButton = (props: ILocateMe) => {
         right="10px"
         borderRadius="50%"
         colorScheme="yellow"
-        aria-label="Add PullUp"
+        aria-label="Add Listing"
         onClick={handleOpen}
       >
         <Icon as={BiMessageAltAdd} />
@@ -182,20 +182,10 @@ const LocateMeButton = (props: ILocateMe) => {
           {status == "authenticated" && session ? (
             <>
               <ModalHeader>
-                <Text fontSize="2xl">Pull Up!</Text>
-                <Text fontSize="xx-small" color="grey">
-                  <Icon as={BiMapPin} /> @{clientLocation?.lat},
-                  {clientLocation?.lng}
-                </Text>
+                <Text fontSize="2xl">Add Listing:</Text>
               </ModalHeader>
               <ModalCloseButton />
               <ModalBody>
-                {/* <PullUpForm
-                  onClose={onClose}
-                  locationData={clientLocation!}
-                  uid={ ''}
-                  userName={session?.user?.name?? ''}
-                /> */}
                 <AddListingForm onDrawerClose={onClose}  />
               </ModalBody>
             </>

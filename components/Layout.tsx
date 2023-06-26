@@ -13,7 +13,7 @@ const Layout = ({ children, title }: Props) => {
 
   return (
     <SessionProvider>
-      <CustomHead title={title || "Pull Up App"} />
+      <CustomHead title={title || "The P.H.O.R.M"} />
       <MyNav />
       {children}
       <MyFooter />
