@@ -109,7 +109,6 @@ const AppMap = ({ client_location, setMapInstance, mapInstance }: IAppMap) => {
   const useRenderMarkers: (clusterer: Clusterer) => React.ReactElement =
     useCallback(
       (clusterer) => {
-        // console.log(clusterer.ready, clusterer.markers,  clusterer.averageCenter)
         return fetchData.map((markerData: IListing) => {
           //return marker if element categories array includes value from selected_categories\\
           // if ( //if closeby
@@ -137,7 +136,7 @@ const AppMap = ({ client_location, setMapInstance, mapInstance }: IAppMap) => {
             <MyMarker
               key={`${markerData.lat}${markerData.lng}`}
               //what data can i set on marker?
-              data={markerData}
+              markerData={markerData}
               // label={}
               // title={}
               clusterer={clusterer}
@@ -181,8 +180,7 @@ const AppMap = ({ client_location, setMapInstance, mapInstance }: IAppMap) => {
   const handleClickCluster = useCallback(() => {
     setWindowClosed();
   }, [setWindowClosed]);
-
-  return isLoaded ? (
+    return isLoaded ? (
     <GoogleMap
       onLoad={(map) => {
         // const bounds = new window.google.maps.LatLngBounds();
@@ -220,7 +218,7 @@ const AppMap = ({ client_location, setMapInstance, mapInstance }: IAppMap) => {
           averageCenter
           enableRetinaIcons
           onClick={handleClickCluster}
-          // onMouseOver={handleMouseOverClusterOrMarker}
+          // onMouseOver={handleMouseOutClusterOrMarker}
           // onMouseOut={handleMouseOutClusterOrMarker}
           gridSize={2}
           minimumClusterSize={2}
@@ -228,8 +226,9 @@ const AppMap = ({ client_location, setMapInstance, mapInstance }: IAppMap) => {
           {useRenderMarkers}
         </MarkerClusterer>
       )}
-      {activeData && isWindowOpen && infoWindowPosition && (
-        <MyInfoWindow activeData={activeData} position={infoWindowPosition} />
+      
+      {activeData && isWindowOpen && (
+        <MyInfoWindow activeData={activeData} position={{lat: activeData[0]?.lat!, lng: activeData[0]?.lng!}} />
       )}
 
       {activeData && isDrawerOpen && (
