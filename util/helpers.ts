@@ -29,7 +29,7 @@ export const findClosestMarker = function (
   for (let i = 0; i < markers.length; i++) {
     if (markers[i].lat && markers[i].lng) {
       let d = google.maps.geometry.spherical.computeDistanceBetween(
-        {lat: markers[i].lat!, lng: markers[i].lng!},
+        { lat: markers[i].lat!, lng: markers[i].lng! },
         start
       );
       distances[i] = d;
@@ -45,3 +45,20 @@ export const findClosestMarker = function (
 export const getTruncated = (float: number) => Math.trunc(float);
 
 export const milesToMeters = (radius: number) => radius * 1609.34
+
+export const checkForOverlaps = (data: IListing[]) => {
+  const result: { [key: string]: IListing[] } = data.reduce((r, a) => {
+    if (a.lng && a.lat) {
+      const locString = `{lng: ${a.lng.toString().slice(0, -3)}, lat: ${a.lat
+        .toString()
+        .slice(0, -3)}}`;
+      r[locString] = r[locString] || [];
+      r[locString].push(a);
+      return r;
+    }
+    return {};
+  }, {} as { [key: string]: IListing[] });
+  // console.log(result)
+  const dupes = Object.values(result).find((el) => el.length > 1);
+  return dupes;
+};
