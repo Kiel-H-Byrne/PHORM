@@ -10,12 +10,13 @@ const MultipleInfoContent = ({
   options: any;
 }) => {
   const { position }: { position: GLocation; } = options;
+  console.log(data)
   return (
     <InfoWindow position={position} options={options}>
       <Box>
-        {data.map(({ name }) => {
+        {data.map(({ name }, i) => {
           return (
-            <Flex key={name} width="xs" direction="column">
+            <Flex key={`${name}${i}`} width="xs" direction="column">
               <Flex
                 maxHeight="100px"
                 direction="row"

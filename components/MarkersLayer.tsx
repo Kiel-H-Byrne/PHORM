@@ -11,7 +11,7 @@ interface Props {
 
 const InfoWindow = () => <Box width="container.sm">InfoWIndow Content</Box>;
 
-export const MarkersLayer = (props: Props) => {
+const MarkersLayer = (props: Props) => {
   const { mapInstance, clientLocation } = props;
   const [infoContent, setInfoContent] = useState("");
   //make api call using user's location

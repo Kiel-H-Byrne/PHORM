@@ -8,8 +8,8 @@ interface IMyMarker {
   clusterer: any;
   activeData: any;
   setActiveData: any;
-  setWindowClose: any;
-  toggleWindow: any;
+  setWindowClosed: any;
+  setWindowOpen: any;
   toggleDrawer: any;
 }
 
@@ -17,8 +17,8 @@ const MyMarker = ({
   data,
   clusterer,
   setActiveData,
-  setWindowClose,
-  toggleWindow,
+  setWindowClosed,
+  setWindowOpen,
   toggleDrawer,
 }: IMyMarker) => {
   const { lat,lng, place_id } = data;
@@ -30,10 +30,10 @@ const MyMarker = ({
 
   const handleMouseOverMarker = () => {
     setActiveData([data]);
-    toggleWindow();
+    setWindowOpen();
   };
   const handleMouseOut = () => {
-    toggleWindow();
+    setWindowClosed();
   };
   const handleClickMarker = () => {
     toggleDrawer();

@@ -17,7 +17,7 @@ const handler = async (req: any, res: any) => {
     console.log(listings)
       if (req.query.from && listings.length > 0) {
         // This is safe to cache because from defines
-        //  a concrete range of pullups
+        //  a finite range of listings
         res.setHeader("cache-control", `public, max-age=${MAX_AGE}`);
       }
 
@@ -30,8 +30,9 @@ const handler = async (req: any, res: any) => {
         // console.log(req.body.data)
         if (!req.body)
           return res.status(400).send("You must write something");
-        // const pullup = await insertPullUp(db, req.body.data);
-        return res.json({ listing: "" });
+        // const listing = await insertListing(db, req.body.data);
+        // return res.json({ listing });
+        return res.json({ });
       break;
     default:
       res.setHeader("Allow", ["GET", "POST"]);

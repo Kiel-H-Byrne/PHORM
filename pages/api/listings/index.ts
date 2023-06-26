@@ -1,11 +1,7 @@
-// import { getPullUps, getPullupsNearBy, insertPullUp } from "../../../db/index";
-// import { connectToDatabase } from "../../../db/mongodb";
 
 import { listingCreate, listingsFetchAll } from "@/db/listings";
 import { MAX_AGE } from "@/util/constants";
 import { IListing } from "../../../types";
-
-const maxAge = 1 * 24 * 60 * 60;
 
 const handler = async (req: any, res: any) => {
   
@@ -44,7 +40,5 @@ const handler = async (req: any, res: any) => {
   }
 };
 
-// handler.post(async (req: Request | any, res: Response | any) => {
-//
-// });
+
 export default handler

@@ -24,7 +24,11 @@ import {
   MarkerClusterer,
   useJsApiLoader,
 } from "@react-google-maps/api";
-import { Clusterer } from "@react-google-maps/marker-clusterer";
+import {
+  Cluster,
+  Clusterer,
+  MarkerExtended,
+} from "@react-google-maps/marker-clusterer";
 import SWR from "swr";
 import { GLocation, IAppMap, IListing } from "../types";
 import { CLUSTER_STYLE, GEOCENTER, MAP_STYLES } from "../util/constants";
@@ -83,11 +87,15 @@ const AppMap = ({ client_location, setMapInstance, mapInstance }: IAppMap) => {
   } = useDisclosure();
   const {
     isOpen: isWindowOpen,
-    onToggle: toggleWindow,
-    onClose: setWindowClose,
+    onOpen: setWindowOpen,
+    onClose: setWindowClosed,
   } = useDisclosure();
-  const [infoWindowPosition, setInfoWindowPosition] = useState({} as GLocation);
-  const [activeData, setActiveData] = useState([] as IListing[]);
+  const [infoWindowPosition, setInfoWindowPosition] = useState(
+    null as GLocation | null
+  );
+  const [activeData, setActiveData] = useState(
+    [] as IListing[] & MarkerExtended[]
+  );
   const { data: fetchData, error } = SWR(uri, fetcher, {
     loadingTimeout: 1000,
     errorRetryCount: 2,
@@ -97,10 +105,9 @@ const AppMap = ({ client_location, setMapInstance, mapInstance }: IAppMap) => {
 
   const useRenderMarkers: (clusterer: Clusterer) => React.ReactElement =
     useCallback(
-      (clusterer) =>
-      {
-      // console.log(clusterer.ready, clusterer.markers,  clusterer.averageCenter)
-        return  fetchData.map((markerData: IListing) => {
+      (clusterer) => {
+        // console.log(clusterer.ready, clusterer.markers,  clusterer.averageCenter)
+        return fetchData.map((markerData: IListing) => {
           //return marker if element categories array includes value from selected_categories\\
           // if ( //if closeby
           // pullup.categories &&
@@ -133,78 +140,44 @@ const AppMap = ({ client_location, setMapInstance, mapInstance }: IAppMap) => {
               clusterer={clusterer}
               activeData={activeData}
               setActiveData={setActiveData}
-              setWindowClose={setWindowClose}
-              toggleWindow={toggleWindow}
+              setWindowClosed={setWindowClosed}
+              setWindowOpen={setWindowOpen}
               toggleDrawer={toggleDrawer}
             />
           );
           // }
-        })},
-      [fetchData, activeData, setWindowClose, toggleDrawer, toggleWindow]
+        });
+      },
+      [fetchData, activeData, setWindowClosed, toggleDrawer, setWindowOpen]
     );
 
-  // const checkForDuplicates = useCallback((data: IListing[]) => {
-  //   const result: { [key: string]: IListing[] } = data.reduce((r, a) => {
-  //     if (a.lng && a.lat) {
-  //       const locString = `{lng: ${a.lng.toString().slice(0, -3)}, lat: ${a.lat
-  //         .toString()
-  //         .slice(0, -3)}}`;
-  //       r[locString] = r[locString] || [];
-  //       r[locString].push(a);
-  //       return r;
-  //     }
-  //     return {};
-  //   }, {} as { [key: string]: IListing[] });
-  //   // console.log(result)
-  //   const dupes = Object.values(result).find((el) => el.length > 1);
-  //   return dupes;
-  // }, []);
-
-  const onClick = useCallback(
-    (e: any) => {
-      //if map zoom is max, and still have cluster, make infowindow with multiple fetchData...
-      // (tab through cards of pins that sit on top of each other)
-      toggleDrawer();
-    },
-    [toggleDrawer]
-  );
-  /**
-   * only for WEB events, not working for mobile (no mouseover)
-   */
-  const handleMouseOver = useCallback(
-    //this not working as expected....
-    // mouseover on marker and on cluster both do same, maybe need two sep handlers
-    (e: any) => {
-      console.log(e)
+  const handleMouseOverClusterOrMarker = useCallback(
+    (e: Cluster) => {
       // detect mouse or touch event, then handle display or not
       // if mouse hover, show infowindow. if click & touch, open drawer
       // or if mouse hover, show infowindow, if mouse click show drawer. if touch once, show infowindow, if touch while infowdindow open, show drawer.
-      
-      if (
-        fetchData
-        // &&  (mapInstance.zoom == mapInstance.maxZoom)
-      ) {
-        //there may be potential for this to not work as expected if multiple groups of markers closeby instead of one?
-        // const dupes = checkForOverlaps(fetchData);
-        const dupes = fetchData;
-        // e.markerclusterer.markers.length //length should equal fetchData length with close centers (within 5 sig dig)
-        const clusterCenter = e.markerClusterer.clusters[0].center;
-        // const clusterCenter = JSON.parse(JSON.stringify(e.markerClusterer.clusters[0].center));
-        setInfoWindowPosition(clusterCenter);
-        // console.log(JSON.stringify(dupes[0].location))
-        setActiveData(dupes);
-        toggleWindow();
+      const { center, getMarkers } = e;
+      const clusterMarkers = getMarkers();
+      if (center && center.lat() && center.lng()) {
+        const centerTuple = { lat: center?.lat(), lng: center?.lng() };
+        center && setInfoWindowPosition(centerTuple);
       }
+      setActiveData(clusterMarkers);
+      setWindowOpen();
     },
-    [fetchData, toggleWindow]
+    [setWindowOpen]
   );
-  const handleMouseOut = useCallback(() => {
-    if (infoWindowPosition) {
-      // setWindowPosition(null)
-      toggleWindow();
-    }
-  }, [toggleWindow, infoWindowPosition]);
 
+  const handleMouseOutClusterOrMarker = useCallback(() => {
+    if (infoWindowPosition) {
+      setInfoWindowPosition(null);
+      setWindowClosed();
+    }
+  }, [setWindowClosed, infoWindowPosition]);
+
+  const handleClickCluster = useCallback(() => {
+    setWindowClosed();
+  }, [setWindowClosed]);
 
   return isLoaded ? (
     <GoogleMap
@@ -243,17 +216,16 @@ const AppMap = ({ client_location, setMapInstance, mapInstance }: IAppMap) => {
           styles={CLUSTER_STYLE}
           averageCenter
           enableRetinaIcons
-          // onClick={onClick}
-          onMouseOver={handleMouseOver}
-          onMouseOut={handleMouseOut}
-          // onClick={(event) =>{console.log(event.getMarkers())}}
+          onClick={handleClickCluster}
+          // onMouseOver={handleMouseOverClusterOrMarker}
+          // onMouseOut={handleMouseOutClusterOrMarker}
           gridSize={2}
           minimumClusterSize={2}
         >
           {useRenderMarkers}
         </MarkerClusterer>
       )}
-      {activeData && isWindowOpen && (
+      {activeData && isWindowOpen && infoWindowPosition && (
         <MyInfoWindow activeData={activeData} position={infoWindowPosition} />
       )}
 
