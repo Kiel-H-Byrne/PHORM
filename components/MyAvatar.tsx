@@ -2,17 +2,19 @@ import {
   Avatar,
   Button,
   Grid,
-  Image,
+  Icon,
+  Link,
   Popover,
   PopoverArrow,
   PopoverBody,
   PopoverCloseButton,
   PopoverContent,
   PopoverHeader,
-  PopoverTrigger,
+  PopoverTrigger
 } from "@chakra-ui/react";
 import { signOut, useSession } from "next-auth/react";
 import { memo } from "react";
+import { FaFacebookSquare, FaLinkedinIn, FaTwitterSquare } from "react-icons/fa";
 
 const MyAvatar = () => {
   const { data: session, status } = useSession()
@@ -20,10 +22,10 @@ const MyAvatar = () => {
     <Popover placement="top-start">
       <PopoverTrigger>
         <Avatar
+        loading="lazy"
           src={
-            session.user.image
-              ? session.user.image
-              : `https://avatars.dicebear.com/api/bottts/${session.user.email}.svg`
+              session.user.image ??
+              `https://api.dicebear.com/6.x/bottts/svg?seed=${session.user.email}`
           }
         />
       </PopoverTrigger>
@@ -33,9 +35,9 @@ const MyAvatar = () => {
         <PopoverCloseButton />
         <PopoverBody>
           <Grid templateColumns="repeat(3, 3fr)" gap={1}>
-            <Image boxSize="30px" src="img/fbook-share.png" alt="Facebook Share" />
-            <Image boxSize="30px" src="img/linkedin-share.png" alt="LinkedIn Share" />
-            <Image boxSize="30px" src="img/twitter-share.png" alt="Twitter Share" />
+            <Link   href="#" ><Icon boxSize={30}as={FaFacebookSquare} alt="Facebook Share" /></Link>
+            <Link  href="#" ><Icon boxSize={30}as={FaLinkedinIn} alt="LinkedIn Share" /></Link>
+            <Link   href="#"  ><Icon boxSize={30}as={FaTwitterSquare} alt="Twitter Share" /></Link>
           </Grid>
           <Button onClick={() => signOut()}>Log Out</Button>
         </PopoverBody>
