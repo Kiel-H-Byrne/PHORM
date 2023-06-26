@@ -1,4 +1,3 @@
-import { CheckCircleIcon } from "@chakra-ui/icons";
 import {
   Avatar,
   Button,
@@ -12,7 +11,7 @@ import {
   PopoverHeader,
   PopoverTrigger,
 } from "@chakra-ui/react";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { memo } from "react";
 
 const MyAvatar = () => {
@@ -44,9 +43,10 @@ const MyAvatar = () => {
     </Popover>
   ) : status === "loading" ? <>Loading...</>
   :(
-    <Button leftIcon={<CheckCircleIcon />} onClick={() => signIn()}>
-      Login
-    </Button>
+    // <Button leftIcon={<CheckCircleIcon />} onClick={() => signIn()}>
+    //   Login
+    // </Button>
+    null
   );
 };
 

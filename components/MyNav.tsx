@@ -12,6 +12,7 @@ import {
   useColorModeValue,
   useDisclosure,
 } from "@chakra-ui/react";
+import { signIn, useSession } from "next-auth/react";
 import { memo, useRef } from "react";
 import { AboutModal, AddListingDrawer, MyAvatar } from "./";
 
@@ -59,6 +60,7 @@ const MyNav = () => {
   } = useDisclosure();
   const firstField = useRef().current;
 
+  const {status} = useSession();
   return (
     <>
       <Box
@@ -94,9 +96,9 @@ const MyNav = () => {
               onClick={
                 () =>
                   //logged in? add form else signIn
-                  // status === "authenticated" ?
+                  status === "authenticated" ?
                   onDrawerOpen()
-                // : signIn()
+                : signIn()
               }
               size={"sm"}
               mr={4}

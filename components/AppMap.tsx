@@ -10,6 +10,8 @@ import {
   DrawerHeader,
   DrawerOverlay,
   Flex,
+  Heading,
+  Icon,
   Tab,
   TabList,
   TabPanel,
@@ -29,6 +31,7 @@ import {
   Clusterer,
   MarkerExtended,
 } from "@react-google-maps/marker-clusterer";
+import { MdInfoOutline } from "react-icons/md";
 import SWR from "swr";
 import { GLocation, IAppMap, IListing } from "../types";
 import { CLUSTER_STYLE, GEOCENTER, MAP_STYLES } from "../util/constants";
@@ -240,7 +243,7 @@ const AppMap = ({ client_location, setMapInstance, mapInstance }: IAppMap) => {
           <DrawerOverlay />
           <DrawerContent>
             <DrawerCloseButton />
-            <DrawerHeader>Info</DrawerHeader>
+            <DrawerHeader bgColor={"gray.200"} pl={1} display={'flex'}> <Icon  boxSize={7} mx={2} as={MdInfoOutline} />Listing Information</DrawerHeader>
             <DrawerBody p={0}>
               {activeData.length > 1 ? (
                 <Tabs isFitted variant="enclosed">
@@ -284,15 +287,10 @@ const AppMap = ({ client_location, setMapInstance, mapInstance }: IAppMap) => {
                   </TabPanels>
                 </Tabs>
               ) : (
-                <>
-                  {/* <Box>Multiple entries?</Box> */}
-                  {/* {activeData[0].name} */}
-                  {/* {activeData[0].address} */}
-                  {/* <InteractiveUserName
-                        userName={activeData[0].name}
-                        uid={activeData[0].place_id!}
-                      /> */}
-                </>
+                <Box px={3}>
+                  <Heading>{activeData[0].name}</Heading>
+
+                </Box>
               )}
             </DrawerBody>
           </DrawerContent>

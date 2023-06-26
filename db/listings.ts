@@ -19,7 +19,7 @@ const listingsFetchAll = async function () {
   console.log("Fetching doc", new Date())
     const querySnapshot = await getDocs(listingsRef);
     const listings: IListing[] = [];
-    querySnapshot.forEach((doc) => {
+    querySnapshot?.forEach((doc) => {
       listings.push(doc.data() as IListing);
     });
     return listings;
