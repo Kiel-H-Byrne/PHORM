@@ -38,6 +38,8 @@ const MyMarker = ({
     setWindowClosed();
   };
   const handleClickMarker = () => {
+    // infowindow needs to be set for mobile (touch, no hover)
+    setActiveData([markerData]);
     toggleDrawer();
   };
   return (

@@ -2,11 +2,10 @@ map/browse
 auth
 add biz form (if auth'd)
 edit biz form (if auth'd && entered/owned business)
+edit profile form (if auth'd)
 
-
-/*
+<!--
 [Header]
-
 Welcome to PHORM: Prince Hall's Online Registry of Merchants
 Discover and Support Businesses Owned by Prince Hall Freemasons
 [Subheader]
@@ -32,5 +31,4 @@ Start Your Journey with PHORM: Download our app today and embark on a meaningful
 About PHORM: Discover more about our mission, commitment, and the unique advantages of being part of our online registry.
 Get Listed: Are you a business owner affiliated with Prince Hall Freemasonry? Join PHORM's online registry to showcase your enterprise, connect with our community, and expand your reach.
 
-
-*/
+--->
