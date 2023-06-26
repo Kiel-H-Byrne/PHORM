@@ -35,9 +35,9 @@ const MyAvatar = () => {
         <PopoverCloseButton />
         <PopoverBody>
           <Grid templateColumns="repeat(3, 3fr)" gap={1}>
-            <Link   href="#" ><Icon boxSize={30}as={FaFacebookSquare} alt="Facebook Share" /></Link>
-            <Link  href="#" ><Icon boxSize={30}as={FaLinkedinIn} alt="LinkedIn Share" /></Link>
-            <Link   href="#"  ><Icon boxSize={30}as={FaTwitterSquare} alt="Twitter Share" /></Link>
+            <Link   href="#" ><Icon boxSize={30}as={FaFacebookSquare}  /></Link>
+            <Link  href="#" ><Icon boxSize={30}as={FaLinkedinIn}  /></Link>
+            <Link   href="#"  ><Icon boxSize={30}as={FaTwitterSquare}  /></Link>
           </Grid>
           <Button onClick={() => signOut()}>Log Out</Button>
         </PopoverBody>
