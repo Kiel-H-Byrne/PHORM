@@ -1,12 +1,14 @@
 import React from "react";
 
 import { Marker } from "@react-google-maps/api";
+import {
+  Clusterer,
+} from "@react-google-maps/marker-clusterer";
 import { IListing } from "../types";
-
 interface IMyMarker {
-  data: IListing;
-  clusterer: any;
-  activeData: any;
+  markerData: IListing;
+  clusterer: Clusterer;
+  activeData: IListing[];
   setActiveData: any;
   setWindowClosed: any;
   setWindowOpen: any;
@@ -14,14 +16,14 @@ interface IMyMarker {
 }
 
 const MyMarker = ({
-  data,
+  markerData,
   clusterer,
   setActiveData,
   setWindowClosed,
   setWindowOpen,
   toggleDrawer,
 }: IMyMarker) => {
-  const { lat,lng, place_id } = data;
+  const { lat,lng, place_id } = markerData;
   // location ? (loc = location.split(",")) : (loc = "50.60982,-1.34987");
   // let locObj = { lat: parseFloat(loc[0]), lng: parseFloat(loc[1]) };
   let image = {
@@ -29,7 +31,7 @@ const MyMarker = ({
   };
 
   const handleMouseOverMarker = () => {
-    setActiveData([data]);
+    setActiveData([markerData]);
     setWindowOpen();
   };
   const handleMouseOut = () => {
