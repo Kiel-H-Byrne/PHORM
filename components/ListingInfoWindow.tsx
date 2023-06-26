@@ -2,7 +2,7 @@ import { Progress } from "@chakra-ui/react";
 import { InfoWindow } from "@react-google-maps/api";
 import React from "react";
 import { IListing } from "../types";
-import { CondensedCard } from "./";
+import ListingCard from "./ListingCard2";
 
 const ListingInfoWindow = ({ activeListing }: {activeListing: IListing}) => {
   const { lat,lng } = activeListing;
@@ -18,7 +18,7 @@ const ListingInfoWindow = ({ activeListing }: {activeListing: IListing}) => {
       >
       {activeListing ? (
         <div /*className={style.root}*/>
-          <CondensedCard activeListing={activeListing} />
+          <ListingCard activeListing={activeListing} />
         </div>
       ) : <Progress />}
     </InfoWindow>

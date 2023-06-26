@@ -10,7 +10,6 @@ import {
   DrawerHeader,
   DrawerOverlay,
   Flex,
-  Heading,
   Icon,
   Tab,
   TabList,
@@ -19,7 +18,7 @@ import {
   Tabs,
   Text,
   useDisclosure,
-  useToast,
+  useToast
 } from "@chakra-ui/react";
 import {
   GoogleMap,
@@ -36,6 +35,7 @@ import SWR from "swr";
 import { GLocation, IAppMap, IListing } from "../types";
 import { CLUSTER_STYLE, GEOCENTER, MAP_STYLES } from "../util/constants";
 import { MyInfoWindow, MyMarker } from "./";
+import Card from "./ListingCard";
 
 export const default_props = {
   center: GEOCENTER,
@@ -287,8 +287,7 @@ const AppMap = ({ client_location, setMapInstance, mapInstance }: IAppMap) => {
                 </Tabs>
               ) : (
                 <Box px={3}>
-                  <Heading>{activeData[0].name}</Heading>
-
+                  <Card activeListing={activeData[0]} />
                 </Box>
               )}
             </DrawerBody>
