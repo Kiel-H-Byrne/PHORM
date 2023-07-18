@@ -22,21 +22,10 @@
 
 -->
 # PHORM: Prince Hall's Online Registry of Merchants
-Discover and Support Local Businesses Rooted in Prince Hall Freemasonry
+Discover and Support Local Businesses Owned by PHAmily Members
 ---
 
-<img width="80%" src="https://github.com/Kiel-H-Byrne/PHORM/assets/955269/30253b62-c6c5-4297-a369-c3d5133ee8a8" />
-
-===
-
-### MVP:
-create businesses,
-claim biz
-map displays message & locations
-map displays your location (search/display messages)
-users & profile data
-
-                                                                                                          |
+<img width="80%" src="https://github.com/Kiel-H-Byrne/PHORM/assets/955269/15413aec-606d-4b9d-bc9b-c7f1d72b8b25" />
 
 ## Technologies
 
