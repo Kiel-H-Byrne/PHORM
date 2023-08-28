@@ -1,6 +1,7 @@
 import { StatesEnum } from "@/types";
 import * as z from "zod";
 
+
 const SocialSchema = z.object({
   facebook: z.string(),
   instagram: z.string(),
@@ -13,7 +14,6 @@ const ProfileSchema = z.object({
   nickName: z.string(),
   lodgeNumber: z.number(),
   lodgeState: z.string(),
-  lodgeName: z.string(),
   email: z.string().email(),
   social: SocialSchema,
   roles: z.array(z.string()),
@@ -32,19 +32,12 @@ export const UserSchema = z.object({
 });
 
 
-const ClaimSchema = z.object({
-  ownerId: z.string(),
-  ownerName: z.string(),
-  ownerPhone: z.string(),
-  ownerProofUri: z.string().url(),
+export const ClaimSchema = z.object({
+  cuid: z.string(),
+  phone: z.string(),
+  proofUri: z.string().url(),
+  member: UserSchema
 });
-
-// const OwnerSchema = z.object({
-//   id: z.string(),
-//   name: z.string(),
-//   phone: z.string(),
-//   email: z.string().email(),
-// });
 
 export const ListingsSchema = z.object({
   name: z.string().min(5),
@@ -56,7 +49,7 @@ export const ListingsSchema = z.object({
   country: z.string(),
   phone: z.string(),
   url: z.string().url(),
-  claims: ClaimSchema,
+  claims: z.array(ClaimSchema),
   claimsCount: z.number(),
   lat: z.number(),
   lng: z.number(),
@@ -74,20 +67,18 @@ export const ListingsSchema = z.object({
   // email: z.string(),
   // categories: z.array(z.string()),
   social: SocialSchema,
-  creator: z.string(),
+  creator: UserSchema,
   submitted: z.date(),
 }).partial()
   .transform((data, ctx) => {
     //make address, and location? and....
-    const { street, city, state, zip, lat,lng } = data
+    const { street, city, state, zip, lat, lng } = data
     const address = `${street} ${city} ${state} ${zip}`
     // const geoHash = geohashForLocation([lat, lng]);
     data["country"] = "USA"
     data["submitted"] = new Date();
     data["address"] = address;
     // data["geoHash"] = geoHash;
-
-
     return data
   }
   );

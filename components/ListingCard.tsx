@@ -1,6 +1,6 @@
-import { IListing } from '@/types';
-import { Box, Button, Collapse, Heading, Image, Text } from '@chakra-ui/react';
-import { useState } from 'react';
+import { IClaims, IListing } from "@/types";
+import { Box, Button, Collapse, Heading, Image, Text } from "@chakra-ui/react";
+import { useState } from "react";
 
 const Card = ({ activeListing }: { activeListing: IListing }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -9,8 +9,9 @@ const Card = ({ activeListing }: { activeListing: IListing }) => {
     setIsOpen(!isOpen);
   };
 
-  const { name, address, description, owner, directions, share, imageUri } = activeListing;
-
+  const { name, address, description, claims, imageUri } = activeListing;
+  const getLikelyOwnerInfo = (claims: IClaims) => claims[0];
+  const ownerInfo = claims && getLikelyOwnerInfo(claims);
   return (
     <Box
       borderWidth="1px"
@@ -40,7 +41,7 @@ const Card = ({ activeListing }: { activeListing: IListing }) => {
           </Text>
           <Box mt={4}>
             <Button size="sm" variant="ghost" onClick={toggleCollapse}>
-              Owned by {owner.username}
+              Owned by {ownerInfo?.member.name}
             </Button>
             <Collapse in={isOpen} animateOpacity>
               <Box mt={2} p={2} bg="gray.100">
@@ -51,10 +52,10 @@ const Card = ({ activeListing }: { activeListing: IListing }) => {
         </Box>
       </Box>
       <Box mt={4}>
-        <Button colorScheme="blue" size="sm" mr={2} onClick={directions}>
+        <Button colorScheme="blue" size="sm" mr={2}>
           Get Directions
         </Button>
-        <Button colorScheme="blue" size="sm" onClick={share}>
+        <Button colorScheme="blue" size="sm">
           Share
         </Button>
         {/* Additional CTA buttons */}
