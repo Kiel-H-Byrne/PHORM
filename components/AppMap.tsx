@@ -36,7 +36,7 @@ import SWR from "swr";
 import { GLocation, IAppMap, IListing } from "../types";
 import { CLUSTER_STYLE, GEOCENTER, MAP_STYLES } from "../util/constants";
 import { MyInfoWindow, MyMarker } from "./";
-import Card from "./ListingCard";
+import ListingCard from "./ListingCard";
 
 export const default_props = {
   center: GEOCENTER,
@@ -304,7 +304,7 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
                 </Tabs>
               ) : (
                 <Box px={3}>
-                  <Card activeListing={activeData[0]} />
+                  <ListingCard activeListing={activeData[0]} />
                 </Box>
               )}
             </DrawerBody>

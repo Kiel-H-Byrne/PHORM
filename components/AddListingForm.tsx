@@ -99,13 +99,7 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
   );
 
   useEffect(() => {
-    if (Object.keys(errors).length !== 0) {
-      console.log(errors);
-    }
-  }, [errors]);
-
-  useEffect(() => {
-    isSubmitting && submitToast();
+    isSubmitting && Object.keys(errors).length !==0 && submitToast();
     if (isSubmitSuccessful) {
       reset();
       onDrawerClose();
@@ -118,6 +112,7 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
     reset,
     onDrawerClose,
     successToast,
+    errors
   ]);
 
   return (

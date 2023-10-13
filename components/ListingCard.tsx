@@ -2,9 +2,8 @@ import { IClaims, IListing } from "@/types";
 import { Box, Button, Collapse, Heading, Image, Text } from "@chakra-ui/react";
 import { useState } from "react";
 
-const Card = ({ activeListing }: { activeListing: IListing }) => {
+const ListingCard = ({ activeListing }: { activeListing: IListing }) => {
   const [isOpen, setIsOpen] = useState(false);
-
   const toggleCollapse = () => {
     setIsOpen(!isOpen);
   };
@@ -64,4 +63,4 @@ const Card = ({ activeListing }: { activeListing: IListing }) => {
   );
 };
 
-export default Card;
+export default ListingCard;
