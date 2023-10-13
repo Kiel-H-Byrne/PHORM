@@ -16,17 +16,31 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "jsxImportSource": "react",
     "jsx": "preserve",
     "incremental": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./*"
+      "@util/*": [
+        "src/util/*"
+      ],
+      "@pages/*": [
+        "pages/*"
+      ],
+      "@components/*": [
+        "src/components/*"
+      ],
+      "@db/*": [
+        "src/db/*"
+      ],
+      "@style/*": [
+        "src/style/*"
       ]
     },
     "types": [
       "jest",
       "node",
+      "react",
       "@testing-library/jest-dom"
     ],
     "plugins": [
@@ -36,12 +50,14 @@
     ]
   },
   "include": [
+    "src",
     "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
+    // "**/*.ts",
+    // "**/*.tsx",
     "types.d.ts",
+    "**/*.d.ts",
     ".next/types/**/*.ts"
-  ],
+, "pages"  ],
   "exclude": [
     "node_modules"
   ]

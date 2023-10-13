@@ -1,5 +1,5 @@
-import { listingsFetch } from '@/db/listings';
-import { MAX_AGE } from '../../../util/constants';
+import { listingsFetch } from '@db/listings';
+import { MAX_AGE } from '@util/constants';
 
 
 const handler = async (req: any, res: any) => {

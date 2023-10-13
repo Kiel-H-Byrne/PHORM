@@ -1,7 +1,6 @@
-import AppList from "@/components/AppList";
+import { AppList, AppMap, Layout, LocateMeButton } from "@components/index";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { AppMap, Layout, LocateMeButton } from "../components";
 const IndexPage = () => {
   const [clientLocation, setClientLocation] = useState(null);
   const [mapInstance, setMapInstance] = useState({} as google.maps.Map);
