@@ -10,16 +10,16 @@ import {
   DrawerHeader,
   DrawerOverlay,
   Flex,
-  Heading,
   Icon,
+  Progress,
   Tab,
   TabList,
   TabPanel,
   TabPanels,
   Tabs,
   Text,
+  createStandaloneToast,
   useDisclosure,
-  useToast,
 } from "@chakra-ui/react";
 import {
   GoogleMap,
@@ -36,6 +36,7 @@ import SWR from "swr";
 import { GLocation, IAppMap, IListing } from "../types";
 import { CLUSTER_STYLE, GEOCENTER, MAP_STYLES } from "../util/constants";
 import { MyInfoWindow, MyMarker } from "./";
+import ListingCard from "./ListingCard";
 
 export const default_props = {
   center: GEOCENTER,
@@ -72,7 +73,7 @@ export const default_props = {
   },
 };
 
-const AppMap = ({ client_location, setMapInstance, mapInstance }: IAppMap) => {
+const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
   let { center, zoom, options } = default_props;
   const uri = client_location
     ? `api/listings?lat=${client_location.lat}&lng=${client_location.lng}`
@@ -104,7 +105,7 @@ const AppMap = ({ client_location, setMapInstance, mapInstance }: IAppMap) => {
     errorRetryCount: 2,
   });
 
-  const toast = useToast();
+  const { ToastContainer, toast } = createStandaloneToast();
 
   const useRenderMarkers: (clusterer: Clusterer) => React.ReactElement =
     useCallback(
@@ -180,7 +181,18 @@ const AppMap = ({ client_location, setMapInstance, mapInstance }: IAppMap) => {
   const handleClickCluster = useCallback(() => {
     setWindowClosed();
   }, [setWindowClosed]);
-    return isLoaded ? (
+  const searchToastData = {
+    title: "Searching Area...",
+    status: "loading" as any,
+    id: "searching-toast",
+  };
+  const noResultsToastData = {
+    title: "No Results",
+    status: "info" as any,
+    id: "noresults-toast",
+  };
+
+  return isLoaded ? (
     <GoogleMap
       onLoad={(map) => {
         // const bounds = new window.google.maps.LatLngBounds();
@@ -208,11 +220,9 @@ const AppMap = ({ client_location, setMapInstance, mapInstance }: IAppMap) => {
             setSelectedCategories={setSelectedCategories}
           />
         )} */}
-      {!fetchData && toast({ title: "Searching Area...", status: "info" })}
-      {fetchData &&
-        fetchData.length == 0 &&
-        toast({ title: "No Results", status: "info" })}
-      {fetchData && fetchData.length !== 0 && (
+      {/* <ToastContainer /> */}
+      {/* {!fetchData && toast(searchToastData)} */}
+      {fetchData && fetchData.length !== 0 ? (
         <MarkerClusterer
           styles={CLUSTER_STYLE}
           averageCenter
@@ -225,10 +235,13 @@ const AppMap = ({ client_location, setMapInstance, mapInstance }: IAppMap) => {
         >
           {useRenderMarkers}
         </MarkerClusterer>
-      )}
-      
+      ) : null}
+
       {activeData && isWindowOpen && (
-        <MyInfoWindow activeData={activeData} position={{lat: activeData[0]?.lat!, lng: activeData[0]?.lng!}} />
+        <MyInfoWindow
+          activeData={activeData}
+          position={{ lat: activeData[0]?.lat!, lng: activeData[0]?.lng! }}
+        />
       )}
 
       {activeData && isDrawerOpen && (
@@ -242,7 +255,11 @@ const AppMap = ({ client_location, setMapInstance, mapInstance }: IAppMap) => {
           <DrawerOverlay />
           <DrawerContent>
             <DrawerCloseButton />
-            <DrawerHeader bgColor={"gray.200"} pl={1} display={'flex'}> <Icon  boxSize={7} mx={2} as={MdInfoOutline} />Listing Information</DrawerHeader>
+            <DrawerHeader bgColor={"gray.200"} pl={1} display={"flex"}>
+              {" "}
+              <Icon boxSize={7} mx={2} as={MdInfoOutline} />
+              Listing Information
+            </DrawerHeader>
             <DrawerBody p={0}>
               {activeData.length > 1 ? (
                 <Tabs isFitted variant="enclosed">
@@ -287,8 +304,7 @@ const AppMap = ({ client_location, setMapInstance, mapInstance }: IAppMap) => {
                 </Tabs>
               ) : (
                 <Box px={3}>
-                  <Heading>{activeData[0].name}</Heading>
-
+                  <ListingCard activeListing={activeData[0]} />
                 </Box>
               )}
             </DrawerBody>
@@ -298,7 +314,9 @@ const AppMap = ({ client_location, setMapInstance, mapInstance }: IAppMap) => {
 
       {/* <HeatmapLayer map={this.state.map && this.state.map} data={data.map(x => {x.location})} /> */}
     </GoogleMap>
-  ) : null;
+  ) : (
+    <Progress />
+  );
 };
 
 export default memo(AppMap);

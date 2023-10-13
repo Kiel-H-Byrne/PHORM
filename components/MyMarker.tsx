@@ -29,9 +29,19 @@ const MyMarker = ({
   let image = {
     url: "/img/orange_marker_sm.png",
   };
-
+const mockData = {
+  name: "Sample Business",
+  address: "123 Main Street, City",
+  description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+  owner: {
+    username: "john_doe",
+    lodge: "ABC Lodge",
+    name: "John Doe",
+  },  imageUri: "https://picsum.photos/200/300",
+}
   const handleMouseOverMarker = () => {
-    setActiveData([markerData]);
+    setActiveData([mockData]);
+    // setActiveData([markerData]);
     setWindowOpen();
   };
   const handleMouseOut = () => {
@@ -39,7 +49,8 @@ const MyMarker = ({
   };
   const handleClickMarker = () => {
     // infowindow needs to be set for mobile (touch, no hover)
-    setActiveData([markerData]);
+    setActiveData([mockData]);
+    // setActiveData([markerData]);
     toggleDrawer();
   };
   return (
