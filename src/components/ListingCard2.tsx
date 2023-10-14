@@ -4,6 +4,7 @@ import {
   Button,
   Collapse,
   Flex,
+  HStack,
   IconButton,
   Image,
   Text,
@@ -39,14 +40,19 @@ const BusinessCard = ({ activeListing }: { activeListing: IListing }) => {
       overflow="hidden"
       boxShadow="md"
     >
-      {/* Image section */}
-      <Image src={imageUri ? imageUri : '/img/red_marker_sm.png'} alt="Business Image" />
+      <HStack justifyContent={'center'}>
+        {/* Image section */}
+        <Image
+          src={imageUri ? imageUri : "/img/red_marker_sm.png"}
+          alt="Business Image"
+        />
 
-      {/* Business Information */}
-      <Box p="4">
+        {/* Business Information */}
         <Text fontWeight="bold" fontSize="lg">
           {activeListing.name}
         </Text>
+      </HStack>
+      <Box p="4">
         <Text fontSize="sm" color="gray.600">
           {owner?.name}
         </Text>

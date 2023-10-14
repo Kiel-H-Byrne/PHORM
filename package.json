@@ -48,7 +48,7 @@
     "@tanstack/react-query-devtools": "^4.0.0",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^14.0.0",
-    "@types/google.maps": "^3.53.4",
+    "@types/google.maps": "^3.54.3",
     "eslint-config-prettier": "^8.0.0",
     "husky": ">=7",
     "jest": "^29.5.0",

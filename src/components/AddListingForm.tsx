@@ -8,9 +8,10 @@ import {
 } from "@chakra-ui/react";
 import { ListingsSchema } from "@db/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { StandaloneSearchBox } from "@react-google-maps/api";
 import { IListing, StatesEnum } from "@util/index";
 import { geohashForLocation } from "geofire-common";
-import { memo, useCallback, useEffect, useRef } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { Form, useForm } from "react-hook-form";
 
 const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
@@ -30,6 +31,12 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
     //   zip: 12345
     // }
   });
+  type Place = {
+    place_id: string;
+    formatted_address: string;
+    geometry: { location: { lat: () => string; lng: () => string } };
+  };
+  const [places, setPlaces] = useState<Place[]>([]);
 
   const submitToast = useToast({
     colorScheme: "yellow",
@@ -53,7 +60,7 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
   });
 
   const formRef = useRef();
-
+  const searchBoxRef = useRef<StandaloneSearchBox>();
   const getPlaceDetails = useCallback(async (address: string) => {
     //  const if all fields filled, make address, pass to geo, create lat/long
     const geocoder = new google.maps.Geocoder();
@@ -97,9 +104,10 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
     },
     [getPlaceDetails]
   );
+  const [searchBox, setSearchBox] = useState<google.maps.places.SearchBox>();
 
   useEffect(() => {
-    isSubmitting && Object.keys(errors).length !==0 && submitToast();
+    isSubmitting && Object.keys(errors).length !== 0 && submitToast();
     if (isSubmitSuccessful) {
       reset();
       onDrawerClose();
@@ -112,9 +120,22 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
     reset,
     onDrawerClose,
     successToast,
-    errors
+    errors,
   ]);
+  const handlePlacesChanged = () => {
+    console.log(searchBox?.getPlaces());
+    setPlaces(places);
+  };
+  const handleSearchTextChange = (e: any) => {
+    const text = e.target.value;
+    // const places = searchBoxRef.current?.state.searchBox?.getPlaces();
 
+    console.log(text, searchBox?.getPlaces());
+  };
+  const USBounds = new google.maps.LatLngBounds(
+    new google.maps.LatLng(25.82, -124.39),
+    new google.maps.LatLng(49.38, -66.94)
+  );
   return (
     <Box
       borderWidth="1px"
@@ -131,17 +152,43 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
         onError={() => alertToast()}
         control={control}
       >
-
-        
         <FormLabel htmlFor="name"> Name</FormLabel>
         {errors.name && <span>{errors.name.message as string as string}</span>}
+
+        <StandaloneSearchBox
+          ref={(ref) => {
+            if (ref) {
+              searchBoxRef.current = ref;
+            }
+          }}
+          onPlacesChanged={handlePlacesChanged}
+          onLoad={(sb) => setSearchBox(sb)}
+          bounds={USBounds}
+        >
+          <Input
+            id="search_box"
+            autoComplete={"true"}
+            {...register("search_box")}
+            onChange={handleSearchTextChange}
+            aria-invalid={errors.search_box ? "true" : "false"}
+          />
+        </StandaloneSearchBox>
+        <ol>
+          {places.map(
+            ({ place_id, formatted_address, geometry: { location } }) => (
+              <li key={place_id}>
+                {formatted_address}
+                {" at "}({location.lat()}, {location.lng()})
+              </li>
+            )
+          )}
+        </ol>
         <Input
           id="name"
           autoComplete={"true"}
           {...register("name")}
           aria-invalid={errors.name ? "true" : "false"}
         />
-
 
         <FormLabel htmlFor="street"> Street</FormLabel>
         {errors.street && <span>{errors.street.message as string}</span>}
@@ -151,8 +198,6 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
           aria-invalid={errors.street ? "true" : "false"}
         />
 
-
-
         <FormLabel htmlFor="city"> City</FormLabel>
         {errors.city && <span>{errors.city.message as string}</span>}
         <Input
@@ -160,7 +205,7 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
           {...register("city")}
           aria-invalid={errors.city ? "true" : "false"}
         />
-        
+
         <FormLabel htmlFor="state"> State</FormLabel>
         {errors.state && <span>{errors.state.message as string}</span>}
         <Select
@@ -177,7 +222,6 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
           ))}
         </Select>
 
-
         <FormLabel htmlFor="zip"> Zip</FormLabel>
         {errors.zip && <span>{errors.zip.message as string}</span>}
 
@@ -189,8 +233,6 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
           })}
           aria-invalid={errors.zip ? "true" : "false"}
         />
-        
-
 
         <Box justifyContent={"space-around"}>
           <Button type="reset" colorScheme="blue" variant={"outline"}>

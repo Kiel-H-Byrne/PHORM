@@ -1,5 +1,5 @@
 import { Box } from "@chakra-ui/react";
-import fetcher from "@util/fetch";
+import { fetcher } from "@util/fetch";
 import { GLocation, IListing } from "@util/index";
 import { useState } from "react";
 import useSWR from "swr";

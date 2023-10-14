@@ -81,6 +81,7 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY!,
+    libraries: ['places']
   });
 
   const {
