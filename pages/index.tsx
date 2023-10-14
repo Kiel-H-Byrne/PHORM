@@ -23,7 +23,8 @@ const viewType = params?.get('viewType')
         setClientLocation={setClientLocation}
         />
         </>
-        : <AppList />
+        : <AppList mapInstance={mapInstance}
+        setMapInstance={setMapInstance}/>
         }
       </Layout>
     </>

@@ -1,10 +1,11 @@
 import { HStack } from "@chakra-ui/react";
-import { useJsApiLoader } from "@react-google-maps/api";
+import { GoogleMapProps, useJsApiLoader } from "@react-google-maps/api";
 import { IListing, fetcher } from "@util/index";
 import SWR from "swr";
 import BusinessCard from "./ListingCard2";
+import MapAutocomplete from "./MapAutocomplete";
 
-const AppList = () => {
+const AppList = ({mapInstance, setMapInstance}: {mapInstance: GoogleMapProps, setMapInstance: any}) => {
   const data_uri = "api/listings";
   const { data: fetchData, error } = SWR(data_uri, fetcher, {
     loadingTimeout: 1000,
@@ -25,6 +26,7 @@ const AppList = () => {
   return (
     isLoaded && (
       <HStack flexWrap={"wrap"}>
+        <MapAutocomplete mapInstance={mapInstance} />
         {fetchData ?
           fetchData.map((listing: IListing) => (
             <BusinessCard activeListing={listing} key={listing.name} />
