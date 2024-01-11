@@ -15,7 +15,9 @@ const Layout = ({ children, title }: Props) => {
     <SessionProvider>
       <CustomHead title={title || "The P.H.O.R.M"} />
       <MyNav />
+      {/* <VStack spacing={4} p={8} > */}
       {children}
+      {/* </VStack> */}
       <MyFooter />
     </SessionProvider>
   );

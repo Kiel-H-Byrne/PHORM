@@ -193,25 +193,27 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
   };
 
   return isLoaded ? (
-    <GoogleMap
-      onLoad={(map) => {
-        // const bounds = new window.google.maps.LatLngBounds();
-        setMapInstance(map);
-      }}
-      id="GMap"
-      // mapContainerClassName={style.map}
-      mapContainerStyle={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        bottom: 0,
-        right: 0,
-      }}
-      center={client_location || center}
-      zoom={client_location ? 16 : zoom}
-      options={options}
-    >
-      {/* {fetchData && (
+    <>
+      <GoogleMap
+        onLoad={(map) => {
+          // const bounds = new window.google.maps.LatLngBounds();
+          setMapInstance(map);
+        }}
+        id="GMap"
+        // mapContainerClassName={style.map}
+        mapContainerStyle={{
+          position: "absolute",
+          height: "calc(100% - 42px)",
+          top: 0,
+          left: 0,
+          bottom: -20,
+          right: 0,
+        }}
+        center={client_location || center}
+        zoom={client_location ? 16 : zoom}
+        options={options}
+      >
+        {/* {fetchData && (
           <MapAutoComplete
             fetchData={fetchData}
             categories={categories}
@@ -220,100 +222,103 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
             setSelectedCategories={setSelectedCategories}
           />
         )} */}
-      {/* <ToastContainer /> */}
-      {/* {!fetchData && toast(searchToastData)} */}
-      {fetchData && fetchData.length !== 0 ? (
-        <MarkerClusterer
-          styles={CLUSTER_STYLE}
-          averageCenter
-          enableRetinaIcons
-          onClick={handleClickCluster}
-          // onMouseOver={handleMouseOutClusterOrMarker}
-          // onMouseOut={handleMouseOutClusterOrMarker}
-          gridSize={2}
-          minimumClusterSize={2}
-        >
-          {useRenderMarkers}
-        </MarkerClusterer>
-      ) : null}
+        {/* <ToastContainer /> */}
+        {/* {!fetchData && toast(searchToastData)} */}
+        {fetchData && fetchData.length !== 0 ? (
+          <MarkerClusterer
+            styles={CLUSTER_STYLE}
+            averageCenter
+            enableRetinaIcons
+            onClick={handleClickCluster}
+            // onMouseOver={handleMouseOutClusterOrMarker}
+            // onMouseOut={handleMouseOutClusterOrMarker}
+            gridSize={2}
+            minimumClusterSize={2}
+          >
+            {useRenderMarkers}
+          </MarkerClusterer>
+        ) : null}
 
-      {activeData && isWindowOpen && (
-        <MyInfoWindow
-          activeData={activeData}
-          position={{ lat: activeData[0]?.lat!, lng: activeData[0]?.lng! }}
-        />
-      )}
+        {activeData && isWindowOpen && (
+          <MyInfoWindow
+            activeData={activeData}
+            position={{ lat: activeData[0]?.lat!, lng: activeData[0]?.lng! }}
+          />
+        )}
 
-      {activeData && isDrawerOpen && (
-        <Drawer
-          // activeData={activeData}
-          isOpen={isDrawerOpen}
-          placement="left"
-          onClose={setDrawerClose}
-          // mapInstance={mapInstance}
-        >
-          <DrawerOverlay />
-          <DrawerContent>
-            <DrawerCloseButton />
-            <DrawerHeader bgColor={"gray.200"} pl={1} display={"flex"}>
-              {" "}
-              <Icon boxSize={7} mx={2} as={MdInfoOutline} />
-              Listing Information
-            </DrawerHeader>
-            <DrawerBody p={0}>
-              {activeData.length > 1 ? (
-                <Tabs isFitted variant="enclosed">
-                  <TabList>
-                    {activeData.map((el, i) => (
-                      <Tab key={i}>
-                        <Text fontSize="sm" fontWeight="semibold">
-                          {" "}
-                          @userName -{" "}
-                          {/* {new Date(el.timestamp).toLocaleDateString()}{" "} */}
-                        </Text>
-                      </Tab>
-                    ))}
-                  </TabList>
-                  <TabPanels>
-                    {activeData.map((el, i) => {
-                      const { name, place_id } = el;
-                      return (
-                        <TabPanel
-                          key={i}
-                          p={0}
-                          bgColor="goldenrod"
-                          boxShadow="xl"
-                        >
-                          <Flex direction="column">
-                            <Box p={1}>
-                              <Text as="h2">{name}</Text>
-                              {/* <InteractiveUserName userName={userName} uid={uid} /> */}
-                              <Text
-                                fontWeight="semibold"
-                                fontSize=".7rem"
-                                color="gray.400"
-                              >
-                                @{place_id}
-                              </Text>
-                            </Box>
-                          </Flex>
-                        </TabPanel>
-                      );
-                    })}
-                  </TabPanels>
-                </Tabs>
-              ) : (
-                <Box px={3}>
-                  <ListingCard activeListing={activeData[0]} />
-                </Box>
-              )}
-            </DrawerBody>
-          </DrawerContent>
-        </Drawer>
-      )}
+        {activeData && isDrawerOpen && (
+          <Drawer
+            // activeData={activeData}
+            isOpen={isDrawerOpen}
+            placement="left"
+            onClose={setDrawerClose}
+            // mapInstance={mapInstance}
+          >
+            <DrawerOverlay />
+            <DrawerContent>
+              <DrawerCloseButton />
+              <DrawerHeader bgColor={"gray.200"} pl={1} display={"flex"}>
+                {" "}
+                <Icon boxSize={7} mx={2} as={MdInfoOutline} />
+                Listing Information
+              </DrawerHeader>
+              <DrawerBody p={0}>
+                {activeData.length > 1 ? (
+                  <Tabs isFitted variant="enclosed">
+                    <TabList>
+                      {activeData.map((el, i) => (
+                        <Tab key={i}>
+                          <Text fontSize="sm" fontWeight="semibold">
+                            {" "}
+                            @userName -{" "}
+                            {/* {new Date(el.timestamp).toLocaleDateString()}{" "} */}
+                          </Text>
+                        </Tab>
+                      ))}
+                    </TabList>
+                    <TabPanels>
+                      {activeData.map((el, i) => {
+                        const { name, place_id } = el;
+                        return (
+                          <TabPanel
+                            key={i}
+                            p={0}
+                            bgColor="goldenrod"
+                            boxShadow="xl"
+                          >
+                            <Flex direction="column">
+                              <Box p={1}>
+                                <Text as="h2">{name}</Text>
+                                {/* <InteractiveUserName userName={userName} uid={uid} /> */}
+                                <Text
+                                  fontWeight="semibold"
+                                  fontSize=".7rem"
+                                  color="gray.400"
+                                >
+                                  @{place_id}
+                                </Text>
+                              </Box>
+                            </Flex>
+                          </TabPanel>
+                        );
+                      })}
+                    </TabPanels>
+                  </Tabs>
+                ) : (
+                  <Box px={3}>
+                    <ListingCard activeListing={activeData[0]} />
+                  </Box>
+                )}
+              </DrawerBody>
+            </DrawerContent>
+          </Drawer>
+        )}
 
-      {/* <HeatmapLayer map={this.state.map && this.state.map} data={data.map(x => {x.location})} /> */}
-    </GoogleMap>
+        {/* <HeatmapLayer map={this.state.map && this.state.map} data={data.map(x => {x.location})} /> */}
+      </GoogleMap>
+      {/* 100% - header hight + footer height */}
+      <Flex style={{ height: "calc(100% - 106px)" }} />
+    </>
   ) : (
     <Progress />
   );

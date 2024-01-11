@@ -11,6 +11,7 @@ import {
   useDisclosure
 } from "@chakra-ui/react";
 import { useSession } from "next-auth/react";
+import { usePathname } from "next/navigation";
 import { memo, useEffect } from "react";
 import { FaDraftingCompass, FaFistRaised, FaGem } from "react-icons/fa";
 import { FeatureCard } from "./";
@@ -42,9 +43,12 @@ function AboutModal() {
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {status} = useSession()
+  const currentPath = usePathname()
+  const isMainPage = currentPath === "/"
   useEffect(() => {
-    onOpen();
-  }, [onOpen]);
+    //open only if page is index
+    isMainPage && onOpen();
+  }, [onOpen, isMainPage ]);
 
   return (
     <Modal

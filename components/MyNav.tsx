@@ -19,8 +19,8 @@ import { AboutModal, AddListingDrawer, MyAvatar } from "./";
 const NAV_LINKS = [
   { path: "/", label: "Home" },
   { path: "/about", label: "About" },
-  { path: "/owners", label: "Owners" },
-  { path: "/list", label: "List View" },
+  // { path: "/owners", label: "Owners" },
+  { path: "/?viewType=list", label: "List View" },
 ];
 const NavLink = ({ path, label }: { path: string; label: string }) => (
   <Link
