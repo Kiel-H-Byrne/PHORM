@@ -1,20 +1,19 @@
 
 <!--- These are examples. See https://shields.io for others or to customize this set of shields. You might want to include dependencies, project status and license info here --->
-![Vercel Deploy](https://vercelbadge.vercel.app/api/kiel-h-byrne/PHORM)
-![Github License](https://img.shields.io/github/license/kiel-h-byrne/PHORM)
+![Vercel Deploy](https://img.shields.io/github/deployments/kiel-h-byrne/phorm/production?logo=vercel&logoColor=white&label=vercel
+)
+
 ![Node Version](https://img.shields.io/node/v/canary)
-![W3C Validation](https://img.shields.io/w3c-validation/default?targetUrl=https%3A%2F%2FPHORM.kielbyrne.com)
 
 ![GitHub repo size](https://img.shields.io/github/repo-size/kiel-h-byrne/PHORM)
 ![Github code size](https://img.shields.io/github/languages/code-size/kiel-h-byrne/PHORM)
-![Github Languages](https://img.shields.io/github/languages/count/kiel-h-byrne/PHORM)
 ![Github Top Language](https://img.shields.io/github/languages/top/kiel-h-byrne/PHORM)
 
 ![GitHub Issues](https://img.shields.io/github/issues-raw/kiel-h-byrne/PHORM)
 ![GitHub contributors](https://img.shields.io/github/contributors/kiel-h-byrne/PHORM)
 ![Github Last Commit](https://img.shields.io/github/last-commit/kiel-h-byrne/PHORM)
 <!--
-
+![Vercel Deploy](https://vercelbadge.vercel.app/api/kielbyrne/phorm)
 ![Github Commit Activity](https://img.shields.io/github/commit-activity/m/kiel-h-byrne/PHORM)
 ![GitHub stars](https://img.shields.io/github/stars/kiel-h-byrne/PHORM?style=social)
 ![GitHub forks](https://img.shields.io/github/forks/kiel-h-byrne/PHORM?style=social)
