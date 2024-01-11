@@ -39,7 +39,7 @@ import {
 const heading = "PHORM Technology Stack";
 
 const frontendTechs = [
-  ["Next.js", "For building UIs through components", SiNextdotjs],
+  ["Next.js", "The React framework", SiNextdotjs],
   ["React", "For building UIs through components", SiReact],
   ["TypeScript", "This is the way...", SiTypescript],
   [
