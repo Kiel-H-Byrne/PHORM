@@ -7,7 +7,6 @@ type Props = {
   title?: string;
 };
 
-
 const Layout = ({ children, title }: Props) => {
   // const [show, setShow] = useState(true);
 
@@ -23,4 +22,4 @@ const Layout = ({ children, title }: Props) => {
   );
 };
 
-export default memo(Layout)
+export default memo(Layout);

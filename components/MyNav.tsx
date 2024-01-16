@@ -41,8 +41,13 @@ const NavLink = ({ path, label }: { path: string; label: string }) => (
 const AvatarDropdown = () => (
   <Box pb={4} display={{ md: "none" }}>
     <Stack as={"nav"} spacing={4}>
-      <Heading color={"royalblue"} justifyContent={"center"} display={"inline-block"}>
-        P.H.O.R.M</Heading>
+      <Heading
+        color={"royalblue"}
+        justifyContent={"center"}
+        display={"inline-block"}
+      >
+        P.H.O.R.M
+      </Heading>
       {NAV_LINKS.map(({ path, label }) => (
         <NavLink key={label} path={path} label={label} />
       ))}
@@ -62,7 +67,7 @@ const MyNav = () => {
   } = useDisclosure();
   const firstField = useRef().current;
 
-  const {status} = useSession();
+  const { status } = useSession();
   return (
     <>
       <Box
@@ -80,7 +85,7 @@ const MyNav = () => {
             onClick={dropdownIsOpen ? onDropdownClose : onDropdownOpen}
           />
           <HStack spacing={8} alignItems={"center"}>
-          <Image height={"14"} width={"14"} src="/img/Logo1.png"  alt="logo"/>
+            <Image height={"14"} width={"14"} src="/img/Logo1.png" alt="logo" />
             <HStack
               as={"nav"}
               spacing={4}
@@ -96,12 +101,9 @@ const MyNav = () => {
             <Button
               variant={"solid"}
               colorScheme={"teal"}
-              onClick={
-                () =>
-                  //logged in? add form else signIn
-                  status === "authenticated" ?
-                  onDrawerOpen()
-                : signIn()
+              onClick={() =>
+                //logged in? add form else signIn
+                status === "authenticated" ? onDrawerOpen() : signIn()
               }
               size={"sm"}
               mr={4}
@@ -124,6 +126,6 @@ const MyNav = () => {
       <AboutModal />
     </>
   );
-}
+};
 
-export default memo(MyNav)
+export default memo(MyNav);

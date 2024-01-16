@@ -6,7 +6,7 @@ export const DynamicControl = ({
   fieldName,
   defaultValue,
   options = [],
-  config = {}
+  config = {},
 }: DynamicFieldData) => {
   const { register } = useFormContext();
 

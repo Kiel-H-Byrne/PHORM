@@ -1,6 +1,6 @@
-import { getApps, initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { initializeFirestore } from "firebase/firestore";
+import { FirebaseApp, getApps, initializeApp } from "firebase/app";
+import { Auth, getAuth } from "firebase/auth";
+import { Firestore, initializeFirestore } from "firebase/firestore";
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FSDB_KEY,
   authDomain: process.env.NEXT_PUBLIC_FSDB_AUTH_URI,
@@ -9,7 +9,7 @@ const firebaseConfig = {
   messagingSenderId: process.env.NEXT_PUBLIC_FSDB_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FSDB_APP_ID,
   measurementId: process.env.NEXT_PUBLIC_FSDB_MEASUREMENT_ID,
-}
+};
 
 // const firebaseCredentials = {
 //   type: process.env.NEXT_PUBLIC_TEST_type,
@@ -24,19 +24,20 @@ const firebaseConfig = {
 //   clientX509CertUrl: process.env.NEXT_PUBLIC_TEST_client_x509_cert_url,
 //   universeDomain: process.env.NEXT_PUBLIC_TEST_universe_domain,
 // }
-let appAuth, appFsdb, phormApp
+let appAuth: Auth | undefined,
+  appFsdb: Firestore | undefined,
+  phormApp: FirebaseApp | undefined;
 if (!firebaseConfig.apiKey) {
-  console.warn("NO FIREBASE API KEYS")
-  phormApp = null
-  appAuth = null
-  appFsdb = null
+  console.warn("NO FIREBASE API KEYS");
+  phormApp = undefined;
+  appAuth = undefined;
+  appFsdb = undefined;
 } else {
-
-  phormApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
+  phormApp =
+    getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
   // const appFsdb = getApps().length === 0 ? admin.initializeApp({credential: admin.credential.cert(firebaseCredentials)}) : getApps()[0]
   // const appAnalytics = getAnalytics(phormApp); //need 'window'
   appAuth = getAuth(phormApp);
-  appFsdb = initializeFirestore(phormApp, {})
+  appFsdb = initializeFirestore(phormApp, {});
 }
 export { appAuth, appFsdb, phormApp };
-

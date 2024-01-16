@@ -1,4 +1,4 @@
-import { IClaim, IListing } from "@/types";
+import { IClaims, IListing } from "@/types";
 import { Box, Button, Collapse, Heading, Image, Text } from "@chakra-ui/react";
 import { useState } from "react";
 
@@ -9,7 +9,7 @@ const ListingCard = ({ activeListing }: { activeListing: IListing }) => {
   };
 
   const { name, address, description, claims, imageUri } = activeListing;
-  const getLikelyOwnerInfo = (claims: IClaim) => claims[0];
+  const getLikelyOwnerInfo = (claims: IClaims) => claims[0];
   const ownerInfo = claims && getLikelyOwnerInfo(claims);
   return (
     <Box

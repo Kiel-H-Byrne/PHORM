@@ -2,8 +2,9 @@ import {
   Box,
   Flex,
   Heading,
-  Icon, Text,
-  useColorModeValue
+  Icon,
+  Text,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { memo } from "react";
 import { IconType } from "react-icons/lib";
@@ -11,7 +12,7 @@ import { IconType } from "react-icons/lib";
 function FeatureCard({
   feature,
 }: {
-  feature: { icon: IconType; heading: string; body: string; };
+  feature: { icon: IconType; heading: string; body: string };
 }) {
   return (
     <Box
@@ -42,4 +43,4 @@ function FeatureCard({
     </Box>
   );
 }
-export default memo(FeatureCard)
+export default memo(FeatureCard);

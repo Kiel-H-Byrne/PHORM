@@ -40,22 +40,19 @@ const MarkersLayer = (props: Props) => {
     infoWindow.open(mapInstance);
   };
 
-  if (!clientLocation) {
-    return null;
-  } else {
-    data &&
-      data.pullups.forEach((el: IListing) => {
-        const marker = new (window as any).google.maps.Marker({
-          position: {lat: el.lat, lng: el.lng},
-          map: mapInstance,
-          // title: el.title
-          // icon:
-        });
-        // marker.addListener("click", () => {
-        //   updateInfoWindow(el.message, marker);
-        // });
+  if (!clientLocation) return;
+  data &&
+    data.pullups.forEach((el: IListing) => {
+      const marker = new (window as any).google.maps.Marker({
+        position: { lat: el.lat, lng: el.lng },
+        map: mapInstance,
+        // title: el.title
+        // icon:
       });
-    //display on map
-    return <div></div>;
-  }
+      // marker.addListener("click", () => {
+      //   updateInfoWindow(el.message, marker);
+      // });
+    });
+  //display on map
+  return <div></div>;
 };

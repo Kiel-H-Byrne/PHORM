@@ -4,13 +4,14 @@ import { memo } from "react";
 import { GLocation, IListing } from "../types";
 
 const MultipleInfoContent = ({
-  data, options,
+  data,
+  options,
 }: {
   data: IListing[];
   options: any;
 }) => {
-  const { position }: { position: GLocation; } = options;
-  console.log(data)
+  const { position }: { position: GLocation } = options;
+  console.log(data);
   return (
     <InfoWindow position={position} options={options}>
       <Box>

@@ -1,10 +1,9 @@
-
-import { FirestoreAdapter } from '@auth/firebase-adapter';
-import { cert } from 'firebase-admin/app';
-import NextAuth from 'next-auth';
+import { FirestoreAdapter } from "@auth/firebase-adapter";
+import { cert } from "firebase-admin/app";
+import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import GoogleProvider from 'next-auth/providers/google';
-import LinkedInProvider from 'next-auth/providers/linkedin';
+import GoogleProvider from "next-auth/providers/google";
+import LinkedInProvider from "next-auth/providers/linkedin";
 import process from "process";
 export default NextAuth({
   providers: [
@@ -17,8 +16,8 @@ export default NextAuth({
         params: {
           access_type: "offline",
           response_type: "code",
-          prompt: "consent"
-        }
+          prompt: "consent",
+        },
       },
       // scope:
       //   "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile",
@@ -27,14 +26,14 @@ export default NextAuth({
       clientId: process.env.NEXT_PUBLIC_LINKEDIN_CLIENT_ID!,
       clientSecret: process.env.NEXT_PUBLIC_LINKEDIN_SECRET!,
       authorization: {
-        url: process.env.NEXT_PUBLIC_LINKEDIN_AUTH_URI
-      }
+        url: process.env.NEXT_PUBLIC_LINKEDIN_AUTH_URI,
+      },
     }),
     CredentialsProvider({
-      name: 'Credentials',
+      name: "Credentials",
       credentials: {
         username: { label: "Username", type: "text", placeholder: "jsmith" },
-        password: { label: "Password", type: "password" }
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials, req) {
         // You need to provide your own logic here that takes the credentials
@@ -55,11 +54,9 @@ export default NextAuth({
         //   return user
         // }
         // Return null if user data could not be retrieved
-        return { id: '1', name: 'J Smith', email: 'jsmith@example.com' }
-
-        return null
-      }
-    })
+        return { id: "1", name: "J Smith", email: "jsmith@example.com" };
+      },
+    }),
     // Sign in with passwordless email link
     // EmailProvider({
     //   server: process.env.MAIL_SERVER,
@@ -67,7 +64,7 @@ export default NextAuth({
     // }),
   ],
   session: {
-    strategy: 'database',
+    strategy: "database",
   },
   //@ts-ignore
   adapter: FirestoreAdapter({

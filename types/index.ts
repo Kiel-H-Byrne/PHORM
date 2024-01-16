@@ -3,12 +3,18 @@ import { GoogleMapProps } from "@react-google-maps/api";
 import { z } from "zod";
 import { ClaimSchema, ListingsSchema, UserSchema } from "../db/schemas";
 
-export type IClaim = z.infer<typeof ClaimSchema>[]
-export type IListing = z.infer<typeof ListingsSchema>
-export type IUser = z.infer<typeof UserSchema>
+export type IClaims = z.infer<typeof ClaimSchema>[];
+export type IListing = z.infer<typeof ListingsSchema>;
+export type IUser = z.infer<typeof UserSchema>;
 
 export type Category = "a" | "b" | "c";
-export type Libraries = ("drawing" | "geometry" | "localContext" | "places" | "visualization")[];
+export type Libraries = (
+  | "drawing"
+  | "geometry"
+  | "localContext"
+  | "places"
+  | "visualization"
+)[];
 
 export interface IAppMap {
   client_location: GLocation | null;
@@ -17,11 +23,14 @@ export interface IAppMap {
 }
 export interface ILocateMe {
   mapInstance: google.maps.Map | google.maps.StreetViewPanorama;
-  setClientLocation: any //a usestate fxn returning {latlng};
-  clientLocation: GLocation | null
+  setClientLocation: any; //a usestate fxn returning {latlng};
+  clientLocation: GLocation | null;
 }
-export interface GLocation { lat: number, lng: number }
-export const StatesEnum = z.enum(STATE_ABBREVIATIONS)
+export interface GLocation {
+  lat: number;
+  lng: number;
+}
+export const StatesEnum = z.enum(STATE_ABBREVIATIONS);
 
 export const PHA_LODGES = {
   [StatesEnum.enum.DC]: {
@@ -50,5 +59,5 @@ export const PHA_LODGES = {
     27: "Prudence",
     28: "Thomas L. Johnson",
     29: "Nathaniel M. Adams Jr. Military",
-  }
-}
+  },
+};

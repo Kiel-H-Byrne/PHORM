@@ -9,7 +9,7 @@ import {
   Stack,
   Text,
   VStack,
-  useDisclosure
+  useDisclosure,
 } from "@chakra-ui/react";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
@@ -62,8 +62,17 @@ function AboutModal() {
       <ModalContent>
         <ModalCloseButton />
         <ModalBody>
-          <Stack direction={{base: "column", md: "row"}} spacing={5} alignItems={"center"}>
-            <Image src={"/img/Logo1.png"} height={{base: 24, lg: 172}} width={{base: 24, lg: 172}} alt="logo" />
+          <Stack
+            direction={{ base: "column", md: "row" }}
+            spacing={5}
+            alignItems={"center"}
+          >
+            <Image
+              src={"/img/Logo1.png"}
+              height={{ base: 24, lg: 172 }}
+              width={{ base: 24, lg: 172 }}
+              alt="logo"
+            />
             <VStack spacing={7}>
               <Text fontSize={"xl"}>
                 Welcome to The{" "}

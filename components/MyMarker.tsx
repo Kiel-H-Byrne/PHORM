@@ -1,9 +1,7 @@
 import React from "react";
 
 import { Marker } from "@react-google-maps/api";
-import {
-  Clusterer,
-} from "@react-google-maps/marker-clusterer";
+import { Clusterer } from "@react-google-maps/marker-clusterer";
 import { IListing } from "../types";
 interface IMyMarker {
   markerData: IListing;
@@ -23,22 +21,23 @@ const MyMarker = ({
   setWindowOpen,
   toggleDrawer,
 }: IMyMarker) => {
-  const { lat,lng, place_id } = markerData;
+  const { lat, lng, place_id } = markerData;
   // location ? (loc = location.split(",")) : (loc = "50.60982,-1.34987");
   // let locObj = { lat: parseFloat(loc[0]), lng: parseFloat(loc[1]) };
   let image = {
     url: "/img/orange_marker_sm.png",
   };
-const mockData = {
-  name: "Sample Business",
-  address: "123 Main Street, City",
-  description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-  owner: {
-    username: "john_doe",
-    lodge: "ABC Lodge",
-    name: "John Doe",
-  },  imageUri: "https://picsum.photos/200/300",
-}
+  const mockData = {
+    name: "Sample Business",
+    address: "123 Main Street, City",
+    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    owner: {
+      username: "john_doe",
+      lodge: "ABC Lodge",
+      name: "John Doe",
+    },
+    imageUri: "https://picsum.photos/200/300",
+  };
   const handleMouseOverMarker = () => {
     setActiveData([mockData]);
     // setActiveData([markerData]);
@@ -56,7 +55,7 @@ const mockData = {
   return (
     <div className="App-marker" key={place_id}>
       <Marker
-        position={{lat: lat!,lng: lng!}}
+        position={{ lat: lat!, lng: lng! }}
         clusterer={clusterer}
         icon={image}
         onMouseOver={handleMouseOverMarker}

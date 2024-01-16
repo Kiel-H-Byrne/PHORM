@@ -135,7 +135,7 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
             // ) ? (
 
             <MyMarker
-              key={`${markerData.lat}${markerData.lng}`}
+              key={`${markerData.lat}, ${markerData.lng}`}
               //what data can i set on marker?
               markerData={markerData}
               // label={}

@@ -1,7 +1,6 @@
-
 <!--- These are examples. See https://shields.io for others or to customize this set of shields. You might want to include dependencies, project status and license info here --->
-![Vercel Deploy](https://img.shields.io/github/deployments/kiel-h-byrne/phorm/production?logo=vercel&logoColor=white&label=vercel
-)
+
+![Vercel Deploy](https://img.shields.io/github/deployments/kiel-h-byrne/phorm/production?logo=vercel&logoColor=white&label=vercel)
 
 ![Node Version](https://img.shields.io/node/v/canary)
 
@@ -12,6 +11,7 @@
 ![GitHub Issues](https://img.shields.io/github/issues-raw/kiel-h-byrne/PHORM)
 ![GitHub contributors](https://img.shields.io/github/contributors/kiel-h-byrne/PHORM)
 ![Github Last Commit](https://img.shields.io/github/last-commit/kiel-h-byrne/PHORM)
+
 <!--
 ![Vercel Deploy](https://vercelbadge.vercel.app/api/kielbyrne/phorm)
 ![Github Commit Activity](https://img.shields.io/github/commit-activity/m/kiel-h-byrne/PHORM)
@@ -20,9 +20,10 @@
 ![Github Manifest Version](https://img.shields.io/github/manifest-json/v/kiel-h-byrne/PHORM)
 
 -->
+
 # PHORM: Prince Hall's Online Registry of Merchants
-Discover and Support Local Businesses Owned by PHAmily Members
----
+
+## Discover and Support Local Businesses Owned by PHAmily Members
 
 <img width="80%" src="https://github.com/Kiel-H-Byrne/PHORM/assets/955269/15413aec-606d-4b9d-bc9b-c7f1d72b8b25" />
 
