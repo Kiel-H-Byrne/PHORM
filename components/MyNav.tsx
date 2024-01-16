@@ -6,6 +6,7 @@ import {
   HStack,
   Heading,
   IconButton,
+  Image,
   Link,
   Menu,
   Stack,
@@ -40,7 +41,8 @@ const NavLink = ({ path, label }: { path: string; label: string }) => (
 const AvatarDropdown = () => (
   <Box pb={4} display={{ md: "none" }}>
     <Stack as={"nav"} spacing={4}>
-      <Heading color={"royalblue"}>P.H.O.R.M</Heading>
+      <Heading color={"royalblue"} justifyContent={"center"} display={"inline-block"}>
+        P.H.O.R.M</Heading>
       {NAV_LINKS.map(({ path, label }) => (
         <NavLink key={label} path={path} label={label} />
       ))}
@@ -71,19 +73,20 @@ const MyNav = () => {
       >
         <Flex h={16} alignItems={"center"} justifyContent={"space-between"}>
           <IconButton
-            size={"md"}
+            size={"lg"}
             icon={dropdownIsOpen ? <CloseIcon /> : <HamburgerIcon />}
             aria-label={"Open Menu"}
             display={{ md: "none" }}
             onClick={dropdownIsOpen ? onDropdownClose : onDropdownOpen}
           />
           <HStack spacing={8} alignItems={"center"}>
+          <Image height={"14"} width={"14"} src="/img/Logo1.png"  alt="logo"/>
             <HStack
               as={"nav"}
               spacing={4}
               display={{ base: "none", md: "flex" }}
             >
-              <Heading color={"royalblue"}>P.H.O.R.M</Heading>
+              {/* <Heading color={"royalblue"}>P.H.O.R.M</Heading> */}
               {NAV_LINKS.map(({ path, label }) => (
                 <NavLink key={label} path={path} label={label} />
               ))}
