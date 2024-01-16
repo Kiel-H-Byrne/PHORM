@@ -3,8 +3,7 @@ import { GoogleMapProps } from "@react-google-maps/api";
 import { z } from "zod";
 import { ClaimSchema, ListingsSchema, UserSchema } from "../db/schemas";
 
-export type IClaims = z.infer<typeof ClaimSchema>[]
-
+export type IClaim = z.infer<typeof ClaimSchema>[]
 export type IListing = z.infer<typeof ListingsSchema>
 export type IUser = z.infer<typeof UserSchema>
 

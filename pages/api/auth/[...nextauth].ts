@@ -4,6 +4,7 @@ import { cert } from 'firebase-admin/app';
 import NextAuth from 'next-auth';
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from 'next-auth/providers/google';
+import LinkedInProvider from 'next-auth/providers/linkedin';
 import process from "process";
 export default NextAuth({
   providers: [
@@ -17,11 +18,18 @@ export default NextAuth({
           access_type: "offline",
           response_type: "code",
           prompt: "consent"
+        }
+      },
+      // scope:
+      //   "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile",
+    }),
+    LinkedInProvider({
+      clientId: process.env.NEXT_PUBLIC_LINKEDIN_CLIENT_ID!,
+      clientSecret: process.env.NEXT_PUBLIC_LINKEDIN_SECRET!,
+      authorization: {
+        url: process.env.NEXT_PUBLIC_LINKEDIN_AUTH_URI
       }
-    },
-    // scope:
-    //   "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile",
-  }),
+    }),
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
@@ -41,7 +49,7 @@ export default NextAuth({
         //   headers: { "Content-Type": "application/json" }
         // })
         // const user = await res.json()
-  
+
         // // If no error and we have user data, return it
         // if (res.ok && user) {
         //   return user
@@ -66,7 +74,7 @@ export default NextAuth({
     credential: cert({
       projectId: process.env.NEXT_PUBLIC_FSDB_PROJECT_ID!,
       clientEmail: process.env.NEXT_PUBLIC_FIREBASE_CLIENT_EMAIL!,
-      privateKey:  process.env.NEXT_PUBLIC_FSDB_PRIVATE_KEY!,
+      privateKey: process.env.NEXT_PUBLIC_FSDB_PRIVATE_KEY!,
     }),
   }),
   debug: true,
