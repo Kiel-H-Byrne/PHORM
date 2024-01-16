@@ -24,10 +24,19 @@ const firebaseConfig = {
 //   clientX509CertUrl: process.env.NEXT_PUBLIC_TEST_client_x509_cert_url,
 //   universeDomain: process.env.NEXT_PUBLIC_TEST_universe_domain,
 // }
-const phormApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
-// const appFsdb = getApps().length === 0 ? admin.initializeApp({credential: admin.credential.cert(firebaseCredentials)}) : getApps()[0]
-// const appAnalytics = getAnalytics(phormApp); //need 'window'
-const appAuth = getAuth(phormApp);
-const appFsdb = initializeFirestore(phormApp, {})
+let appAuth, appFsdb, phormApp
+if (!firebaseConfig.apiKey) {
+  console.warn("NO FIREBASE API KEYS")
+  phormApp = null
+  appAuth = null
+  appFsdb = null
+} else {
+
+  phormApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
+  // const appFsdb = getApps().length === 0 ? admin.initializeApp({credential: admin.credential.cert(firebaseCredentials)}) : getApps()[0]
+  // const appAnalytics = getAnalytics(phormApp); //need 'window'
+  appAuth = getAuth(phormApp);
+  appFsdb = initializeFirestore(phormApp, {})
+}
 export { appAuth, appFsdb, phormApp };
 
