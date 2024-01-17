@@ -7,10 +7,10 @@ import { useState } from "react";
 import useSWR, { mutate } from "swr";
 
 export default function MemberDirectory() {
-  const [searchParams, setSearchParams] = useState({}as MemberQuery);
+  const [searchParams, setSearchParams] = useState({} as MemberQuery);
 
   const { data, isLoading, error } = useSWR(() => {
-    const params = new URLSearchParams(searchParams as Record<string, string> );
+    const params = new URLSearchParams(searchParams as Record<string, string>);
     console.log(`${params}`);
     return `/api/users?${params}`;
   }, fetcher);

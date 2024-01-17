@@ -119,10 +119,7 @@ function AboutModal() {
               </Text>
             </Stack>
           </VStack>
-          <Stack
-            direction={{ base: "column", md: "row" }}
-            spacing={4}
-          >
+          <Stack direction={{ base: "column", md: "row" }} spacing={4}>
             {feats.map((feature, i) => {
               return <FeatureCard key={i} feature={feature} />;
             })}

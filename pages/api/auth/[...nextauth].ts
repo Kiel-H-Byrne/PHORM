@@ -8,19 +8,19 @@ import LinkedInProvider from "next-auth/providers/linkedin";
 import process from "process";
 
 export type ILinkedInProfile = {
-  iss: string,
-  aud: string,
-  iat: number,
-  exp: number,
-  sub: string,
-  name: string,
-  given_name: string,
-  family_name: string,
-  picture: string,
-  email: string,
-  email_verified: string,
-  locale: string,
-}
+  iss: string;
+  aud: string;
+  iat: number;
+  exp: number;
+  sub: string;
+  name: string;
+  given_name: string;
+  family_name: string;
+  picture: string;
+  email: string;
+  email_verified: string;
+  locale: string;
+};
 
 export default NextAuth({
   providers: [
@@ -69,12 +69,12 @@ export default NextAuth({
           email: profile.email,
           image: profile.picture,
           emailVerified: profile.email_verified,
-          profile: ({
+          profile: {
             firstName: profile.given_name,
             lastName: profile.family_name,
-          }) as Partial<IUser['profile']>
-        }
-      }) as any
+          } as Partial<IUser["profile"]>,
+        };
+      }) as any,
     }),
     CredentialsProvider({
       name: "Credentials",
@@ -122,7 +122,7 @@ export default NextAuth({
     }),
   }),
   debug: true,
-  // don't see this fring 
+  // don't see this fring
   // callbacks: {
   //   jwt: ({ trigger, user, token, session }) => {
   //     console.log(trigger)

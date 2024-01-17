@@ -31,8 +31,7 @@ function MemberCard({ user }: { user: IUser }) {
           </Heading>
           {lodgeNumber && (
             <Text>
-              {PHA_LODGES["DC"][lodgeNumber]}{" "}
-              Lodge #{`${lodgeNumber}`}
+              {PHA_LODGES["DC"][lodgeNumber]} Lodge #{`${lodgeNumber}`}
             </Text>
           )}
         </Box>
