@@ -9,11 +9,11 @@ import {
   query,
   where,
 } from "firebase/firestore";
-import { NextRequest, NextResponse } from "next/server";
+import { NextApiRequest, NextApiResponse } from "next";
 
 const maxAge = 1 * 24 * 60 * 60;
 
-const userHandler = async (req: NextRequest, res: NextResponse) => {
+const userHandler = async (req: NextApiRequest, res: NextApiResponse) => {
   const {
     //@ts-ignore
     //can send query params to sort & limit results
@@ -24,7 +24,6 @@ const userHandler = async (req: NextRequest, res: NextResponse) => {
     case "GET":
       if (appFsdb) {
         let membersRef = collection(appFsdb, "users");
-
         const queries: QueryConstraint[] = [];
 
         if (id) {
@@ -55,41 +54,23 @@ const userHandler = async (req: NextRequest, res: NextResponse) => {
         }
 
         const membersSnapshot = await getDocs(membersRef);
-
         const members: IUser[] = [];
 
         membersSnapshot.forEach((doc) => {
-          console.log(doc.data());
-          const newProfile = {};
-          // members.push({
-          //   profile: {...doc.profile, ...doc.data() } as any
-          // })
+          console.log(doc.data())
+          members.push(doc.data());
+          
         });
-        console.log(res);
+        // console.log(res);
         if (from && members.length > 0) {
           // This is safe to cache because from defines
           //  a concrete range of orders
           res.setHeader("cache-control", `public, max-age=${maxAge}`);
         }
-        res.status == 200;
-        res.json(members);
+        res.status(200).json(members);
       } else {
         res.status(200).json("NO DB LOADED");
       }
-
-      // const orders = await getUsers(
-      //   db,
-      //   // req.query.from ? req.query.from : undefined,
-      //   // req.query.by,
-      //   // req.query.limit ? parseInt(req.query.limit, 10) : 100
-      // );
-
-      // if (req.query.from && orders.length > 0) {
-      //   // This is safe to cache because from defines
-      //   //  a concrete range of orders
-      //   res.setHeader("cache-control", `public, max-age=${maxAge}`);
-      // }
-      // res.send({ orders });
       break;
     case "POST":
       // if (!req.user) {

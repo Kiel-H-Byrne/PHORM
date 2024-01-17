@@ -12,9 +12,9 @@ const handler = async (req: any, res: any) => {
   switch (method) {
     case "GET":
       const listings = await listingsFetch("0");
-      console.log("fetching...");
+      console.log("await fetching...");
       console.log(listings);
-      if (req.query.from && listings.length > 0) {
+      if (req.query.from && listings?.length > 0) {
         // This is safe to cache because from defines
         //  a finite range of listings
         res.setHeader("cache-control", `public, max-age=${MAX_AGE}`);

@@ -7,6 +7,7 @@ const MyFooter = (props: Props) => {
   return (
     <Flex
       as="footer"
+      position="sticky"
       bottom={0}
       left={0}
       zIndex={1}

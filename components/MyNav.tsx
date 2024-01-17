@@ -22,6 +22,7 @@ const NAV_LINKS = [
   { path: "/about", label: "About" },
   // { path: "/owners", label: "Owners" },
   { path: "/?viewType=list", label: "List View" },
+  { path: "/member-directory", label: "Member Directory" },
 ];
 const NavLink = ({ path, label }: { path: string; label: string }) => (
   <Link
@@ -85,7 +86,7 @@ const MyNav = () => {
             onClick={dropdownIsOpen ? onDropdownClose : onDropdownOpen}
           />
           <HStack spacing={8} alignItems={"center"}>
-            <Image height={"14"} width={"14"} src="/img/Logo1.png" alt="logo" />
+            <Image height={14} aspectRatio={.787} src="/img/Logo1.png" alt="logo" />
             <HStack
               as={"nav"}
               spacing={4}

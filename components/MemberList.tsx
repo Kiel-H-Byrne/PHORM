@@ -1,14 +1,16 @@
 import { IUser } from "@/types";
-import { Box, Grid, Text } from "@chakra-ui/react";
+import { Grid, Icon, Text, VStack } from "@chakra-ui/react";
 import { BsCollection } from "react-icons/bs";
 import MemberCard from "./MemberCard";
 
-export default function MemberList() {
-  const members: IUser[] = [];
+export default function MemberList({members, isLoading}:{members: IUser[], isLoading: Boolean} ) {
+  console.table( members)
   return (
-    <Box>
-      <Text fontSize="2xl" mb={4}>
-        <BsCollection /> Member Directory
+    (!members) ? <>No Members</> :
+    (isLoading) ? <>Loading...</> :
+    <VStack spacing={3} marginBlock={3}>
+      <Text fontSize="2xl" mb={4} as={"h2"}>
+        <Icon as={BsCollection} /> Member Directory
       </Text>
 
       <Grid templateColumns="repeat(3, 1fr)" gap={4}>
@@ -16,6 +18,6 @@ export default function MemberList() {
           <MemberCard user={member} key={member.profile.id} />
         ))}
       </Grid>
-    </Box>
+    </VStack>
   );
 }

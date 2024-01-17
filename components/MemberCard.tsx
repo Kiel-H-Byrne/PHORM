@@ -1,36 +1,37 @@
-import { IUser } from "@/types";
-import { Avatar, Box, Button, Flex, Heading, Text } from "@chakra-ui/react";
+import { IUser, PHA_LODGES } from "@/types";
+import { Avatar, Box, Button, HStack, Heading, Link, Text, VStack } from "@chakra-ui/react";
 
 function MemberCard({ user }: { user: IUser }) {
   const {
     firstName,
     lastName,
     profilePhoto,
-    lodge,
+    lodgeNumber = 10,
     occupation,
     location,
     bio,
   } = user.profile;
 
   return (
-    <Box borderWidth="1px" p={4} rounded="md">
-      <Flex align="center">
+    <VStack borderWidth="1px" p={4} rounded="md" spacing={3}>
+      <HStack align="center">
         <Avatar src={profilePhoto} />
         <Box ml={3}>
           <Heading size="md">
-            {firstName} {lastName}
+            {firstName|| "Jimothy"} {lastName|| "LaCraQuis"}
           </Heading>
-          <Text>{lodge}</Text>
+          {lodgeNumber && <Text>{PHA_LODGES['DC'][lodgeNumber]} Lodge #{`${lodgeNumber}`}</Text>}
         </Box>
-      </Flex>
+      </HStack>
+      <Text fontSize={12} color="royalblue">{occupation || "Random Occupation"}</Text>
+      <Text fontSize={12} color="grey">{location || "Washington, DC"}</Text>
 
-      <Text>{occupation}</Text>
-      <Text>{location}</Text>
-
-      <Text>{bio.substring(0, 100)}...</Text>
-
-      <Button mt={3}>View Profile</Button>
-    </Box>
+      {bio && <Text>{bio.substring(0, 100)}...</Text>}
+      <Text>{"sample bio for the beginning which could seem long in order to get cropped by the substring, then we can really see the potential of the function and the memberCard".substring(0, 100)}...</Text>
+      <Link href={`/member/${user.profile.id}`}>
+      <Button size={"sm"}  >View Profile</Button>
+      </Link>
+    </VStack>
   );
 }
 export default MemberCard;
