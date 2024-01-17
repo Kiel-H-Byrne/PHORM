@@ -71,5 +71,8 @@ export const PHA_LODGES = {
 //   occupation: string;
 //   location: string;
 // };
-export type IMemberQuery = Partial<IUser['profile']>
-export type MemberQuery = Partial<Pick<IUser['profile'], "id" | "occupation" | "location" | "lodgeNumber"> & Pick<IUser, "name" | "email">>
+export type IMemberQuery = Partial<IUser["profile"]>;
+export type MemberQuery = Partial<
+  Pick<IUser["profile"], "id" | "occupation" | "location" | "lodgeNumber"> &
+    Pick<IUser, "name" | "email">
+>;

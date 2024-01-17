@@ -1,11 +1,9 @@
-import { useRouter } from 'next/router';
+import { useRouter } from "next/router";
 
 const MemberPage = () => {
-    const router = useRouter()
-const uid = router.query.uid;
-  return (
-    <div>User ID: {uid}</div>
-  )
-}
+  const router = useRouter();
+  const uid = router.query.uid;
+  return <div>User ID: {uid}</div>;
+};
 
-export default MemberPage
+export default MemberPage;

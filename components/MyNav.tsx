@@ -86,7 +86,12 @@ const MyNav = () => {
             onClick={dropdownIsOpen ? onDropdownClose : onDropdownOpen}
           />
           <HStack spacing={8} alignItems={"center"}>
-            <Image height={14} aspectRatio={.787} src="/img/Logo1.png" alt="logo" />
+            <Image
+              height={14}
+              aspectRatio={0.787}
+              src="/img/Logo1.png"
+              alt="logo"
+            />
             <HStack
               as={"nav"}
               spacing={4}

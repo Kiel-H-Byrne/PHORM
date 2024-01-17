@@ -3,11 +3,19 @@ import { Grid, Icon, Text, VStack } from "@chakra-ui/react";
 import { BsCollection } from "react-icons/bs";
 import MemberCard from "./MemberCard";
 
-export default function MemberList({members, isLoading}:{members: IUser[], isLoading: Boolean} ) {
-  console.table( members)
-  return (
-    (!members) ? <>No Members</> :
-    (isLoading) ? <>Loading...</> :
+export default function MemberList({
+  members,
+  isLoading,
+}: {
+  members: IUser[];
+  isLoading: Boolean;
+}) {
+  console.table(members);
+  return !members ? (
+    <>No Members</>
+  ) : isLoading ? (
+    <>Loading...</>
+  ) : (
     <VStack spacing={3} marginBlock={3}>
       <Text fontSize="2xl" mb={4} as={"h2"}>
         <Icon as={BsCollection} /> Member Directory

@@ -6,7 +6,7 @@ import {
   collection,
   getDocs,
   query,
-  where
+  where,
 } from "firebase/firestore";
 import { NextApiRequest, NextApiResponse } from "next";
 
@@ -45,10 +45,7 @@ const userHandler = async (req: NextApiRequest, res: NextApiResponse) => {
         }
 
         if (queries.length > 0) {
-          const q = query(
-            membersRef,
-            ...queries
-          ) as CollectionReference<IUser>;
+          const q = query(membersRef, ...queries) as CollectionReference<IUser>;
           membersRef = q;
         }
 
@@ -56,7 +53,7 @@ const userHandler = async (req: NextApiRequest, res: NextApiResponse) => {
         const members: IUser[] = [];
 
         membersSnapshot.forEach((doc) => {
-          console.log(doc.data())
+          console.log(doc.data());
           members.push(doc.data() as any);
         });
         // console.log(res);

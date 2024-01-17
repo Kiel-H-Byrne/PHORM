@@ -10,8 +10,8 @@ export default function MemberDirectory() {
   const [searchParams, setSearchParams] = useState({} as MemberQuery);
 
   const { data, isLoading, error } = useSWR(() => {
-    const params = new URLSearchParams(searchParams as Record<string,string>);
-    console.log(`${params}`)
+    const params = new URLSearchParams(searchParams as Record<string, string>);
+    console.log(`${params}`);
     return `/api/users?${params}`;
   }, fetcher);
   if (error) {
@@ -28,7 +28,7 @@ export default function MemberDirectory() {
     mutate("/api/users");
   }
   return (
-    <Container >
+    <Container>
       <MemberFilter
         searchParams={searchParams}
         setSearchParams={setSearchParams}
