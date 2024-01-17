@@ -317,7 +317,7 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
         {/* <HeatmapLayer map={this.state.map && this.state.map} data={data.map(x => {x.location})} /> */}
       </GoogleMap>
       {/* 100% - header hight + footer height */}
-      <Flex style={{ height: "calc(100% - 106px)" }} />
+      {/* <Flex style={{ height: "calc(100% - 106px)" }} /> */}
     </>
   ) : (
     <Progress />

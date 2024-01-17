@@ -1,3 +1,4 @@
+import { IUser } from "@/types";
 import { FirestoreAdapter } from "@auth/firebase-adapter";
 import { cert } from "firebase-admin/app";
 import NextAuth from "next-auth";
@@ -5,12 +6,29 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import LinkedInProvider from "next-auth/providers/linkedin";
 import process from "process";
+
+export type ILinkedInProfile = {
+  iss: string,
+  aud: string,
+  iat: number,
+  exp: number,
+  sub: string,
+  name: string,
+  given_name: string,
+  family_name: string,
+  picture: string,
+  email: string,
+  email_verified: string,
+  locale: string,
+}
+
 export default NextAuth({
   providers: [
     // OAuth authentication providers
     GoogleProvider({
       clientId: process.env.NEXT_PUBLIC_GOOGLE_ID!,
       clientSecret: process.env.NEXT_PUBLIC_GOOGLE_SECRET!,
+      allowDangerousEmailAccountLinking: true,
       authorization: {
         url: process.env.NEXT_PUBLIC_TEST_auth_uri,
         params: {
@@ -19,6 +37,19 @@ export default NextAuth({
           prompt: "consent",
         },
       },
+      // not seeing id or emailVerified being set
+      // profile: (profile) => ({
+      //   id: profile.sub,
+      //   name: profile.name,
+      //   email: profile.email,
+      //   image: profile.picture,
+      //   emailVerified: profile.email_verified,
+      //   profile: ({
+      //     firstName: profile.given_name,
+      //     lastName: profile.family_name,
+      //   })
+      // }) as any
+
       // scope:
       //   "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile",
     }),
@@ -26,8 +57,24 @@ export default NextAuth({
       clientId: process.env.NEXT_PUBLIC_LINKEDIN_CLIENT_ID!,
       clientSecret: process.env.NEXT_PUBLIC_LINKEDIN_SECRET!,
       authorization: {
-        url: process.env.NEXT_PUBLIC_LINKEDIN_AUTH_URI,
+        params: { scope: "openid profile email" },
       },
+      issuer: "https://www.linkedin.com",
+      jwks_endpoint: "https://www.linkedin.com/oauth/openid/jwks",
+      allowDangerousEmailAccountLinking: true,
+      profile: ((profile: ILinkedInProfile) => {
+        return {
+          id: profile.sub,
+          name: profile.name,
+          email: profile.email,
+          image: profile.picture,
+          emailVerified: profile.email_verified,
+          profile: ({
+            firstName: profile.given_name,
+            lastName: profile.family_name,
+          }) as Partial<IUser['profile']>
+        }
+      }) as any
     }),
     CredentialsProvider({
       name: "Credentials",
@@ -75,11 +122,17 @@ export default NextAuth({
     }),
   }),
   debug: true,
+  // don't see this fring 
   // callbacks: {
-  //   session: async (session: Session, user: Profile) => {
-  //     // console.log(session.id, user.id)
-  //     session.id = user.id
-  //     return Promise.resolve(session)
+  //   jwt: ({ trigger, user, token, session }) => {
+  //     console.log(trigger)
+  //     if (trigger === "signUp") {
+  //       //set user id to session.userId
+  //       console.log(user.id, session.userId)
+  //       user.id = session.userId
+  //     }
+  //     console.log(user.id, token)
+  //     return token
   //   }
   // }
 });

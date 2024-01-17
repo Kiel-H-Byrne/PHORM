@@ -1,4 +1,4 @@
-import { Flex, HStack, Link, Text } from "@chakra-ui/react";
+import { Container, Flex, Link, Text } from "@chakra-ui/react";
 import { memo } from "react";
 
 interface Props {}
@@ -7,15 +7,12 @@ const MyFooter = (props: Props) => {
   return (
     <Flex
       as="footer"
-      position="sticky"
-      bottom={0}
-      left={0}
-      zIndex={1}
+      marginTop="calc(100vh - 64px - 42px)"
       p={3}
       backgroundColor={"gray.200"}
       w="full"
     >
-      <HStack spacing={8} fontSize={"xs"} {...props}>
+      <Container maxW={"3xl"} fontSize={"xs"} {...props}>
         <Text as="span">
           © Copyright{" "}
           <Link isExternal href="https://tenksolutions.com">
@@ -23,7 +20,7 @@ const MyFooter = (props: Props) => {
           </Link>
           All Rights Reserved
         </Text>
-        <Text as={"span"} fontSize="xs">
+        <Text as={"span"} fontSize="xs" p={1}>
           |
         </Text>
         <Text as="span">
@@ -31,7 +28,7 @@ const MyFooter = (props: Props) => {
             How We Built This Site
           </Link>
         </Text>
-      </HStack>
+      </Container>
     </Flex>
   );
 };

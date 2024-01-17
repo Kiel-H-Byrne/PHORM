@@ -23,7 +23,7 @@ export default function MemberList({
 
       <Grid templateColumns="repeat(3, 1fr)" gap={4}>
         {members.map((member) => (
-          <MemberCard user={member} key={member.profile.id} />
+          <MemberCard user={member} key={member.id} />
         ))}
       </Grid>
     </VStack>

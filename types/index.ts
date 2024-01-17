@@ -31,8 +31,8 @@ export interface GLocation {
   lng: number;
 }
 export const StatesEnum = z.enum(STATE_ABBREVIATIONS);
-
-export const PHA_LODGES = {
+type GenericRecord = Record<string, Record<number, string>>;
+export const PHA_LODGES: GenericRecord = {
   [StatesEnum.enum.DC]: {
     1: "Social",
     3: "Felix",

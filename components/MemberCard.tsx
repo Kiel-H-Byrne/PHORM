@@ -31,7 +31,7 @@ function MemberCard({ user }: { user: IUser }) {
           </Heading>
           {lodgeNumber && (
             <Text>
-              {PHA_LODGES["DC"][lodgeNumber as keyof (typeof PHA_LODGES)["DC"]]}{" "}
+              {PHA_LODGES["DC"][lodgeNumber]}{" "}
               Lodge #{`${lodgeNumber}`}
             </Text>
           )}
@@ -52,7 +52,7 @@ function MemberCard({ user }: { user: IUser }) {
         )}
         ...
       </Text>
-      <Link href={`/member/${user.profile.id}`}>
+      <Link href={`/member/${user.id}`}>
         <Button size={"sm"}>View Profile</Button>
       </Link>
     </VStack>

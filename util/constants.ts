@@ -22,7 +22,7 @@ export const BRAND_THEME = {
         height: "100%",
       },
       "#__next": {
-        height: "100%",
+        // height: "100%",
       },
     },
   },

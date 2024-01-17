@@ -19,7 +19,7 @@ const getLodgeName = ({
   state: string | undefined;
   lodgeNo: number | undefined;
   //@ts-ignore
-}) => state && lodgeNo && (PHA_LODGES[state] as any[lodgeNo]);
+}) => state && lodgeNo && (PHA_LODGES[state][lodgeNo]);
 
 const BusinessCard = ({ activeListing }: { activeListing: IListing }) => {
   const [isOwnerInfoOpen, setIsOwnerInfoOpen] = useState(false);

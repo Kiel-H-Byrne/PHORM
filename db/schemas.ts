@@ -8,7 +8,6 @@ const SocialSchema = z.object({
 });
 
 const ProfileSchema = z.object({
-  id: z.string(),
   firstName: z.string(),
   lastName: z.string(),
   nickName: z.string(),
@@ -21,7 +20,6 @@ const ProfileSchema = z.object({
   bio: z.string(),
   skills: z.array(z.string()),
   email: z.string().email(),
-
   contact: z.object({
     email: z.string().email(),
     phone: z.string(),
@@ -35,10 +33,11 @@ const ProfileSchema = z.object({
 });
 
 export const UserSchema = z.object({
+  id: z.string(),
   name: z.string(),
   email: z.string().email(),
   image: z.string(),
-  emailVerified: z.boolean(),
+  emailVerified: z.string(),
   profile: ProfileSchema,
 });
 
