@@ -73,6 +73,6 @@ export const PHA_LODGES: GenericRecord = {
 // };
 export type IMemberQuery = Partial<IUser["profile"]>;
 export type MemberQuery = Partial<
-  Pick<IUser["profile"], "id" | "occupation" | "location" | "lodgeNumber"> &
+  Pick<IUser["profile"], "occupation" | "location" | "lodgeNumber"> &
     Pick<IUser, "name" | "email">
 >;
