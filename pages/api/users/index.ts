@@ -2,12 +2,11 @@ import { appFsdb } from "@/db/firebase";
 import { IUser } from "@/types";
 import {
   CollectionReference,
-  DocumentData,
   QueryConstraint,
   collection,
   getDocs,
   query,
-  where,
+  where
 } from "firebase/firestore";
 import { NextApiRequest, NextApiResponse } from "next";
 
@@ -49,7 +48,7 @@ const userHandler = async (req: NextApiRequest, res: NextApiResponse) => {
           const q = query(
             membersRef,
             ...queries
-          ) as CollectionReference<DocumentData>;
+          ) as CollectionReference<IUser>;
           membersRef = q;
         }
 
@@ -58,8 +57,7 @@ const userHandler = async (req: NextApiRequest, res: NextApiResponse) => {
 
         membersSnapshot.forEach((doc) => {
           console.log(doc.data())
-          members.push(doc.data());
-          
+          members.push(doc.data() as any);
         });
         // console.log(res);
         if (from && members.length > 0) {

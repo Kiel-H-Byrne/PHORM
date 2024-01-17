@@ -10,7 +10,7 @@ export default function MemberDirectory() {
   const [searchParams, setSearchParams] = useState({} as MemberQuery);
 
   const { data, isLoading, error } = useSWR(() => {
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams as Record<string,string>);
     console.log(`${params}`)
     return `/api/users?${params}`;
   }, fetcher);

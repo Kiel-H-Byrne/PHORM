@@ -15,7 +15,7 @@ const handler = async (req: any, res: any) => {
         //     15, [Number(lat),Number(lng)] ,
         //   ) :
         await listingsFetchAll();
-      if (listings.length == 0) {
+      if (listings?.length == 0) {
         console.log("NO LISTINGS");
       }
       res.setHeader(
