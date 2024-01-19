@@ -22,7 +22,7 @@ export const BRAND_THEME = {
         height: "100%",
       },
       "#__next": {
-        height: "100%",
+        // height: "100%",
       },
     },
   },
@@ -230,7 +230,7 @@ export const MAP_STYLES = {
       stylers: [{ color: "#ffffff" }],
     },
   ],
-  darkGray:[
+  darkGray: [
     {
       featureType: "administrative",
       elementType: "labels.text.fill",
@@ -522,9 +522,9 @@ export const MAP_STYLES = {
         },
       ],
     },
-  ]
+  ],
 };
-
+// 1000 U ST NW DC:  (38.91657, -77.02631)
 export const GEOCENTER = { lat: 38.91657, lng: -77.02631 };
 
 export const LIBRARIES: Libraries = [

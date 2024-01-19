@@ -1,3 +1,4 @@
+import { Container } from "@chakra-ui/react";
 import { SessionProvider } from "next-auth/react";
 import { ReactNode, memo } from "react";
 import { CustomHead, MyFooter, MyNav } from "./";
@@ -7,7 +8,6 @@ type Props = {
   title?: string;
 };
 
-
 const Layout = ({ children, title }: Props) => {
   // const [show, setShow] = useState(true);
 
@@ -15,12 +15,10 @@ const Layout = ({ children, title }: Props) => {
     <SessionProvider>
       <CustomHead title={title || "The P.H.O.R.M"} />
       <MyNav />
-      {/* <VStack spacing={4} p={8} > */}
-      {children}
-      {/* </VStack> */}
+      <Container maxW="3xl">{children}</Container>
       <MyFooter />
     </SessionProvider>
   );
 };
 
-export default memo(Layout)
+export default memo(Layout);

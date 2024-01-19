@@ -40,7 +40,8 @@ import ListingCard from "./ListingCard";
 
 export const default_props = {
   center: GEOCENTER,
-  zoom: 11, //vs 11
+  // 11 is metro area level
+  zoom: 11,
   options: {
     // mapTypeId:google.maps.MapTypeId.TERRAIN,
     backgroundColor: "#555",
@@ -67,9 +68,9 @@ export const default_props = {
     gestureHandling: "greedy",
     scrollwheel: true,
     maxZoom: 18,
-    minZoom: 4, //3 at mobbv0
+    minZoom: 4,
     // Map styles; snippets from 'Snazzy Maps'.
-    styles: MAP_STYLES.lightGray,
+    styles: MAP_STYLES.whiteMono,
   },
 };
 
@@ -110,46 +111,27 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
   const useRenderMarkers: (clusterer: Clusterer) => React.ReactElement =
     useCallback(
       (clusterer) => {
-        return fetchData.map((markerData: IListing) => {
-          //return marker if element categories array includes value from selected_categories\\
-          // if ( //if closeby
-          // pullup.categories &&
-          // pullup.categories.some((el) => selectedCategories.has(el))
-          // && mapInstance.containsLocation(fetchData.location)
-          // ) {yav
-          // if (pullup.location) {
-          //   const [lat, lng] = pullup.location.split(",");
-
-          //   let isInside = new window.google.maps.LatLngBounds().contains(
-          //     { lat: +lat, lng: +lng }
-          //   );
-          //   // console.log(isInside);
-          // }
-          return (
-            // return (
-            //   pullup.categories
-            //     ? pullup.categories.some((el) =>
-            //         selected_categories.includes(el)
-            //       )
-            //     : false
-            // ) ? (
-
-            <MyMarker
-              key={`${markerData.lat}${markerData.lng}`}
-              //what data can i set on marker?
-              markerData={markerData}
-              // label={}
-              // title={}
-              clusterer={clusterer}
-              activeData={activeData}
-              setActiveData={setActiveData}
-              setWindowClosed={setWindowClosed}
-              setWindowOpen={setWindowOpen}
-              toggleDrawer={toggleDrawer}
-            />
-          );
-          // }
-        });
+        return (
+          fetchData &&
+          fetchData.map((markerData: IListing) => {
+            return (
+              <MyMarker
+                key={`${markerData.lat}, ${markerData.lng}-${markerData.name}`}
+                //what data can i set on marker?
+                markerData={markerData}
+                // label={}
+                // title={}
+                clusterer={clusterer}
+                activeData={activeData}
+                setActiveData={setActiveData}
+                setWindowClosed={setWindowClosed}
+                setWindowOpen={setWindowOpen}
+                toggleDrawer={toggleDrawer}
+              />
+            );
+            // }
+          })
+        );
       },
       [fetchData, activeData, setWindowClosed, toggleDrawer, setWindowOpen]
     );
@@ -317,7 +299,7 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
         {/* <HeatmapLayer map={this.state.map && this.state.map} data={data.map(x => {x.location})} /> */}
       </GoogleMap>
       {/* 100% - header hight + footer height */}
-      <Flex style={{ height: "calc(100% - 106px)" }} />
+      {/* <Flex style={{ height: "calc(100% - 106px)" }} /> */}
     </>
   ) : (
     <Progress />

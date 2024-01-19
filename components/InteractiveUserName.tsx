@@ -23,15 +23,14 @@ import { useFetchUser } from "../util/userHooks";
 export const InteractiveUserName = ({
   userName,
   uid,
-  showAvatar
+  showAvatar,
 }: {
   userName: string;
   uid: string;
   showAvatar?: boolean;
 }) => {
-
   const user = useFetchUser(uid) || null;
-  
+
   return (
     <Box>
       <Popover placement="auto-end" trigger="hover">

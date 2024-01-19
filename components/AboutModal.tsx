@@ -9,7 +9,7 @@ import {
   Stack,
   Text,
   VStack,
-  useDisclosure
+  useDisclosure,
 } from "@chakra-ui/react";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
@@ -44,6 +44,7 @@ function AboutModal() {
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { status } = useSession();
+  const isLoggedIn = status === "authenticated";
   const currentPath = usePathname();
   const isMainPage = currentPath === "/";
   useEffect(() => {
@@ -54,7 +55,7 @@ function AboutModal() {
   return (
     <Modal
       isCentered
-      isOpen={isOpen && status === "unauthenticated"}
+      isOpen={isOpen}
       onClose={onClose}
       size={{ base: "xs", md: "3xl" }}
     >
@@ -62,36 +63,50 @@ function AboutModal() {
       <ModalContent>
         <ModalCloseButton />
         <ModalBody>
-          <Stack direction={{base: "column", md: "row"}} spacing={5} alignItems={"center"}>
-            <Image src={"/img/Logo1.png"} height={{base: 24, lg: 172}} width={{base: 24, lg: 172}} alt="logo" />
-            <VStack spacing={7}>
-              <Text fontSize={"xl"}>
-                Welcome to The{" "}
-                <Text as="span" color="royalblue">
-                  P
-                </Text>
-                rince{" "}
-                <Text as="span" color="royalblue">
-                  H
-                </Text>
-                all{" "}
-                <Text as="span" color="royalblue">
-                  O
-                </Text>
-                nline{" "}
-                <Text as="span" color="royalblue">
-                  R
-                </Text>
-                egistry of{" "}
-                <Text as="span" color="royalblue">
-                  M
-                </Text>
-                erchants
-                <Heading size="sm" color="gray.500" fontStyle={"oblique"}>
-                  Connecting Communities, Empowering Entrepreneurs,
-                  Strengthening our Brotherhood
-                </Heading>
+          <VStack spacing={3}>
+            <Heading
+              as={"h1"}
+              fontSize={{ base: "xl", md: "2xl" }}
+              width="full"
+            >
+              Welcome to The{" "}
+              <Text as="span" color="royalblue">
+                P
               </Text>
+              rince{" "}
+              <Text as="span" color="royalblue">
+                H
+              </Text>
+              all{" "}
+              <Text as="span" color="royalblue">
+                O
+              </Text>
+              nline{" "}
+              <Text as="span" color="royalblue">
+                R
+              </Text>
+              egistry of{" "}
+              <Text as="span" color="royalblue">
+                M
+              </Text>
+              erchants
+            </Heading>
+            <Heading size="sm" color="gray.500" fontStyle={"oblique"} mb={2}>
+              Connecting Communities, Empowering Entrepreneurs, Strengthening
+              our Brotherhood
+            </Heading>
+            <Stack
+              direction={{ base: "column", md: "row" }}
+              spacing={5}
+              p={3}
+              alignItems={"center"}
+            >
+              <Image
+                src={"/img/Logo1.png"}
+                aspectRatio={0.787}
+                height={{ base: 24, md: 172 }}
+                alt="logo"
+              />
               <Text fontSize="md" mb={7} fontFamily={"body"} px={3}>
                 Welcome to{" "}
                 <Text as="span" fontWeight="bold" color="blue.600">
@@ -101,15 +116,11 @@ function AboutModal() {
                 supporting businesses owned by individuals affiliated with
                 Prince Hall Freemasonry. Immerse yourself in a platform that
                 celebrates our shared bond while showcasing the talents and
-                offerings of our esteemed Brethren and Sistren.
+                offerings of our esteemed PHAmily.
               </Text>
-            </VStack>
-          </Stack>
-          <Stack
-            direction={{ base: "column", md: "row" }}
-            spacing={4}
-            align={"center"}
-          >
+            </Stack>
+          </VStack>
+          <Stack direction={{ base: "column", md: "row" }} spacing={4}>
             {feats.map((feature, i) => {
               return <FeatureCard key={i} feature={feature} />;
             })}

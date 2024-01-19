@@ -10,7 +10,7 @@ const MyInfoWindow = ({
   position: GLocation;
 }) => {
   // const hasNoData = !activeData || activeData.length == 0
-  const hasOneItem = (activeData?.length == 1);
+  const hasOneItem = activeData?.length == 1;
   const options = {
     pixelOffset: { height: -40, width: 0, equals: undefined },
     disableAutoPan: true,
@@ -19,7 +19,7 @@ const MyInfoWindow = ({
       : clusterCenter,
   };
   // console.log(activeData, hasOneItem)
-// if (!position.lat) return
+  // if (!position.lat) return
   return hasOneItem ? (
     <SingleInfoContent data={activeData} options={options} />
   ) : (

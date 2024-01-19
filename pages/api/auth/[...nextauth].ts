@@ -1,32 +1,86 @@
-
-import { FirestoreAdapter } from '@auth/firebase-adapter';
-import { cert } from 'firebase-admin/app';
-import NextAuth from 'next-auth';
+import { IUser } from "@/types";
+import { FirestoreAdapter } from "@auth/firebase-adapter";
+import { cert } from "firebase-admin/app";
+import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import GoogleProvider from 'next-auth/providers/google';
+import GoogleProvider from "next-auth/providers/google";
+import LinkedInProvider from "next-auth/providers/linkedin";
 import process from "process";
+
+export type ILinkedInProfile = {
+  iss: string;
+  aud: string;
+  iat: number;
+  exp: number;
+  sub: string;
+  name: string;
+  given_name: string;
+  family_name: string;
+  picture: string;
+  email: string;
+  email_verified: string;
+  locale: string;
+};
+
 export default NextAuth({
   providers: [
     // OAuth authentication providers
     GoogleProvider({
       clientId: process.env.NEXT_PUBLIC_GOOGLE_ID!,
       clientSecret: process.env.NEXT_PUBLIC_GOOGLE_SECRET!,
+      allowDangerousEmailAccountLinking: true,
       authorization: {
         url: process.env.NEXT_PUBLIC_TEST_auth_uri,
         params: {
           access_type: "offline",
           response_type: "code",
-          prompt: "consent"
-      }
-    },
-    // scope:
-    //   "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile",
-  }),
+          prompt: "consent",
+        },
+      },
+      // not seeing id or emailVerified being set
+      // profile: (profile) => ({
+      //   id: profile.sub,
+      //   name: profile.name,
+      //   email: profile.email,
+      //   image: profile.picture,
+      //   emailVerified: profile.email_verified,
+      //   profile: ({
+      //     firstName: profile.given_name,
+      //     lastName: profile.family_name,
+      //   })
+      // }) as any
+
+      // scope:
+      //   "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile",
+    }),
+    LinkedInProvider({
+      clientId: process.env.NEXT_PUBLIC_LINKEDIN_CLIENT_ID!,
+      clientSecret: process.env.NEXT_PUBLIC_LINKEDIN_SECRET!,
+      authorization: {
+        params: { scope: "openid profile email" },
+      },
+      issuer: "https://www.linkedin.com",
+      jwks_endpoint: "https://www.linkedin.com/oauth/openid/jwks",
+      allowDangerousEmailAccountLinking: true,
+      profile: ((profile: ILinkedInProfile) => {
+        return {
+          id: profile.sub,
+          name: profile.name,
+          email: profile.email,
+          image: profile.picture,
+          emailVerified: profile.email_verified,
+          profile: {
+            firstName: profile.given_name,
+            lastName: profile.family_name,
+          } as Partial<IUser["profile"]>,
+        };
+      }) as any,
+    }),
     CredentialsProvider({
-      name: 'Credentials',
+      name: "Credentials",
       credentials: {
         username: { label: "Username", type: "text", placeholder: "jsmith" },
-        password: { label: "Password", type: "password" }
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials, req) {
         // You need to provide your own logic here that takes the credentials
@@ -41,17 +95,15 @@ export default NextAuth({
         //   headers: { "Content-Type": "application/json" }
         // })
         // const user = await res.json()
-  
+
         // // If no error and we have user data, return it
         // if (res.ok && user) {
         //   return user
         // }
         // Return null if user data could not be retrieved
-        return { id: '1', name: 'J Smith', email: 'jsmith@example.com' }
-
-        return null
-      }
-    })
+        return { id: "1", name: "J Smith", email: "jsmith@example.com" };
+      },
+    }),
     // Sign in with passwordless email link
     // EmailProvider({
     //   server: process.env.MAIL_SERVER,
@@ -59,22 +111,27 @@ export default NextAuth({
     // }),
   ],
   session: {
-    strategy: 'database',
+    strategy: "jwt",
   },
   //@ts-ignore
   adapter: FirestoreAdapter({
     credential: cert({
       projectId: process.env.NEXT_PUBLIC_FSDB_PROJECT_ID!,
       clientEmail: process.env.NEXT_PUBLIC_FIREBASE_CLIENT_EMAIL!,
-      privateKey:  process.env.NEXT_PUBLIC_FSDB_PRIVATE_KEY!,
+      privateKey: process.env.NEXT_PUBLIC_FSDB_PRIVATE_KEY!,
     }),
   }),
-  debug: true,
-  // callbacks: {
-  //   session: async (session: Session, user: Profile) => {
-  //     // console.log(session.id, user.id)
-  //     session.id = user.id
-  //     return Promise.resolve(session)
-  //   }
-  // }
+  debug: false,
+  // ensure user.id is always on object in client
+  callbacks: {
+    session: async ({ session, token }) => {
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: token.sub,
+        },
+      };
+    },
+  },
 });

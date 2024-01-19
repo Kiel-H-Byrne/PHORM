@@ -99,7 +99,7 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
   );
 
   useEffect(() => {
-    isSubmitting && Object.keys(errors).length !==0 && submitToast();
+    isSubmitting && Object.keys(errors).length !== 0 && submitToast();
     if (isSubmitSuccessful) {
       reset();
       onDrawerClose();
@@ -112,7 +112,7 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
     reset,
     onDrawerClose,
     successToast,
-    errors
+    errors,
   ]);
 
   return (
@@ -131,8 +131,6 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
         onError={() => alertToast()}
         control={control}
       >
-
-        
         <FormLabel htmlFor="name"> Name</FormLabel>
         {errors.name && <span>{errors.name.message as string as string}</span>}
         <Input
@@ -142,7 +140,6 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
           aria-invalid={errors.name ? "true" : "false"}
         />
 
-
         <FormLabel htmlFor="street"> Street</FormLabel>
         {errors.street && <span>{errors.street.message as string}</span>}
         <Input
@@ -151,8 +148,6 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
           aria-invalid={errors.street ? "true" : "false"}
         />
 
-
-
         <FormLabel htmlFor="city"> City</FormLabel>
         {errors.city && <span>{errors.city.message as string}</span>}
         <Input
@@ -160,7 +155,7 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
           {...register("city")}
           aria-invalid={errors.city ? "true" : "false"}
         />
-        
+
         <FormLabel htmlFor="state"> State</FormLabel>
         {errors.state && <span>{errors.state.message as string}</span>}
         <Select
@@ -177,7 +172,6 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
           ))}
         </Select>
 
-
         <FormLabel htmlFor="zip"> Zip</FormLabel>
         {errors.zip && <span>{errors.zip.message as string}</span>}
 
@@ -189,8 +183,6 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
           })}
           aria-invalid={errors.zip ? "true" : "false"}
         />
-        
-
 
         <Box justifyContent={"space-around"}>
           <Button type="reset" colorScheme="blue" variant={"outline"}>

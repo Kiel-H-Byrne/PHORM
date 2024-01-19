@@ -18,10 +18,7 @@ import { memo, useCallback, useEffect, useState } from "react";
 import { BiMessageAltAdd } from "react-icons/bi";
 import { MdMyLocation } from "react-icons/md";
 import { GLocation, ILocateMe } from "../types";
-import {
-  milesToMeters,
-  targetClient
-} from "../util/helpers";
+import { milesToMeters, targetClient } from "../util/helpers";
 import AddListingForm from "./AddListingForm";
 
 const LocateMeButton = (props: ILocateMe) => {
@@ -186,7 +183,7 @@ const LocateMeButton = (props: ILocateMe) => {
               </ModalHeader>
               <ModalCloseButton />
               <ModalBody>
-                <AddListingForm onDrawerClose={onClose}  />
+                <AddListingForm onDrawerClose={onClose} />
               </ModalBody>
             </>
           ) : (

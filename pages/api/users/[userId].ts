@@ -1,29 +1,29 @@
 // 608da9f19a70cb0805c59923
 
-import { NextApiRequest, NextApiResponse } from 'next';
+import { findUserById } from "@/db/users";
+import { NextApiRequest, NextApiResponse } from "next";
 
-export default async function userHandler(req: NextApiRequest, res: NextApiResponse) {
+export default async function userHandler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   const {
     query: { userId },
     method,
-  } = req
+  } = req;
   switch (method) {
-    case 'GET':
-      // Get data from your database
+    case "GET":
       try {
-        // const user = await findUserById(db, userId as string);
-        const user = {}
-        res.status(200).json(user)
+        if (typeof userId === "string") {
+          const user = await findUserById(userId);
+          res.status(200).json(user);
+        }
       } catch (error: any) {
-        res.status(404).send({"error": error.message})
+        res.status(404).send({ error: error.message });
       }
-      break
-    // case 'PUT':
-    //   // Update or create data in your database
-    //   res.status(200).json({ userId, name: name || `User ${userId}` })
-    //   break
+      break;
     default:
-      res.setHeader('Allow', ['GET', 'PUT'])
-      res.status(405).end(`Method ${method} Not Allowed`)
+      res.setHeader("Allow", ["GET"]);
+      res.status(405).end(`Method ${method} Not Allowed`);
   }
 }

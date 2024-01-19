@@ -1,13 +1,11 @@
 import { useState } from "react";
-import { IListing } from '../types';
-
-
+import { IListing } from "../types";
 
 const DEFAULT_IMAGE = "http://placeimg.com/89/50/arch";
 
-const ListingImage = ({ name, /*image,url*/ }: Partial<IListing & Element>) => {
+const ListingImage = ({ name /*image,url*/ }: Partial<IListing & Element>) => {
   const [ogImage, setogImage] = useState("");
-return null
+  return null;
   // const handleImageError = async (e: GlobalEventHandlers) => {
   //   // modify db to remove the image url for this listing _id
   //   //get opengraph image and save src instead

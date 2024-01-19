@@ -4,23 +4,23 @@ import {
   Divider,
   Drawer,
   Grid,
-  Text
+  Text,
 } from "@chakra-ui/react";
 import { MdDirections } from "react-icons/md";
-import { IListing } from '../types';
+import { IListing } from "../types";
 
 interface ISideDrawer {
   activeListing: IListing;
   isOpen: boolean;
   onClose: () => void;
   mapInstance: any;
-  onOpen: () => void
+  onOpen: () => void;
 }
 
-const SideGrid = ({activeListing}: { activeListing: IListing }) => {
-  const { name, /*url, image, description, phone, address*/ } = activeListing;
+const SideGrid = ({ activeListing }: { activeListing: IListing }) => {
+  const { name /*url, image, description, phone, address*/ } = activeListing;
   return (
-    <Container >
+    <Container>
       {/* <a
         href={url}
         title="Listing Image"
@@ -66,7 +66,6 @@ const SideDrawer = ({
   onClose,
   mapInstance,
 }: ISideDrawer) => {
-
   /*
 address: "2729 Piatt St, Wichita, KS 67219"
 categories: ["Health & Wellness"]

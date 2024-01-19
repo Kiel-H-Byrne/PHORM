@@ -1,4 +1,5 @@
 {
-    "typescript.tsdk": "node_modules/typescript/lib",
-    "cSpell.language": "en,en-US"
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "cSpell.language": "en,en-US",
+  "cSpell.ignoreWords": ["Fsdb"]
 }

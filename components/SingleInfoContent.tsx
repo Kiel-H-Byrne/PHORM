@@ -3,14 +3,15 @@ import { memo } from "react";
 import { IListing } from "../types";
 import Card from "./ListingCard2";
 
- const SingleInfoContent = ({
-  data, options,
+const SingleInfoContent = ({
+  data,
+  options,
 }: {
   data: IListing[];
   options: any;
 }) => {
   const { lat, lng, name } = data[0];
-  const listing = data[0]
+  const listing = data[0];
   if (lat && lng) {
     return (
       <InfoWindow position={{ lat, lng }} options={options}>
@@ -19,4 +20,4 @@ import Card from "./ListingCard2";
     );
   }
 };
-export default memo(SingleInfoContent)
+export default memo(SingleInfoContent);
