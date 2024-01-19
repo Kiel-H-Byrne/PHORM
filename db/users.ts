@@ -22,7 +22,6 @@ const findUserById = async (userId: string) => {
   return;
 };
 
-
 const findUserByEmail = async (email: string) => {
   if (!usersRef) return;
   const q = query(usersRef, where("email", "==", email));

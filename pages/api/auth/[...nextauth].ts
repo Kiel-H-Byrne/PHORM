@@ -131,7 +131,7 @@ export default NextAuth({
           ...session.user,
           id: token.sub,
         },
-      }
+      };
     },
-  }
+  },
 });

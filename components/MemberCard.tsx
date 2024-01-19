@@ -10,7 +10,7 @@ import {
   HStack,
   Heading,
   Link,
-  Text
+  Text,
 } from "@chakra-ui/react";
 
 function MemberCard({ user }: { user: IUser }) {

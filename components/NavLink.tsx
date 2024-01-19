@@ -1,6 +1,6 @@
 import { Link, useColorModeValue } from "@chakra-ui/react";
 
-export const NavLink = ({ path, label }: { path: string; label: string; }) => {
+export const NavLink = ({ path, label }: { path: string; label: string }) => {
   const LinkHoverBgColor = useColorModeValue("gray.200", "gray.700");
   return (
     <Link

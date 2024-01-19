@@ -111,26 +111,27 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
   const useRenderMarkers: (clusterer: Clusterer) => React.ReactElement =
     useCallback(
       (clusterer) => {
-        return fetchData && fetchData.map((markerData: IListing) => {
-
-          return (
-
-            <MyMarker
-              key={`${markerData.lat}, ${markerData.lng}-${markerData.name}`}
-              //what data can i set on marker?
-              markerData={markerData}
-              // label={}
-              // title={}
-              clusterer={clusterer}
-              activeData={activeData}
-              setActiveData={setActiveData}
-              setWindowClosed={setWindowClosed}
-              setWindowOpen={setWindowOpen}
-              toggleDrawer={toggleDrawer}
-            />
-          );
-          // }
-        });
+        return (
+          fetchData &&
+          fetchData.map((markerData: IListing) => {
+            return (
+              <MyMarker
+                key={`${markerData.lat}, ${markerData.lng}-${markerData.name}`}
+                //what data can i set on marker?
+                markerData={markerData}
+                // label={}
+                // title={}
+                clusterer={clusterer}
+                activeData={activeData}
+                setActiveData={setActiveData}
+                setWindowClosed={setWindowClosed}
+                setWindowOpen={setWindowOpen}
+                toggleDrawer={toggleDrawer}
+              />
+            );
+            // }
+          })
+        );
       },
       [fetchData, activeData, setWindowClosed, toggleDrawer, setWindowOpen]
     );

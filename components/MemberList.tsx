@@ -17,8 +17,8 @@ export default function MemberList({
     <>Loading...</>
   ) : (
     <VStack spacing={3} marginBlock={3}>
-      <Heading fontSize="2xl" mb={4} >
-        <Icon as={BsCollection} marginInline={5}/>
+      <Heading fontSize="2xl" mb={4}>
+        <Icon as={BsCollection} marginInline={5} />
         Member Directory
       </Heading>
 
