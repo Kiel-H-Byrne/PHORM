@@ -2,7 +2,7 @@ import MemberFilter from "@/components/MemberFilter";
 import MemberList from "@/components/MemberList";
 import { MemberQuery } from "@/types";
 import fetcher from "@/util/fetch";
-import { Container } from "@chakra-ui/react";
+import { VStack } from "@chakra-ui/react";
 import { useState } from "react";
 import useSWR, { mutate } from "swr";
 
@@ -28,13 +28,13 @@ export default function MemberDirectory() {
     mutate("/api/users");
   }
   return (
-    <Container>
+    <VStack spacing={3} p={4}>
       <MemberFilter
         searchParams={searchParams}
         setSearchParams={setSearchParams}
         handleSearch={handleSearch}
       />
       <MemberList members={data} isLoading={isLoading} />
-    </Container>
+    </VStack>
   );
 }

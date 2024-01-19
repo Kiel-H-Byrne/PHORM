@@ -1,5 +1,5 @@
 import { IUser } from "@/types";
-import { Grid, Icon, Text, VStack } from "@chakra-ui/react";
+import { Heading, Icon, Stack, VStack } from "@chakra-ui/react";
 import { BsCollection } from "react-icons/bs";
 import MemberCard from "./MemberCard";
 
@@ -17,15 +17,16 @@ export default function MemberList({
     <>Loading...</>
   ) : (
     <VStack spacing={3} marginBlock={3}>
-      <Text fontSize="2xl" mb={4} as={"h2"}>
-        <Icon as={BsCollection} /> Member Directory
-      </Text>
+      <Heading fontSize="2xl" mb={4} >
+        <Icon as={BsCollection} marginInline={5}/>
+        Member Directory
+      </Heading>
 
-      <Grid templateColumns="repeat(3, 1fr)" gap={4}>
+      <Stack spacing={4} direction={"row"}>
         {members.map((member) => (
           <MemberCard user={member} key={member.id} />
         ))}
-      </Grid>
+      </Stack>
     </VStack>
   );
 }

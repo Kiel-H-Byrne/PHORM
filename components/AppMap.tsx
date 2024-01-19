@@ -40,7 +40,8 @@ import ListingCard from "./ListingCard";
 
 export const default_props = {
   center: GEOCENTER,
-  zoom: 11, //vs 11
+  // 11 is metro area level
+  zoom: 11,
   options: {
     // mapTypeId:google.maps.MapTypeId.TERRAIN,
     backgroundColor: "#555",
@@ -67,9 +68,9 @@ export const default_props = {
     gestureHandling: "greedy",
     scrollwheel: true,
     maxZoom: 18,
-    minZoom: 4, //3 at mobbv0
+    minZoom: 4,
     // Map styles; snippets from 'Snazzy Maps'.
-    styles: MAP_STYLES.lightGray,
+    styles: MAP_STYLES.whiteMono,
   },
 };
 
@@ -110,32 +111,12 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
   const useRenderMarkers: (clusterer: Clusterer) => React.ReactElement =
     useCallback(
       (clusterer) => {
-        return fetchData.map((markerData: IListing) => {
-          //return marker if element categories array includes value from selected_categories\\
-          // if ( //if closeby
-          // pullup.categories &&
-          // pullup.categories.some((el) => selectedCategories.has(el))
-          // && mapInstance.containsLocation(fetchData.location)
-          // ) {yav
-          // if (pullup.location) {
-          //   const [lat, lng] = pullup.location.split(",");
+        return fetchData && fetchData.map((markerData: IListing) => {
 
-          //   let isInside = new window.google.maps.LatLngBounds().contains(
-          //     { lat: +lat, lng: +lng }
-          //   );
-          //   // console.log(isInside);
-          // }
           return (
-            // return (
-            //   pullup.categories
-            //     ? pullup.categories.some((el) =>
-            //         selected_categories.includes(el)
-            //       )
-            //     : false
-            // ) ? (
 
             <MyMarker
-              key={`${markerData.lat}, ${markerData.lng}`}
+              key={`${markerData.lat}, ${markerData.lng}-${markerData.name}`}
               //what data can i set on marker?
               markerData={markerData}
               // label={}

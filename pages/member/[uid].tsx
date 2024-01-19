@@ -1,9 +1,12 @@
+import MemberCard from "@/components/MemberCard";
+import fetcher from "@/util/fetch";
 import { useRouter } from "next/router";
+import useSWR from "swr";
 
 const MemberPage = () => {
-  const router = useRouter();
-  const uid = router.query.uid;
-  return <div>User ID: {uid}</div>;
+  const {query: {uid}} = useRouter();
+  const { data } = useSWR(`/api/users/${uid}`, fetcher);
+  return data && <MemberCard user={data} />;
 };
 
 export default MemberPage;

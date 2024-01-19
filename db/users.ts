@@ -10,6 +10,8 @@ import {
 } from "firebase/firestore";
 import { appFsdb } from "./firebase";
 
+const usersRef = appFsdb ? collection(appFsdb, "users") : undefined;
+
 const findUserById = async (userId: string) => {
   if (!usersRef) return;
   const userRef = doc(usersRef, userId);
@@ -20,7 +22,6 @@ const findUserById = async (userId: string) => {
   return;
 };
 
-const usersRef = appFsdb ? collection(appFsdb, "users") : undefined;
 
 const findUserByEmail = async (email: string) => {
   if (!usersRef) return;

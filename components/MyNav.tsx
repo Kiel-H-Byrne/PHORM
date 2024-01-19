@@ -4,57 +4,28 @@ import {
   Button,
   Flex,
   HStack,
-  Heading,
   IconButton,
   Image,
   Link,
   Menu,
-  Stack,
   useColorModeValue,
   useDisclosure,
 } from "@chakra-ui/react";
 import { signIn, useSession } from "next-auth/react";
 import { memo, useRef } from "react";
 import { AboutModal, AddListingDrawer, MyAvatar } from "./";
+import { AvatarDropdown } from "./AvatarDropdown";
+import { NavLinks } from "./NavLinks";
 
 const NAV_LINKS = [
-  { path: "/", label: "Home" },
-  { path: "/about", label: "About" },
+  { path: "/", label: "Home", isPrivate: false },
+  { path: "/about", label: "About", isPrivate: false },
   // { path: "/owners", label: "Owners" },
-  { path: "/?viewType=list", label: "List View" },
-  { path: "/member-directory", label: "Member Directory" },
+  { path: "/?viewType=list", label: "List View", isPrivate: false },
+  { path: "/member-directory", label: "Member Directory", isPrivate: true },
 ];
-const NavLink = ({ path, label }: { path: string; label: string }) => (
-  <Link
-    px={2}
-    py={1}
-    rounded={"md"}
-    _hover={{
-      textDecoration: "none",
-      bg: useColorModeValue("gray.200", "gray.700"),
-    }}
-    href={path}
-  >
-    {label}
-  </Link>
-);
+export type INAVLINKS = typeof NAV_LINKS;
 
-const AvatarDropdown = () => (
-  <Box pb={4} display={{ md: "none" }}>
-    <Stack as={"nav"} spacing={4}>
-      <Heading
-        color={"royalblue"}
-        justifyContent={"center"}
-        display={"inline-block"}
-      >
-        P.H.O.R.M
-      </Heading>
-      {NAV_LINKS.map(({ path, label }) => (
-        <NavLink key={label} path={path} label={label} />
-      ))}
-    </Stack>
-  </Box>
-);
 const MyNav = () => {
   const {
     isOpen: dropdownIsOpen,
@@ -69,6 +40,9 @@ const MyNav = () => {
   const firstField = useRef().current;
 
   const { status } = useSession();
+  const isPrivateLink = (link: { isPrivate: boolean }) => link.isPrivate;
+  const isLoggedIn = status === "authenticated";
+  const isLoading = status === "loading";
   return (
     <>
       <Box
@@ -86,21 +60,21 @@ const MyNav = () => {
             onClick={dropdownIsOpen ? onDropdownClose : onDropdownOpen}
           />
           <HStack spacing={8} alignItems={"center"}>
-            <Image
-              height={14}
-              aspectRatio={0.787}
-              src="/img/Logo1.png"
-              alt="logo"
-            />
+            <Link href="/">
+              <Image
+                height={14}
+                aspectRatio={0.787}
+                src="/img/Logo1.png"
+                alt="logo"
+              />
+            </Link>
             <HStack
               as={"nav"}
               spacing={4}
               display={{ base: "none", md: "flex" }}
             >
               {/* <Heading color={"royalblue"}>P.H.O.R.M</Heading> */}
-              {NAV_LINKS.map(({ path, label }) => (
-                <NavLink key={label} path={path} label={label} />
-              ))}
+              <NavLinks links={NAV_LINKS} isLoggedIn={isLoggedIn} />
             </HStack>
           </HStack>
           <Flex alignItems={"center"}>
@@ -109,7 +83,7 @@ const MyNav = () => {
               colorScheme={"teal"}
               onClick={() =>
                 //logged in? add form else signIn
-                status === "authenticated" ? onDrawerOpen() : signIn()
+                isLoggedIn ? onDrawerOpen() : signIn()
               }
               size={"sm"}
               mr={4}
@@ -122,14 +96,16 @@ const MyNav = () => {
             </Menu>
           </Flex>
         </Flex>
-        {dropdownIsOpen ? <AvatarDropdown /> : null}
+        {dropdownIsOpen ? (
+          <AvatarDropdown isLoggedIn={isLoggedIn} links={NAV_LINKS} />
+        ) : null}
       </Box>
       <AddListingDrawer
         drawerIsOpen={drawerIsOpen}
         firstField={firstField}
         onDrawerClose={onDrawerClose}
       />
-      <AboutModal />
+      {!isLoggedIn && !isLoading && <AboutModal />}
     </>
   );
 };

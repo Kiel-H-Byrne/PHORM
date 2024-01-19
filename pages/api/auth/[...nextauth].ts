@@ -111,7 +111,7 @@ export default NextAuth({
     // }),
   ],
   session: {
-    strategy: "database",
+    strategy: "jwt",
   },
   //@ts-ignore
   adapter: FirestoreAdapter({
@@ -121,18 +121,17 @@ export default NextAuth({
       privateKey: process.env.NEXT_PUBLIC_FSDB_PRIVATE_KEY!,
     }),
   }),
-  debug: true,
-  // don't see this fring
-  // callbacks: {
-  //   jwt: ({ trigger, user, token, session }) => {
-  //     console.log(trigger)
-  //     if (trigger === "signUp") {
-  //       //set user id to session.userId
-  //       console.log(user.id, session.userId)
-  //       user.id = session.userId
-  //     }
-  //     console.log(user.id, token)
-  //     return token
-  //   }
-  // }
+  debug: false,
+  // ensure user.id is always on object in client
+  callbacks: {
+    session: async ({ session, token }) => {
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: token.sub,
+        },
+      }
+    },
+  }
 });

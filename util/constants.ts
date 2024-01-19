@@ -524,7 +524,7 @@ export const MAP_STYLES = {
     },
   ],
 };
-
+// 1000 U ST NW DC:  (38.91657, -77.02631)
 export const GEOCENTER = { lat: 38.91657, lng: -77.02631 };
 
 export const LIBRARIES: Libraries = [

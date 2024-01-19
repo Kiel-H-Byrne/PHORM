@@ -44,6 +44,7 @@ function AboutModal() {
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { status } = useSession();
+  const isLoggedIn = status === "authenticated";
   const currentPath = usePathname();
   const isMainPage = currentPath === "/";
   useEffect(() => {
@@ -54,7 +55,7 @@ function AboutModal() {
   return (
     <Modal
       isCentered
-      isOpen={isOpen && status === "unauthenticated"}
+      isOpen={isOpen}
       onClose={onClose}
       size={{ base: "xs", md: "3xl" }}
     >

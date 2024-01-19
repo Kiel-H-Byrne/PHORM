@@ -53,8 +53,7 @@ const userHandler = async (req: NextApiRequest, res: NextApiResponse) => {
         const members: IUser[] = [];
 
         membersSnapshot.forEach((doc) => {
-          console.log(doc.data());
-          members.push(doc.data() as any);
+          members.push({id: doc.id, ...doc.data()} as IUser);
         });
         // console.log(res);
         if (from && members.length > 0) {
