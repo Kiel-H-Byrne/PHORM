@@ -27,20 +27,19 @@ const MyMarker = ({
   let image = {
     url: "/img/orange_marker_sm.png",
   };
-  const mockData = {
-    name: "Sample Business",
-    address: "123 Main Street, City",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-    owner: {
-      username: "john_doe",
-      lodge: "ABC Lodge",
-      name: "John Doe",
-    },
-    imageUri: "https://picsum.photos/200/300",
-  };
+  // const mockData = {
+  //   name: "Sample Business",
+  //   address: "123 Main Street, City",
+  //   description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+  //   owner: {
+  //     username: "john_doe",
+  //     lodge: "ABC Lodge",
+  //     name: "John Doe",
+  //   },
+  //   imageUri: "https://picsum.photos/200/300",
+  // };
   const handleMouseOverMarker = () => {
-    setActiveData([mockData]);
-    // setActiveData([markerData]);
+    setActiveData([markerData]);
     setWindowOpen();
   };
   const handleMouseOut = () => {
@@ -48,8 +47,7 @@ const MyMarker = ({
   };
   const handleClickMarker = () => {
     // infowindow needs to be set for mobile (touch, no hover)
-    setActiveData([mockData]);
-    // setActiveData([markerData]);
+    setActiveData([markerData]);
     toggleDrawer();
   };
   return (
@@ -62,7 +60,7 @@ const MyMarker = ({
         onMouseOut={handleMouseOut}
         onClick={handleClickMarker}
         //@ts-ignore
-        // __data={data}
+        // __data={markerData}
         // visible={categories.some((el) => selectedCategories.has(el))} //check for if category matches selected categories
       />
     </div>

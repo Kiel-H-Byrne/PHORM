@@ -7,7 +7,6 @@ const ListingCard = ({ activeListing }: { activeListing: IListing }) => {
   const toggleCollapse = () => {
     setIsOpen(!isOpen);
   };
-
   const { name, address, description, claims, imageUri } = activeListing;
   const getLikelyOwnerInfo = (claims: IClaims) => claims[0];
   const ownerInfo = claims && getLikelyOwnerInfo(claims);
