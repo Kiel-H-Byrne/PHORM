@@ -29,8 +29,7 @@ const BusinessCard = ({ activeListing }: { activeListing: IListing }) => {
   const [isOwnerInfoOpen, setIsOwnerInfoOpen] = useState(false);
   const { claims, imageUri, creator } = activeListing;
   const ownerID = claims?.[0].member.id || creator?.id;
-  const {data: owner, error, isLoading} = useSWR(
-    `/api/users/${ownerID}`,)
+  const { data: owner, error, isLoading } = useSWR(`/api/users/${ownerID}`);
   const handleOwnerInfoToggle = () => {
     setIsOwnerInfoOpen(!isOwnerInfoOpen);
   };

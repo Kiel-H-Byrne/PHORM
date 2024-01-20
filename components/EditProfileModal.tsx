@@ -4,25 +4,27 @@ import {
   ModalCloseButton,
   ModalContent,
   ModalHeader,
-  ModalOverlay
+  ModalOverlay,
 } from "@chakra-ui/react";
 import { EditProfileForm } from "./EditProfileForm";
 
 export const EditProfileModal = ({
-  isOpen, onClose, onToggle
+  isOpen,
+  onClose,
+  onToggle,
 }: {
   isOpen: boolean;
   onClose: () => void;
   onToggle: () => void;
 }) => {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} >
+    <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Edit Your Profile</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <EditProfileForm onToggle={onToggle}/>
+          <EditProfileForm onToggle={onToggle} />
         </ModalBody>
       </ModalContent>
     </Modal>

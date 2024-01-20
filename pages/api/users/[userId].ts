@@ -27,8 +27,8 @@ export default async function userHandler(
       try {
         if (typeof userId === "string") {
           const user = await findUserById(userId);
-          const newProfile = Object.assign(user?.profile, JSON.parse(req.body))
-          updateUserById(userId, newProfile)
+          const newProfile = Object.assign(user?.profile, JSON.parse(req.body));
+          updateUserById(userId, newProfile);
           res.status(200);
         }
       } catch (error: any) {
@@ -36,7 +36,7 @@ export default async function userHandler(
       }
       res.status(200).json({ userId: userId, name: "John Doe" });
       break;
-      default:
+    default:
       res.setHeader("Allow", ["GET", "POST"]);
       res.status(405).end(`Method ${method} Not Allowed`);
   }

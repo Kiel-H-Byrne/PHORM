@@ -11,16 +11,14 @@ const AppList = () => {
   });
   return (
     <VStack spacing={5}>
-
-    <Heading as={"h1"}>Listings</Heading>
-    <HStack flexWrap={"wrap"} spacing={5}>
-      {fetchData &&
-        fetchData.map((listing: IListing) => (
-          <BusinessCard activeListing={listing} key={listing.name} />
-        ))}
-    </HStack>
+      <Heading as={"h1"}>Listings</Heading>
+      <HStack flexWrap={"wrap"} spacing={5}>
+        {fetchData &&
+          fetchData.map((listing: IListing) => (
+            <BusinessCard activeListing={listing} key={listing.name} />
+          ))}
+      </HStack>
     </VStack>
-
   );
 };
 

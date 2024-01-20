@@ -204,7 +204,7 @@ export function TechList({ techs }: { techs: (As | string | any)[][] }) {
             fontSize={"2em"}
             lineHeight={"2em"}
           />
-          <Text as={"span"} >
+          <Text as={"span"}>
             <strong>{tech[0]}</strong> - {tech[1]}
           </Text>
         </ListItem>

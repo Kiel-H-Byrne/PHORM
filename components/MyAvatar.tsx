@@ -41,7 +41,9 @@ const MyAvatar = () => {
         />
       </PopoverTrigger>
       <PopoverContent>
-        <PopoverHeader fontWeight="semibold" textAlign={"center"}>Log Out/Share</PopoverHeader>
+        <PopoverHeader fontWeight="semibold" textAlign={"center"}>
+          Log Out/Share
+        </PopoverHeader>
         <PopoverArrow />
         <PopoverCloseButton />
         <PopoverBody>

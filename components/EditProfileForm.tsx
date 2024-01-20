@@ -11,7 +11,7 @@ import {
   Icon,
   Input,
   Select,
-  useToast
+  useToast,
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSession } from "next-auth/react";
@@ -66,7 +66,7 @@ export function EditProfileForm({ onToggle }: { onToggle: () => void }) {
     });
 
     mutate({ data });
-    if (ok ) {
+    if (ok) {
       onToggle();
       successToast();
     }
