@@ -14,7 +14,6 @@ export const toPositionObj = (location: string | undefined) => {
     let lat = Number(latLng[0]);
     let lng = Number(latLng[1]);
     let pos = new google.maps.LatLng({ lat: lat, lng: lng });
-    console.log(lat, lng, pos.lat())
     return pos;
   }
 };
