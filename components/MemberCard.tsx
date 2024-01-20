@@ -18,7 +18,7 @@ function MemberCard({ user }: { user: IUser }) {
     firstName,
     lastName,
     profilePhoto,
-    lodgeNumber = 10,
+    lodgeOrChapterNumber,
     occupation,
     location,
     bio,
@@ -35,9 +35,10 @@ function MemberCard({ user }: { user: IUser }) {
             <Heading size="md">
               {firstName || "Jimothy"} {lastName || "LaCraQuis"}
             </Heading>
-            {lodgeNumber && (
+            {lodgeOrChapterNumber && (
               <Text>
-                {PHA_LODGES["DC"][lodgeNumber]} Lodge #{`${lodgeNumber}`}
+                {PHA_LODGES["DC"][lodgeOrChapterNumber]} Lodge #
+                {`${lodgeOrChapterNumber}`}
               </Text>
             )}
           </Box>

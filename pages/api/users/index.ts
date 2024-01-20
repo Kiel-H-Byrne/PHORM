@@ -14,7 +14,6 @@ const maxAge = 1 * 24 * 60 * 60;
 
 const userHandler = async (req: NextApiRequest, res: NextApiResponse) => {
   const {
-    //@ts-ignore
     //can send query params to sort & limit results
     query: { id, name, by, limit, from, occupation, location },
     method,

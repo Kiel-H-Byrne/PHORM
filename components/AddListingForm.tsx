@@ -1,3 +1,5 @@
+"use client";
+
 import { ListingsSchema } from "@/db/schemas";
 import {
   Box,
@@ -9,6 +11,7 @@ import {
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { geohashForLocation } from "geofire-common";
+import { useSession } from "next-auth/react";
 import { memo, useCallback, useEffect, useRef } from "react";
 import { Form, useForm } from "react-hook-form";
 import { IListing, StatesEnum } from "../types";
@@ -53,7 +56,8 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
   });
 
   const formRef = useRef();
-
+  const { data } = useSession();
+  const creator = data?.user;
   const getPlaceDetails = useCallback(async (address: string) => {
     //  const if all fields filled, make address, pass to geo, create lat/long
     const geocoder = new google.maps.Geocoder();
@@ -88,14 +92,15 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
       const { city, state, zip, street } = data;
       const address = `${street} ${city} ${state} ${zip} `;
       const details = await getPlaceDetails(address);
+      console.log(creator);
       //combine
-      const submitData = { ...data, ...details };
+      const submitData = { ...data, ...{ creator }, ...details };
       await fetch("/api/listings", {
         method: "POST",
         body: JSON.stringify(submitData),
       });
     },
-    [getPlaceDetails]
+    [getPlaceDetails, creator]
   );
 
   useEffect(() => {

@@ -15,7 +15,7 @@ const Layout = ({ children, title }: Props) => {
     <SessionProvider>
       <CustomHead title={title || "The P.H.O.R.M"} />
       <MyNav />
-      <Container maxW="3xl">{children}</Container>
+      <Container maxW="container.lg">{children}</Container>
       <MyFooter />
     </SessionProvider>
   );

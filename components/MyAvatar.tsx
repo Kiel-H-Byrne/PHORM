@@ -1,7 +1,9 @@
 import {
   Avatar,
   Button,
-  Grid,
+  CircularProgress,
+  CircularProgressLabel,
+  HStack,
   Icon,
   Link,
   Popover,
@@ -11,6 +13,7 @@ import {
   PopoverContent,
   PopoverHeader,
   PopoverTrigger,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { signOut, useSession } from "next-auth/react";
 import { memo } from "react";
@@ -19,9 +22,13 @@ import {
   FaLinkedinIn,
   FaTwitterSquare,
 } from "react-icons/fa";
+import { TbProgress } from "react-icons/tb";
+import { EditProfileModal } from "./EditProfileModal";
 
 const MyAvatar = () => {
   const { data: session, status } = useSession();
+  const { isOpen, onToggle, onOpen, onClose } = useDisclosure();
+
   return status === "authenticated" && session.user ? (
     <Popover placement="top-start">
       <PopoverTrigger>
@@ -34,11 +41,13 @@ const MyAvatar = () => {
         />
       </PopoverTrigger>
       <PopoverContent>
-        <PopoverHeader fontWeight="semibold">Log Out/Share</PopoverHeader>
+        <PopoverHeader fontWeight="semibold" textAlign={"center"}>
+          Log Out/Share
+        </PopoverHeader>
         <PopoverArrow />
         <PopoverCloseButton />
         <PopoverBody>
-          <Grid templateColumns="repeat(3, 3fr)" gap={1}>
+          <HStack spacing={1} justifyContent={"space-evenly"}>
             <Link href="#">
               <Icon boxSize={30} as={FaFacebookSquare} />
             </Link>
@@ -48,13 +57,25 @@ const MyAvatar = () => {
             <Link href="#">
               <Icon boxSize={30} as={FaTwitterSquare} />
             </Link>
-          </Grid>
-          <Button onClick={() => signOut()}>Log Out</Button>
+          </HStack>
+          <HStack justify="space-evenly">
+            <Button onClick={() => signOut()}>Log Out</Button>
+            <Button onClick={onToggle}>Edit Profile</Button>
+          </HStack>
+          <EditProfileModal
+            isOpen={isOpen}
+            onClose={onClose}
+            onToggle={onToggle}
+          />
         </PopoverBody>
       </PopoverContent>
     </Popover>
   ) : status === "loading" ? (
-    <>Loading...</>
+    <CircularProgress isIndeterminate>
+      <CircularProgressLabel>
+        <Icon as={TbProgress} />
+      </CircularProgressLabel>
+    </CircularProgress>
   ) : // <Button leftIcon={<CheckCircleIcon />} onClick={() => signIn()}>
   //   Login
   // </Button>

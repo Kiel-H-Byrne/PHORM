@@ -12,6 +12,7 @@ import {
   Flex,
   Icon,
   Progress,
+  SlideOptions,
   Tab,
   TabList,
   TabPanel,
@@ -19,6 +20,7 @@ import {
   Tabs,
   Text,
   createStandaloneToast,
+  useBreakpointValue,
   useDisclosure,
 } from "@chakra-ui/react";
 import {
@@ -50,7 +52,7 @@ export const default_props = {
     fullscreenControl: false,
     zoomControl: true,
     // zoomControlOptions: {
-    //   position: window.google.maps.ControlPosition.RIGHT_CENTER,
+    //   position: google.maps.ControlPosition.RIGHT_CENTER,
     // },
     mapTypeControl: false,
     // mapTypeControlOptions: {
@@ -112,28 +114,40 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
     useCallback(
       (clusterer) => {
         return (
+          isLoaded &&
           fetchData &&
           fetchData.map((markerData: IListing) => {
+            const { lat, lng } = markerData;
             return (
-              <MyMarker
-                key={`${markerData.lat}, ${markerData.lng}-${markerData.name}`}
-                //what data can i set on marker?
-                markerData={markerData}
-                // label={}
-                // title={}
-                clusterer={clusterer}
-                activeData={activeData}
-                setActiveData={setActiveData}
-                setWindowClosed={setWindowClosed}
-                setWindowOpen={setWindowOpen}
-                toggleDrawer={toggleDrawer}
-              />
+              lat &&
+              lng && (
+                <MyMarker
+                  key={`${lat}, ${lng}-${markerData.name}`}
+                  //what data can i set on marker?
+                  markerData={markerData}
+                  // label={}
+                  // title={}
+                  clusterer={clusterer}
+                  activeData={activeData}
+                  setActiveData={setActiveData}
+                  setWindowClosed={setWindowClosed}
+                  setWindowOpen={setWindowOpen}
+                  toggleDrawer={toggleDrawer}
+                />
+              )
             );
             // }
           })
         );
       },
-      [fetchData, activeData, setWindowClosed, toggleDrawer, setWindowOpen]
+      [
+        fetchData,
+        activeData,
+        setWindowClosed,
+        toggleDrawer,
+        setWindowOpen,
+        isLoaded,
+      ]
     );
 
   const handleMouseOverClusterOrMarker = useCallback(
@@ -173,6 +187,8 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
     status: "info" as any,
     id: "noresults-toast",
   };
+  const responsivePlacement: SlideOptions["direction"] =
+    useBreakpointValue({ base: "bottom", md: "left" }) || "left";
 
   return isLoaded ? (
     <>
@@ -204,9 +220,8 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
             setSelectedCategories={setSelectedCategories}
           />
         )} */}
-        {/* <ToastContainer /> */}
         {/* {!fetchData && toast(searchToastData)} */}
-        {fetchData && fetchData.length !== 0 ? (
+        {isLoaded && fetchData?.length !== 0 ? (
           <MarkerClusterer
             styles={CLUSTER_STYLE}
             averageCenter
@@ -232,7 +247,7 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
           <Drawer
             // activeData={activeData}
             isOpen={isDrawerOpen}
-            placement="left"
+            placement={responsivePlacement}
             onClose={setDrawerClose}
             // mapInstance={mapInstance}
           >

@@ -79,3 +79,8 @@ const checkForDuplicates = (data: IListing[]) => {
   const dupes = Object.values(result).find((el) => el.length > 1);
   return dupes;
 };
+
+export const camelToSentenceCase = (s: string) => {
+  const result = s.replace(/([A-Z])/g, " $1");
+  return result.charAt(0).toUpperCase() + result.slice(1);
+};
