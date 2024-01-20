@@ -221,7 +221,7 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
           />
         )} */}
         {/* {!fetchData && toast(searchToastData)} */}
-        {isLoaded && fetchData.length !== 0 ? (
+        {isLoaded && fetchData?.length !== 0 ? (
           <MarkerClusterer
             styles={CLUSTER_STYLE}
             averageCenter

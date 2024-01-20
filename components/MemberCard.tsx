@@ -18,7 +18,7 @@ function MemberCard({ user }: { user: IUser }) {
     firstName,
     lastName,
     profilePhoto,
-    lodgeNumber = 10,
+    lodgeOrChapterNumber: lodgeNumber = 10,
     occupation,
     location,
     bio,

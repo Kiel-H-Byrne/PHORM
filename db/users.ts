@@ -6,7 +6,7 @@ import {
   getDocs,
   query,
   updateDoc,
-  where,
+  where
 } from "firebase/firestore";
 import { appFsdb } from "./firebase";
 
@@ -35,7 +35,9 @@ const findUserByEmail = async (email: string) => {
 const updateUserById = async (userId: string, newData: Partial<IUser>) => {
   if (!usersRef) return;
   const userRef = doc(usersRef, userId);
-  await updateDoc(userRef, newData);
+  const userDoc = (await getDoc(userRef)).data();
+  const newDoc = { ...userDoc, profile: { ...userDoc?.profile, ...newData } }
+  if (userDoc) await updateDoc(userRef, newDoc);
 };
 
 const getUsers = async () => {

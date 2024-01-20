@@ -20,7 +20,7 @@ const ListingCard = ({ activeListing }: { activeListing: IListing }) => {
       maxW="400px"
     >
       <Box position="relative">
-        <Image src={imageUri} alt={name} h="200px" w="100%" objectFit="cover" />
+        {imageUri && <Image src={imageUri} alt={name} h="200px" w="100%" objectFit="cover" />}
         <Box
           position="absolute"
           bottom="0"

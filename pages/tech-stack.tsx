@@ -139,7 +139,7 @@ export default function TechPage() {
       }}
     >
       <Heading>{heading} </Heading>
-      <Box maxW="3xl" p={3}>
+      <Box maxW="" p={3}>
         <Text as={"p"} textAlign={"left"}>
           This page outlines the technology stack, infrastructure, tooling and
           techniques used in implementing this website.
@@ -198,8 +198,15 @@ export function TechList({ techs }: { techs: (As | string | any)[][] }) {
     <UnorderedList>
       {techs.map((tech, i) => (
         <ListItem key={i}>
-          <ListIcon as={tech[2]} />
-          <strong>{tech[0]}</strong> - {tech[1]}
+          <ListIcon
+            as={tech[2]}
+            justifyItems="center"
+            fontSize={"2em"}
+            lineHeight={"2em"}
+          />
+          <Text as={"span"} >
+            <strong>{tech[0]}</strong> - {tech[1]}
+          </Text>
         </ListItem>
       ))}
     </UnorderedList>

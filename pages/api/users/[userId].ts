@@ -1,6 +1,6 @@
 // 608da9f19a70cb0805c59923
 
-import { findUserById } from "@/db/users";
+import { findUserById, updateUserById } from "@/db/users";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export default async function userHandler(
@@ -22,8 +22,22 @@ export default async function userHandler(
         res.status(404).send({ error: error.message });
       }
       break;
-    default:
-      res.setHeader("Allow", ["GET"]);
+    case "POST":
+      // Update or create data in your database
+      try {
+        if (typeof userId === "string") {
+          const user = await findUserById(userId);
+          const newProfile = Object.assign(user?.profile, JSON.parse(req.body))
+          updateUserById(userId, newProfile)
+          res.status(200);
+        }
+      } catch (error: any) {
+        res.status(404).send({ error: error.message });
+      }
+      res.status(200).json({ userId: userId, name: "John Doe" });
+      break;
+      default:
+      res.setHeader("Allow", ["GET", "POST"]);
       res.status(405).end(`Method ${method} Not Allowed`);
   }
 }

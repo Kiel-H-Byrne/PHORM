@@ -1,6 +1,6 @@
 import { IListing } from "@/types";
 import fetcher from "@/util/fetch";
-import { HStack } from "@chakra-ui/react";
+import { HStack, Heading, VStack } from "@chakra-ui/react";
 import SWR from "swr";
 import BusinessCard from "./ListingCard2";
 const AppList = () => {
@@ -10,12 +10,17 @@ const AppList = () => {
     errorRetryCount: 2,
   });
   return (
-    <HStack flexWrap={"wrap"}>
+    <VStack spacing={5}>
+
+    <Heading as={"h1"}>Listings</Heading>
+    <HStack flexWrap={"wrap"} spacing={5}>
       {fetchData &&
         fetchData.map((listing: IListing) => (
           <BusinessCard activeListing={listing} key={listing.name} />
         ))}
     </HStack>
+    </VStack>
+
   );
 };
 
