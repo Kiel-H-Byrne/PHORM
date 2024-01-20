@@ -31,34 +31,34 @@ export interface GLocation {
   lng: number;
 }
 export const StatesEnum = z.enum(STATE_ABBREVIATIONS);
-type GenericRecord = Record<string, Record<number, string>>;
+type GenericRecord = Record<string, Record<string, string>>;
 export const PHA_LODGES: GenericRecord = {
   [StatesEnum.enum.DC]: {
-    1: "Social",
-    3: "Felix",
-    4: "Hiram",
-    5: "Eureka",
-    6: "Meridian",
-    7: "Widow's Son",
-    8: "Warren",
-    9: "Pythagoras",
-    10: "John F. Cook",
-    12: "St. John's",
-    14: "Prince Hall",
-    15: "Charles Datcher",
-    16: "James H. Hill",
-    17: "Ionic",
-    18: "Corinthian",
-    19: "Doric",
-    20: "Fidelity",
-    22: "Harmony",
-    23: "Victory",
-    24: "Redemption",
-    25: "Acacia",
-    26: "Fellowship",
-    27: "Prudence",
-    28: "Thomas L. Johnson",
-    29: "Nathaniel M. Adams Jr. Military",
+    '1': "Social",
+    '3': "Felix",
+    '4': "Hiram",
+    '5': "Eureka",
+    '6': "Meridian",
+    '7': "Widow's Son",
+    '8': "Warren",
+    '9': "Pythagoras",
+    '10': "John F. Cook",
+    '12': "St. John's",
+    '14': "Prince Hall",
+    '15': "Charles Datcher",
+    '16': "James H. Hill",
+    '17': "Ionic",
+    '18': "Corinthian",
+    '19': "Doric",
+    '20': "Fidelity",
+    '22': "Harmony",
+    '23': "Victory",
+    '24': "Redemption",
+    '25': "Acacia",
+    '26': "Fellowship",
+    '27': "Prudence",
+    '28': "Thomas L. Johnson",
+    '29': "Nathaniel M. Adams Jr. Military",
   },
 };
 
@@ -73,6 +73,6 @@ export const PHA_LODGES: GenericRecord = {
 // };
 export type IMemberQuery = Partial<IUser["profile"]>;
 export type MemberQuery = Partial<
-  Pick<IUser["profile"], "occupation" | "location" | "lodgeNumber"> &
-    Pick<IUser, "name" | "email">
+  IUser["profile"] &
+  Pick<IUser, "name" | "email">
 >;
