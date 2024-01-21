@@ -92,7 +92,6 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
       const { city, state, zip, street } = data;
       const address = `${street} ${city} ${state} ${zip} `;
       const details = await getPlaceDetails(address);
-      console.log(creator);
       //combine
       const submitData = { ...data, ...{ creator }, ...details };
       await fetch("/api/listings", {

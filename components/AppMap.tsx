@@ -201,10 +201,10 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
         // mapContainerClassName={style.map}
         mapContainerStyle={{
           position: "absolute",
-          height: "calc(100% - 42px)",
-          top: 0,
+          height: "calc(100% - 106px)",
+          top: "64px",
           left: 0,
-          bottom: -20,
+          bottom: 0,
           right: 0,
         }}
         center={client_location || center}

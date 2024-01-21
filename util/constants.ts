@@ -15,14 +15,8 @@ export const BRAND_THEME = {
         width: "100%",
         overflowX: "hidden",
       },
-      "#map": {
-        height: "100%",
-      },
-      "#GMap": {
-        height: "100%",
-      },
       "#__next": {
-        // height: "100%",
+        height: "100%",
       },
     },
   },

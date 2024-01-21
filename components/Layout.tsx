@@ -9,13 +9,13 @@ type Props = {
 };
 
 const Layout = ({ children, title }: Props) => {
-  // const [show, setShow] = useState(true);
-
   return (
     <SessionProvider>
       <CustomHead title={title || "The P.H.O.R.M"} />
       <MyNav />
-      <Container maxW="container.lg">{children}</Container>
+      <Container maxW="container.lg" minHeight={"calc(100% - 106px)"}>
+        {children}
+      </Container>
       <MyFooter />
     </SessionProvider>
   );

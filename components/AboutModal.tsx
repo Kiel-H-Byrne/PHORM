@@ -61,10 +61,11 @@ function AboutModal() {
     >
       <OverlayOne />
       <ModalContent>
-        <ModalCloseButton />
+        <ModalCloseButton right={1}/>
         <ModalBody>
           <VStack spacing={3}>
             <Heading
+              textAlign="center"
               as={"h1"}
               fontSize={{ base: "xl", md: "2xl" }}
               width="full"
@@ -91,14 +92,13 @@ function AboutModal() {
               </Text>
               erchants
             </Heading>
-            <Heading size="sm" color="gray.500" fontStyle={"oblique"} mb={2}>
+            <Heading size="sm" color="gray.500" fontStyle={"oblique"} mb={2} textAlign={"center"}>
               Connecting Communities, Empowering Entrepreneurs, Strengthening
               our Brotherhood
             </Heading>
             <Stack
               direction={{ base: "column", md: "row" }}
               spacing={5}
-              p={3}
               alignItems={"center"}
             >
               <Image
@@ -107,7 +107,7 @@ function AboutModal() {
                 height={{ base: 24, md: 172 }}
                 alt="logo"
               />
-              <Text fontSize="md" mb={7} fontFamily={"body"} px={3}>
+              <Text fontSize="md" mb={7} fontFamily={"body"}>
                 Welcome to{" "}
                 <Text as="span" fontWeight="bold" color="blue.600">
                   The PHORM
