@@ -2,7 +2,7 @@ import { Map, initialize, mockInstances } from "@googlemaps/jest-mocks";
 import "@testing-library/jest-dom/extend-expect";
 import { fireEvent, render } from "@testing-library/react";
 import { SessionProvider } from "next-auth/react";
-import LocateMeButton from "../LocateMeButton";
+import FloatingButtons from "../LocateMeButton";
 
 beforeEach(() => {
   initialize();
@@ -18,7 +18,7 @@ describe("LocateMeButton", () => {
   it("should render the component correctly", () => {
     const { container } = render(
       <SessionProvider>
-        <LocateMeButton
+        <FloatingButtons
           mapInstance={mockInstances.get(Map)[0]}
           setClientLocation={mockSetClientLocation}
           clientLocation={null}
@@ -32,7 +32,7 @@ describe("LocateMeButton", () => {
   it('should call handleClick when the "My Location" button is clicked', () => {
     const { getByLabelText } = render(
       <SessionProvider>
-        <LocateMeButton
+        <FloatingButtons
           mapInstance={mockInstances.get(Map)[0]}
           setClientLocation={mockSetClientLocation}
           clientLocation={null}
@@ -51,7 +51,7 @@ describe("LocateMeButton", () => {
   it('should call handleOpen when the "Add Listing" button is clicked', () => {
     const { getByLabelText } = render(
       <SessionProvider>
-        <LocateMeButton
+        <FloatingButtons
           mapInstance={mockInstances.get(Map)[0]}
           setClientLocation={mockSetClientLocation}
           clientLocation={null}

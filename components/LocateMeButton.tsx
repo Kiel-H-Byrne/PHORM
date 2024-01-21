@@ -29,7 +29,7 @@ import { GLocation, ILocateMe } from "../types";
 import { milesToMeters, targetClient } from "../util/helpers";
 import AddListingForm from "./AddListingForm";
 
-const LocateMeButton = (props: ILocateMe) => {
+const FloatingButtons = (props: ILocateMe) => {
   // const [clientLocation, setClientLocation] = useState(null); //hoisted
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [closestMarker, setClosestMarker] = useState({} as google.maps.Marker);
@@ -199,7 +199,7 @@ const LocateMeButton = (props: ILocateMe) => {
   );
 };
 
-export default memo(LocateMeButton);
+export default memo(FloatingButtons);
 function FloatingPopoverButton({
   colorScheme,
   popOverText,
@@ -226,9 +226,7 @@ function FloatingPopoverButton({
       <PopoverContent width={"11em"}>
         <PopoverArrow />
         <PopoverCloseButton />
-        {/* <PopoverHeader>{popOverText}</PopoverHeader> */}
         <PopoverBody>{popOverText}</PopoverBody>
-        {/* <PopoverBody>Are you sure you want to have that milkshake?</PopoverBody> */}
       </PopoverContent>
     </Popover>
   );
