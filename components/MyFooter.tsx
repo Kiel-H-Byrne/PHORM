@@ -7,10 +7,10 @@ const MyFooter = (props: Props) => {
   return (
     <Flex
       as="footer"
-      marginTop="calc(100vh - 64px - 42px)"
+      // position="relative"
+      // marginTop="64px"
       p={3}
       backgroundColor={"gray.200"}
-      w="full"
     >
       <Container maxW={"3xl"} fontSize={"xs"} {...props}>
         <Text as="span">
@@ -19,6 +19,14 @@ const MyFooter = (props: Props) => {
             TenK Solutions, LLC.{" "}
           </Link>
           All Rights Reserved
+        </Text>
+        <Text as={"span"} fontSize="xs" p={1}>
+          |
+        </Text>
+        <Text as="span">
+          <Link href="/privacy-and-terms/" fontSize="xs">
+            Privacy Policy & Terms
+          </Link>
         </Text>
         <Text as={"span"} fontSize="xs" p={1}>
           |

@@ -39,31 +39,32 @@ export default NextAuth({
         },
       },
       // not seeing id or emailVerified being set
-      // profile: (profile) => ({
-      //   id: profile.sub,
-      //   name: profile.name,
-      //   email: profile.email,
-      //   image: profile.picture,
-      //   emailVerified: profile.email_verified,
-      //   profile: ({
-      //     firstName: profile.given_name,
-      //     lastName: profile.family_name,
-      //   })
-      // }) as any
-
+      profile: async (profile) => {
+        return {
+          id: profile.sub,
+          name: profile.name,
+          email: profile.email,
+          image: profile.picture,
+          emailVerified: profile.email_verified,
+          profile: ({
+            firstName: profile.given_name,
+            lastName: profile.family_name,
+          })
+        } as any
+      },
       // scope:
       //   "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile",
     }),
     LinkedInProvider({
       clientId: process.env.NEXT_PUBLIC_LINKEDIN_CLIENT_ID!,
       clientSecret: process.env.NEXT_PUBLIC_LINKEDIN_SECRET!,
+      issuer: 'https://www.linkedin.com',
       authorization: {
         params: { scope: "openid profile email" },
       },
-      issuer: "https://www.linkedin.com",
       jwks_endpoint: "https://www.linkedin.com/oauth/openid/jwks",
       allowDangerousEmailAccountLinking: true,
-      profile: ((profile: ILinkedInProfile) => {
+      profile: (async (profile: ILinkedInProfile) => {
         return {
           id: profile.sub,
           name: profile.name,
