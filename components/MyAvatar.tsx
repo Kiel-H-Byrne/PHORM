@@ -1,5 +1,6 @@
 import {
   Avatar,
+  Box,
   Button,
   CircularProgress,
   CircularProgressLabel,
@@ -15,7 +16,8 @@ import {
   PopoverTrigger,
   useDisclosure,
 } from "@chakra-ui/react";
-import { signOut, useSession } from "next-auth/react";
+import { signIn, signOut, useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 import { memo } from "react";
 import {
   FaFacebookSquare,
@@ -27,22 +29,37 @@ import { EditProfileModal } from "./EditProfileModal";
 
 const MyAvatar = () => {
   const { data: session, status } = useSession();
+  const { push } = useRouter();
   const { isOpen, onToggle, onOpen, onClose } = useDisclosure();
-
-  return status === "authenticated" && session.user ? (
+  const handleSignOut = () => {
+    push("/");
+    signOut();
+  };
+  const isLoggedIn = status === "authenticated";
+  return (
     <Popover placement="top-start">
       <PopoverTrigger>
-        <Avatar
-          loading="lazy"
-          src={
-            session.user.image ??
-            `https://api.dicebear.com/6.x/bottts/svg?seed=${session.user.email}`
-          }
-        />
+        <Box>
+          {isLoggedIn && session?.user?.image ? (
+            <Avatar loading="lazy" src={session.user.image} />
+          ) : status === "loading" ? (
+            <CircularProgress isIndeterminate>
+              <CircularProgressLabel>
+                <Icon as={TbProgress} />
+              </CircularProgressLabel>
+            </CircularProgress>
+          ) : (
+            <Avatar
+              src={`https://api.dicebear.com/7.x/shapes/svg?backgroundType=gradientLinear,solid&radius=50&seed=${Math.random().toPrecision(
+                20
+              )}}`}
+            />
+          )}
+        </Box>
       </PopoverTrigger>
       <PopoverContent>
         <PopoverHeader fontWeight="semibold" textAlign={"center"}>
-          Log Out/Share
+          Status
         </PopoverHeader>
         <PopoverArrow />
         <PopoverCloseButton />
@@ -59,7 +76,11 @@ const MyAvatar = () => {
             </Link>
           </HStack>
           <HStack justify="space-evenly">
-            <Button onClick={() => signOut()}>Log Out</Button>
+            {isLoggedIn ? (
+              <Button onClick={handleSignOut}>Sign Out</Button>
+            ) : (
+              <Button onClick={() => signIn()}>Sign In</Button>
+            )}
             <Button onClick={onToggle}>Edit Profile</Button>
           </HStack>
           <EditProfileModal
@@ -70,16 +91,9 @@ const MyAvatar = () => {
         </PopoverBody>
       </PopoverContent>
     </Popover>
-  ) : status === "loading" ? (
-    <CircularProgress isIndeterminate>
-      <CircularProgressLabel>
-        <Icon as={TbProgress} />
-      </CircularProgressLabel>
-    </CircularProgress>
-  ) : // <Button leftIcon={<CheckCircleIcon />} onClick={() => signIn()}>
+  ); // <Button leftIcon={<CheckCircleIcon />} onClick={() => signIn()}>
   //   Login
   // </Button>
-  null;
 };
 
 export default memo(MyAvatar);

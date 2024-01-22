@@ -46,11 +46,11 @@ export default NextAuth({
           email: profile.email,
           image: profile.picture,
           emailVerified: profile.email_verified,
-          profile: ({
+          profile: {
             firstName: profile.given_name,
             lastName: profile.family_name,
-          })
-        } as any
+          },
+        } as any;
       },
       // scope:
       //   "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile",
@@ -58,7 +58,7 @@ export default NextAuth({
     LinkedInProvider({
       clientId: process.env.NEXT_PUBLIC_LINKEDIN_CLIENT_ID!,
       clientSecret: process.env.NEXT_PUBLIC_LINKEDIN_SECRET!,
-      issuer: 'https://www.linkedin.com',
+      issuer: "https://www.linkedin.com",
       authorization: {
         params: { scope: "openid profile email" },
       },

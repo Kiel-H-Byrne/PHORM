@@ -61,7 +61,7 @@ function AboutModal() {
     >
       <OverlayOne />
       <ModalContent>
-        <ModalCloseButton right={1}/>
+        <ModalCloseButton right={1} />
         <ModalBody>
           <VStack spacing={3}>
             <Heading
@@ -92,7 +92,13 @@ function AboutModal() {
               </Text>
               erchants
             </Heading>
-            <Heading size="sm" color="gray.500" fontStyle={"oblique"} mb={2} textAlign={"center"}>
+            <Heading
+              size="sm"
+              color="gray.500"
+              fontStyle={"oblique"}
+              mb={2}
+              textAlign={"center"}
+            >
               Connecting Communities, Empowering Entrepreneurs, Strengthening
               our Brotherhood
             </Heading>
