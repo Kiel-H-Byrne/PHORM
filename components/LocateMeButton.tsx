@@ -1,6 +1,6 @@
 import {
   Button,
-  Center,
+  Heading,
   Icon,
   IconButton,
   Modal,
@@ -161,21 +161,23 @@ const FloatingButtons = (props: ILocateMe) => {
         <FloatingPopoverButton
           colorScheme={"yellow"}
           icon={BiMessageAltAdd}
-          handleClick={handleOpen}
+          handleClick={onOpen}
           popOverText={"Add A Business!"}
         />
         <FloatingPopoverButton
           colorScheme={clientLocation ? "green" : "red"}
           handleClick={handleGetLocation}
           icon={MdMyLocation}
-          popOverText={clientLocation ? "Pinpoint Location" : "Find My Location"}
+          popOverText={
+            clientLocation ? "Pinpoint Location" : "Find My Location"
+          }
         />
       </VStack>
 
-      <Modal isOpen={isOpen} onClose={onClose} closeOnOverlayClick={false}>
+      <Modal isOpen={isOpen} onClose={onClose} closeOnOverlayClick={true}>
         <ModalOverlay />
         <ModalContent>
-          {status == "authenticated" && session ? (
+          {status == "authenticated" ? (
             <>
               <ModalHeader>
                 <Text fontSize="2xl">Add Listing:</Text>
@@ -186,9 +188,12 @@ const FloatingButtons = (props: ILocateMe) => {
               </ModalBody>
             </>
           ) : (
-            <Center padding="22">
-              <Button onClick={() => signIn()}>Register / Log In</Button>
-            </Center>
+            <VStack padding="22">
+              <Heading textAlign="center" size="lg">
+                Sign In to Add Your Business
+              </Heading>
+              <Button onClick={() => signIn()}>Sign In</Button>
+            </VStack>
           )}
         </ModalContent>
       </Modal>

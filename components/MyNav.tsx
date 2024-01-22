@@ -89,7 +89,7 @@ const MyNav = () => {
               mr={4}
               leftIcon={<AddIcon />}
             >
-              Register Business {/** Get Listed */}
+              Add Your Business {/** Get Listed */}
             </Button>
             <Menu>
               <MyAvatar />

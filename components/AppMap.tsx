@@ -189,7 +189,6 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
   };
   const responsivePlacement: SlideOptions["direction"] =
     useBreakpointValue({ base: "bottom", md: "left" }) || "left";
-
   return isLoaded ? (
     <>
       <GoogleMap
@@ -243,7 +242,7 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
           />
         )}
 
-        {activeData && isDrawerOpen && (
+        {activeData && (
           <Drawer
             // activeData={activeData}
             isOpen={isDrawerOpen}
@@ -259,7 +258,7 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
                 <Icon boxSize={7} mx={2} as={MdInfoOutline} />
                 Listing Information
               </DrawerHeader>
-              <DrawerBody p={0}>
+              <DrawerBody p={3} alignSelf="center">
                 {activeData.length > 1 ? (
                   <Tabs isFitted variant="enclosed">
                     <TabList>
@@ -302,9 +301,7 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
                     </TabPanels>
                   </Tabs>
                 ) : (
-                  <Box px={3}>
-                    <ListingCard activeListing={activeData[0]} />
-                  </Box>
+                  <ListingCard activeListing={activeData[0]} />
                 )}
               </DrawerBody>
             </DrawerContent>
