@@ -37,7 +37,7 @@ export default function MemberDirectory() {
     </VStack>
   ) : (
     <Container py={10}>
-      <Heading textAlign={'center'}>You must be Logged In</Heading>
-      </Container>
+      <Heading textAlign={"center"}>You must be Logged In</Heading>
+    </Container>
   );
 }

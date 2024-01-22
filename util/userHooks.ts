@@ -12,7 +12,7 @@ export function useFetchUser(userId: string) {
     revalidateOnFocus: false,
   });
   if (error) {
-    console.log('error',error);
+    console.log("error", error);
     return;
   }
   return data?.user;

@@ -15,21 +15,20 @@ import MyMarker from "./MyMarker";
 import MyNav from "./MyNav";
 import SingleInfoContent from "./SingleInfoContent";
 export {
-    AboutModal,
-    AddListingDrawer,
-    AddListingForm,
-    AppMap,
-    CondensedCard,
-    CustomHead,
-    FeatureCard,
-    Layout,
-    FloatingButtons as LocateMeButton,
-    MultipleInfoContent,
-    MyAvatar,
-    MyFooter,
-    MyInfoWindow,
-    MyMarker,
-    MyNav,
-    SingleInfoContent
+  AboutModal,
+  AddListingDrawer,
+  AddListingForm,
+  AppMap,
+  CondensedCard,
+  CustomHead,
+  FeatureCard,
+  Layout,
+  FloatingButtons as LocateMeButton,
+  MultipleInfoContent,
+  MyAvatar,
+  MyFooter,
+  MyInfoWindow,
+  MyMarker,
+  MyNav,
+  SingleInfoContent,
 };
-

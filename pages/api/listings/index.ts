@@ -31,7 +31,7 @@ const handler = async (req: any, res: any) => {
       console.log("received POST");
       if (!req.body) return res.status(400).send("You must write something");
       const listing = await listingCreate(JSON.parse(req.body) as IListing);
-      console.log('listing', listing);
+      console.log("listing", listing);
       return res.json({ listing: req.body });
       break;
     default:
