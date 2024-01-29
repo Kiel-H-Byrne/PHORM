@@ -9,11 +9,11 @@ export const AvatarDropdown = ({
   isLoggedIn: boolean;
   links: INAVLINKS;
 }) => (
-  <Box pb={4} display={{ md: "none" }}>
+  <Box pb={4} display={{ md: "none" }} >
     <Stack as={"nav"} spacing={4}>
       <Heading
         color={"royalblue"}
-        justifyContent={"center"}
+        textAlign={"center"}
         display={"inline-block"}
       >
         P.H.O.R.M

@@ -1,12 +1,10 @@
 import {
-  Button,
   Drawer,
   DrawerBody,
   DrawerCloseButton,
   DrawerContent,
-  DrawerFooter,
   DrawerHeader,
-  DrawerOverlay,
+  DrawerOverlay
 } from "@chakra-ui/react";
 import { memo } from "react";
 import { AddListingForm } from "./";
@@ -45,12 +43,12 @@ function AddListingDrawer({
           <AddListingForm onDrawerClose={onDrawerClose} />
         </DrawerBody>
 
-        <DrawerFooter borderTopWidth="1px">
+        {/* <DrawerFooter borderTopWidth="1px">
           <Button variant="outline" mr={3} onClick={onDrawerClose}>
             Cancel
           </Button>
-          {/* <Button colorScheme="blue" onClick={handleSubmit}>Submit</Button> */}
-        </DrawerFooter>
+          <Button colorScheme="mwphgldc.blue" onClick={handleSubmit}>Submit</Button>
+        </DrawerFooter> */}
       </DrawerContent>
     </Drawer>
   );
