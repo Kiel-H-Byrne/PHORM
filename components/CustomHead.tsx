@@ -53,7 +53,7 @@ const CustomHead = ({ title }: Props) => {
         content="OJEUZfTeTwEUiclFV1wP8-_pr29LuzIbx1ldaX5jdK4"
       /> */}
       <meta
-        name="google-signin-client_id"
+        name="google-signin-client_id" 
         content={process.env.NEXT_PUBLIC_TEST_client_id}
       />
       <meta name="google-signin-cookiepolicy" content="single_host_origin" />
@@ -66,11 +66,11 @@ const CustomHead = ({ title }: Props) => {
         name="msapplication-TileImage"
         content="/img/icons/mstile-144x144.png"
       />
-      {/* <link
+      <link
         rel="manifest"
         type="application/manifest+json"
         href="/app_manifest.json"
-      /> */}
+      />
 
       <link
         rel="icon"
