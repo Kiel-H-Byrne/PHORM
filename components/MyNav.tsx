@@ -46,7 +46,7 @@ const MyNav = () => {
   return (
     <>
       <Box
-        bg={useColorModeValue("gray.100", "gray.900")}
+        bg={useColorModeValue("mwphgldc.blue.50", "gray.900")}
         px={4}
         position={"relative"}
         zIndex={1}
@@ -80,7 +80,8 @@ const MyNav = () => {
           <Flex alignItems={"center"}>
             <Button
               variant={"solid"}
-              colorScheme={"teal"}
+              colorScheme={"mwphgldc.blue"}
+              color="#fff"
               onClick={() =>
                 //logged in? add form else signIn
                 isLoggedIn ? onDrawerOpen() : signIn()

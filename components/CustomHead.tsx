@@ -66,11 +66,11 @@ const CustomHead = ({ title }: Props) => {
         name="msapplication-TileImage"
         content="/img/icons/mstile-144x144.png"
       />
-      {/* <link
+      <link
         rel="manifest"
         type="application/manifest+json"
         href="/app_manifest.json"
-      /> */}
+      />
 
       <link
         rel="icon"

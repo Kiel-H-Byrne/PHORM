@@ -52,10 +52,10 @@ const ListingCard = ({ activeListing }: { activeListing: IListing }) => {
         </Box>
       </Box>
       <Box mt={4}>
-        <Button colorScheme="blue" size="sm" mr={2}>
+        <Button colorScheme="mwphgldc.blue" size="sm" mr={2}>
           Get Directions
         </Button>
-        <Button colorScheme="blue" size="sm">
+        <Button colorScheme="mwphgldc.blue" size="sm">
           Share
         </Button>
         {/* Additional CTA buttons */}

@@ -2,8 +2,12 @@ import { Libraries } from "../types";
 
 export const MAX_AGE = 1 * 24 * 60 * 60;
 
-export enum BRAND_COLORS {
-  GREEN = "#330000",
+enum BRAND_COLORS {
+  MASONIC_BLUE = "#2828C8",
+  MWPGLDC_PURPLE = "#431250", //#8E0084
+  MWPGLDC_GOLD = "#CC9829", //#FED500
+  GTGC_PINK = "#9B5BA5",
+  GTGC_BLUE = "#009DDC",
 }
 export const BRAND_THEME = {
   styles: {
@@ -25,7 +29,55 @@ export const BRAND_THEME = {
       100: "#fff",
       900: "#000",
     },
+    mwphgldc: {
+      blue: {
+        '50': '#edf2ff',
+        '100': '#dee8ff',
+        '200': '#c3d5ff',
+        '300': '#9eb7ff',
+        '400': '#788fff',
+        '500': '#5868fc',
+        '600': '#3a3ef1',
+        '700': '#2828c8', // MASONIC_BLUE
+        '800': '#2729ac',
+        '900': '#282c87',
+        '950': '#17174f',
+      },
+      purple: {
+        '50': '#fbf6fd',
+        '100': '#f5ebfc',
+        '200': '#ecd7f7',
+        '300': '#deb7f0',
+        '400': '#cc8ce6',
+        '500': '#b35fd6',
+        '600': '#9940b9',
+        '700': '#803299',
+        '800': '#6a2b7d',
+        '900': '#5a2867',
+        '950': '#431250', // GL_PURPLE
+       },
+      gold: {
+        '50': '#fbf8ea',
+        '100': '#f6efcb',
+        '200': '#eddd9c',
+        '300': '#e3c563',
+        '400': '#d9aa36',
+        '500': '#cc9828', // GL_GOLD
+        '600': '#ac7420',
+        '700': '#8b561d',
+        '800': '#75471f',
+        '900': '#643c20',
+        '950': '#381d0f',
+      }
+    },
+    gtgc: {
+      pink: { 100: BRAND_COLORS.GTGC_PINK },
+      blue: { 100: BRAND_COLORS.GTGC_BLUE }
+    },
   },
+  defaultProps: {
+    colorScheme: "mwphgldc.blue"
+  }
 };
 
 export const MAP_STYLES = {
