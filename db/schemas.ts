@@ -8,6 +8,7 @@ const SocialSchema = z.object({
 });
 const OrgSchema = z.object({
   type: z.string(), //"lodge" | "chapter" | "appendant"
+  name: z.string(),
   number: z.string(),
   state: z.string()
 })
@@ -41,7 +42,7 @@ export const UserSchema = z.object({
   image: z.string(),
   emailVerified: z.string(),
   profile: ProfileSchema.partial().required({
-    org: true
+    orgs: true
   }),
 });
 

@@ -1,4 +1,4 @@
-import { IUser, PHA_LODGES } from "@/types";
+import { IUser } from "@/types";
 import {
   Avatar,
   Box,
@@ -18,12 +18,12 @@ function MemberCard({ user }: { user: IUser }) {
     firstName,
     lastName,
     profilePhoto,
-    lodgeOrChapterNumber,
+    orgs,
     occupation,
     location,
     bio,
   } = user.profile;
-
+  
   return (
     // <VStack borderWidth="1px" p={4} rounded="md" spacing={3}>
     <Card borderWidth="1px" p={4} rounded="md" maxW={"sm"}>
@@ -35,12 +35,12 @@ function MemberCard({ user }: { user: IUser }) {
             <Heading size="md">
               {firstName || "Jimothy"} {lastName || "LaCraQuis"}
             </Heading>
-            {lodgeOrChapterNumber && (
+            {/* {lodgeOrChapterNumber && (
               <Text>
-                {PHA_LODGES["DC"][lodgeOrChapterNumber]} Lodge #
+                {PHA_LODGES["DC"][orgs]} Lodge #
                 {`${lodgeOrChapterNumber}`}
               </Text>
-            )}
+            )} */}
           </Box>
         </HStack>
         <Text fontSize={12} color="royalblue">
