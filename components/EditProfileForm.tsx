@@ -11,7 +11,7 @@ import {
   Icon,
   Input,
   Select,
-  useToast
+  useToast,
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSession } from "next-auth/react";
@@ -44,8 +44,8 @@ export function EditProfileForm({ onToggle }: { onToggle: () => void }) {
     resolver: zodResolver(FormSchema),
   });
   const keys = Object.keys(FormSchema.keyof().Values);
-  const types = FormSchema.shape
-  console.log(types)
+  const types = FormSchema.shape;
+  console.log(types);
   const { data: session } = useSession();
   const {
     data: userData,
@@ -157,5 +157,3 @@ export function EditProfileForm({ onToggle }: { onToggle: () => void }) {
     );
   }
 }
-
-

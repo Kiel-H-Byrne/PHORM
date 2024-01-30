@@ -10,8 +10,8 @@ const OrgSchema = z.object({
   type: z.string(), //"lodge" | "chapter" | "appendant"
   name: z.string(),
   number: z.string(),
-  state: z.string()
-})
+  state: z.string(),
+});
 export const ProfileSchema = z.object({
   firstName: z.string(),
   lastName: z.string(),
@@ -42,7 +42,7 @@ export const UserSchema = z.object({
   image: z.string(),
   emailVerified: z.string(),
   profile: ProfileSchema.partial().required({
-    orgs: true
+    orgs: true,
   }),
 });
 

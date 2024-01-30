@@ -14,16 +14,9 @@ import {
 } from "@chakra-ui/react";
 
 function MemberCard({ user }: { user: IUser }) {
-  const {
-    firstName,
-    lastName,
-    profilePhoto,
-    orgs,
-    occupation,
-    location,
-    bio,
-  } = user.profile;
-  
+  const { firstName, lastName, profilePhoto, orgs, occupation, location, bio } =
+    user.profile;
+
   return (
     // <VStack borderWidth="1px" p={4} rounded="md" spacing={3}>
     <Card borderWidth="1px" p={4} rounded="md" maxW={"sm"}>

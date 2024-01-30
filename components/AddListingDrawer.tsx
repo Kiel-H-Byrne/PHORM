@@ -4,7 +4,7 @@ import {
   DrawerCloseButton,
   DrawerContent,
   DrawerHeader,
-  DrawerOverlay
+  DrawerOverlay,
 } from "@chakra-ui/react";
 import { memo } from "react";
 import { AddListingForm } from "./";
