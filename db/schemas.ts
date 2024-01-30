@@ -9,6 +9,7 @@ const SocialSchema = z.object({
 const OrgSchema = z.object({
   type: z.string(), //"lodge" | "chapter" | "appendant"
   number: z.string(),
+  name: z.string(),
   state: z.string()
 })
 export const ProfileSchema = z.object({
@@ -21,7 +22,6 @@ export const ProfileSchema = z.object({
   location: z.string(),
   bio: z.string(),
   skills: z.array(z.string()),
-  // email: z.string().email(),
   contact: z.object({
     email: z.string().email(),
     phone: z.string(),
@@ -41,7 +41,7 @@ export const UserSchema = z.object({
   image: z.string(),
   emailVerified: z.string(),
   profile: ProfileSchema.partial().required({
-    org: true
+    orgs: true
   }),
 });
 
