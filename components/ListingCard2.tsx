@@ -36,7 +36,6 @@ const BusinessCard = ({ activeListing }: { activeListing: IListing }) => {
   const handleOwnerInfoToggle = () => {
     setIsOwnerInfoOpen(!isOwnerInfoOpen);
   };
-  console.log(owner);
   return (
     <Card
       maxW="md"
