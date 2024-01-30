@@ -1,4 +1,4 @@
-import { IUser, PHA_LODGES } from "@/types";
+import { IUser } from "@/types";
 import {
   Avatar,
   Box,
@@ -14,15 +14,8 @@ import {
 } from "@chakra-ui/react";
 
 function MemberCard({ user }: { user: IUser }) {
-  const {
-    firstName,
-    lastName,
-    profilePhoto,
-    lodgeOrChapterNumber,
-    occupation,
-    location,
-    bio,
-  } = user.profile;
+  const { firstName, lastName, profilePhoto, orgs, occupation, location, bio } =
+    user.profile;
 
   return (
     // <VStack borderWidth="1px" p={4} rounded="md" spacing={3}>
@@ -35,12 +28,12 @@ function MemberCard({ user }: { user: IUser }) {
             <Heading size="md">
               {firstName || "Jimothy"} {lastName || "LaCraQuis"}
             </Heading>
-            {lodgeOrChapterNumber && (
+            {/* {lodgeOrChapterNumber && (
               <Text>
-                {PHA_LODGES["DC"][lodgeOrChapterNumber]} Lodge #
+                {PHA_LODGES["DC"][orgs]} Lodge #
                 {`${lodgeOrChapterNumber}`}
               </Text>
-            )}
+            )} */}
           </Box>
         </HStack>
         <Text fontSize={12} color="royalblue">

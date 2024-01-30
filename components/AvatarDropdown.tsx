@@ -13,7 +13,7 @@ export const AvatarDropdown = ({
     <Stack as={"nav"} spacing={4}>
       <Heading
         color={"royalblue"}
-        justifyContent={"center"}
+        textAlign={"center"}
         display={"inline-block"}
       >
         P.H.O.R.M

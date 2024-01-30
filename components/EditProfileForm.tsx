@@ -15,7 +15,7 @@ import {
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSession } from "next-auth/react";
-import * as React from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { MdSave } from "react-icons/md";
 import useSWR from "swr";
@@ -43,8 +43,9 @@ export function EditProfileForm({ onToggle }: { onToggle: () => void }) {
   } = useForm({
     resolver: zodResolver(FormSchema),
   });
-
   const keys = Object.keys(FormSchema.keyof().Values);
+  const types = FormSchema.shape;
+  console.log(types);
   const { data: session } = useSession();
   const {
     data: userData,
@@ -59,7 +60,7 @@ export function EditProfileForm({ onToggle }: { onToggle: () => void }) {
     description: `Successfully submitted form.`,
   });
 
-  const onSubmit = async (data: IUser["profile"]) => {
+  const onSubmit = async (data: Partial<IUser["profile"]>) => {
     const { ok } = await fetch(`/api/users/${(session?.user as IUser).id}`, {
       method: "POST",
       body: JSON.stringify(data),
@@ -72,61 +73,66 @@ export function EditProfileForm({ onToggle }: { onToggle: () => void }) {
     }
   };
 
-  return (
-    !isLoading && (
+  return !isLoading && <Form1 />;
+
+  function Form1() {
+    return (
       <form onSubmit={handleSubmit(onSubmit)}>
-        {keys.map((field) => (
-          <React.Fragment key={field}>
-            <FormControl isInvalid={!!errors[field]?.message}></FormControl>
-            <FormLabel htmlFor={field}> {camelToSentenceCase(field)}</FormLabel>
-            {errors[field] && <span>{errors[field]?.message as string}</span>}
-            {field === "lodgeOrChapterState" ? (
-              <Select
-                key={field}
-                id={field}
-                maxLength={2}
-                autoComplete={"true"}
-                defaultValue={"DC"}
-                {...register(field)}
-                aria-invalid={errors.state ? "true" : "false"}
-                // only DC Lodges ATM
-                // value={"DC"}
-              >
-                {StatesEnum.options.map((state) => (
-                  <option value={state} key={state}>
-                    {state}
-                  </option>
-                ))}
-              </Select>
-            ) : field === "lodgeOrChapterNumber" ? (
-              <Select
-                key={field}
-                id={field}
-                maxLength={2}
-                autoComplete={"true"}
-                {...register(field)}
-                aria-invalid={errors.state ? "true" : "false"}
-              >
-                {Object.keys(PHA_LODGES["DC"]).map((number) => {
-                  let val = parseInt(number);
-                  return (
-                    <option value={val} key={val}>
-                      {val}
+        {keys.map((field) => {
+          return (
+            <React.Fragment key={field}>
+              <FormControl isInvalid={!!errors[field]?.message}></FormControl>
+              <FormLabel htmlFor={field}>
+                {" "}
+                {camelToSentenceCase(field)}
+              </FormLabel>
+              {errors[field] && <span>{errors[field]?.message as string}</span>}
+              {field === "state" ? (
+                <Select
+                  key={field}
+                  id={field}
+                  maxLength={2}
+                  autoComplete={"true"}
+                  defaultValue={"DC"}
+                  {...register(field)}
+                  aria-invalid={errors.state ? "true" : "false"}
+                >
+                  {StatesEnum.options.map((state) => (
+                    <option value={state} key={state}>
+                      {state}
                     </option>
-                  );
-                })}
-              </Select>
-            ) : (
-              <Input
-                id={field}
-                autoComplete={"true"}
-                defaultValue={userData.profile?.[field]}
-                {...register(field)}
-                aria-invalid={errors.name ? "true" : "false"}
-              />
-            )}
-          </React.Fragment>
-        ))}
+                  ))}
+                </Select>
+              ) : field === "number" ? (
+                <Select
+                  key={field}
+                  id={field}
+                  maxLength={2}
+                  autoComplete={"true"}
+                  {...register(field)}
+                  aria-invalid={errors.state ? "true" : "false"}
+                >
+                  {Object.keys(PHA_LODGES["DC"]).map((number) => {
+                    let val = parseInt(number);
+                    return (
+                      <option value={val} key={val}>
+                        {val}
+                      </option>
+                    );
+                  })}
+                </Select>
+              ) : (
+                <Input
+                  id={field}
+                  autoComplete={"true"}
+                  defaultValue={userData.profile?.[field]}
+                  {...register(field)}
+                  aria-invalid={errors.name ? "true" : "false"}
+                />
+              )}
+            </React.Fragment>
+          );
+        })}
         <HStack justify={"space-evenly"} p={3}>
           {isSubmitting ? (
             <Button>Submitting...</Button>
@@ -148,6 +154,6 @@ export function EditProfileForm({ onToggle }: { onToggle: () => void }) {
           </Button>
         </HStack>
       </form>
-    )
-  );
+    );
+  }
 }

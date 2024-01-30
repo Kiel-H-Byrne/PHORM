@@ -9,10 +9,15 @@ const MyFooter = (props: Props) => {
       as="footer"
       // position="relative"
       // marginTop="64px"
-      p={3}
-      backgroundColor={"gray.200"}
+      p={{ base: 1, sm: 3 }}
+      backgroundColor={"mwphgldc.blue.50"}
     >
-      <Container maxW={"3xl"} fontSize={"xs"} {...props}>
+      <Container
+        maxW={"3xl"}
+        fontSize={{ base: "2xs", sm: "xs" }}
+        {...props}
+        maxHeight="42px"
+      >
         <Text as="span">
           © Copyright{" "}
           <Link isExternal href="https://tenksolutions.com">
@@ -20,11 +25,11 @@ const MyFooter = (props: Props) => {
           </Link>
           All Rights Reserved
         </Text>
-        <Text as={"span"} fontSize="xs" p={1}>
+        <Text as={"span"} fontSize="inherit" p={1}>
           |
         </Text>
         <Text as="span">
-          <Link href="/privacy-and-terms/" fontSize="xs">
+          <Link href="/privacy-and-terms/" fontSize="inherit">
             Privacy Policy & Terms
           </Link>
         </Text>
@@ -32,7 +37,7 @@ const MyFooter = (props: Props) => {
           |
         </Text>
         <Text as="span">
-          <Link href="/tech-stack/" fontSize="xs">
+          <Link href="/tech-stack/" fontSize="inherit">
             How We Built This Site
           </Link>
         </Text>
