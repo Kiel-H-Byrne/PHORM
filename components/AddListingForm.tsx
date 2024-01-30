@@ -189,12 +189,12 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
         />
 
         <Box justifyContent={"space-around"}>
-          <Button type="reset" colorScheme="blue" variant={"outline"}>
+          <Button type="reset" colorScheme="mwphgldc.blue" variant={"outline"}>
             Reset
           </Button>
           <Button
             type="submit"
-            colorScheme="blue"
+            colorScheme="mwphgldc.blue"
             isDisabled={Object.keys(errors).length > 0}
           >
             Submit

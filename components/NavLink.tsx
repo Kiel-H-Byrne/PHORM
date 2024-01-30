@@ -1,4 +1,4 @@
-import { Link, useColorModeValue } from "@chakra-ui/react";
+import { Button, Link, useColorModeValue } from "@chakra-ui/react";
 
 export const NavLink = ({ path, label }: { path: string; label: string }) => {
   const LinkHoverBgColor = useColorModeValue("gray.200", "gray.700");
@@ -13,7 +13,9 @@ export const NavLink = ({ path, label }: { path: string; label: string }) => {
       }}
       href={path}
     >
-      {label}
+      <Button variant={"outline"} width="full" colorScheme="mwphgldc.blue">
+        {label}
+      </Button>
     </Link>
   );
 };

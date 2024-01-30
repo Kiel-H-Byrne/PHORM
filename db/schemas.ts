@@ -6,15 +6,18 @@ const SocialSchema = z.object({
   instagram: z.string(),
   twitter: z.string(),
 });
-
+const OrgSchema = z.object({
+  type: z.string(), //"lodge" | "chapter" | "appendant"
+  name: z.string(),
+  number: z.string(),
+  state: z.string(),
+});
 export const ProfileSchema = z.object({
   firstName: z.string(),
   lastName: z.string(),
   nickName: z.string(),
-  lodgeOrChapterNumber: z.string(),
-  lodgeOrChapterState: z.string(),
+  orgs: z.array(OrgSchema),
   profilePhoto: z.string(),
-  lodgeOrChapter: z.string(),
   occupation: z.string(),
   location: z.string(),
   bio: z.string(),
@@ -38,7 +41,9 @@ export const UserSchema = z.object({
   email: z.string().email(),
   image: z.string(),
   emailVerified: z.string(),
-  profile: ProfileSchema.partial(),
+  profile: ProfileSchema.partial().required({
+    orgs: true,
+  }),
 });
 
 export const ClaimSchema = z.object({

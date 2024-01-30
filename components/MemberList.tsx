@@ -11,7 +11,7 @@ export default function MemberList({ members }: { members: IUser[] }) {
       <Heading pb={3}>No Members Yet...</Heading>
       <Button
         variant={"solid"}
-        colorScheme={"teal"}
+        colorScheme={"mwphgldc.blue"}
         onClick={() => signIn()}
         size={"sm"}
         mr={4}
@@ -26,7 +26,7 @@ export default function MemberList({ members }: { members: IUser[] }) {
         <Icon as={BsCollection} marginInline={5} />
         Member Directory
       </Heading>
-      <Stack spacing={4} direction={"row"}>
+      <Stack spacing={4} direction={{ base: "column", sm: "row" }}>
         {members.map((member) => (
           <MemberCard user={member} key={member.id} />
         ))}

@@ -159,13 +159,13 @@ const FloatingButtons = (props: ILocateMe) => {
     <>
       <VStack position="absolute" top="50%" right="10px">
         <FloatingPopoverButton
-          colorScheme={"yellow"}
+          colorScheme={"mwphgldc.purple"}
           icon={BiMessageAltAdd}
           handleClick={onOpen}
           popOverText={"Add A Business!"}
         />
         <FloatingPopoverButton
-          colorScheme={clientLocation ? "green" : "red"}
+          colorScheme={clientLocation ? "mwphgldc.purple" : "mwphgldc.gold"}
           handleClick={handleGetLocation}
           icon={MdMyLocation}
           popOverText={
