@@ -28,11 +28,15 @@ const getLodgeName = ({
 const BusinessCard = ({ activeListing }: { activeListing: IListing }) => {
   const [isOwnerInfoOpen, setIsOwnerInfoOpen] = useState(false);
   const { claims, imageUri, creator } = activeListing;
-  const ownerID = claims?.[0].member.id || creator?.id;
-  const { data: owner, error, isLoading } = useSWR(`/api/users/${ownerID}`);
+  const claimantID = claims?.[0].member.id;
+  const uploaderID = creator?.id;
+  const ownerID = claimantID || uploaderID;
+  const fetchURI = ownerID ? `/api/users/${ownerID}` : null;
+  const { data: owner, error, isLoading } = useSWR(fetchURI);
   const handleOwnerInfoToggle = () => {
     setIsOwnerInfoOpen(!isOwnerInfoOpen);
   };
+  console.log(owner);
   return (
     <Card
       maxW="md"
@@ -53,45 +57,45 @@ const BusinessCard = ({ activeListing }: { activeListing: IListing }) => {
             {activeListing.name}
           </Text>
           <Text fontSize="sm" color="gray.600">
-            {owner?.name}
-          </Text>
-          <Text fontSize="sm" color="gray.600">
             {activeListing.address}
           </Text>
-
           {/* Owner Information Dropdown */}
-          <Flex justify="space-between" align="center" mt="2">
-            <Button
-              size="sm"
-              colorScheme="teal"
-              onClick={handleOwnerInfoToggle}
-            >
-              Owned by {owner?.name}
-            </Button>
-
-            <IconButton
-              icon={isOwnerInfoOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
-              aria-label="Toggle Owner Info"
-              variant="outline"
-              size="sm"
-              onClick={handleOwnerInfoToggle}
-            />
-          </Flex>
-
-          <Collapse in={isOwnerInfoOpen} animateOpacity>
-            <Box mt="2" bg="gray.100" rounded="md">
-              <Text fontSize="sm" fontWeight="bold">
-                Owner Information
-              </Text>
-              <Text fontSize="sm">{owner?.name}</Text>
-              <Text fontSize="sm">
-                {getLodgeName({
-                  state: owner?.profile.lodgeState,
-                  lodgeNo: owner?.profile.lodgeNumber,
-                })}
-              </Text>
-            </Box>
-          </Collapse>
+          {owner && (
+            <>
+              <Flex justify="space-between" align="center" mt="2">
+                <Button
+                  size="sm"
+                  colorScheme="teal"
+                  onClick={handleOwnerInfoToggle}
+                >
+                  Owned by {owner?.name}
+                </Button>
+                <IconButton
+                  icon={
+                    isOwnerInfoOpen ? <ChevronUpIcon /> : <ChevronDownIcon />
+                  }
+                  aria-label="Toggle Owner Info"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleOwnerInfoToggle}
+                />
+              </Flex>
+              <Collapse in={isOwnerInfoOpen} animateOpacity>
+                <Box mt="2" bg="gray.100" rounded="md">
+                  <Text fontSize="sm" fontWeight="bold">
+                    Owner Information
+                  </Text>
+                  <Text fontSize="sm">{owner?.name}</Text>
+                  <Text fontSize="sm">
+                    {getLodgeName({
+                      state: owner?.profile.lodgeState,
+                      lodgeNo: owner?.profile.lodgeNumber,
+                    })}
+                  </Text>
+                </Box>
+              </Collapse>
+            </>
+          )}
         </CardBody>
         <CardFooter>
           {/* Call to Action Buttons */}
@@ -103,7 +107,7 @@ const BusinessCard = ({ activeListing }: { activeListing: IListing }) => {
               rounded="full"
               // onClick={directions}
             >
-              Get Directions
+              Directions
             </Button>
 
             <Button
@@ -113,7 +117,7 @@ const BusinessCard = ({ activeListing }: { activeListing: IListing }) => {
               rounded="full"
               // onClick={share}
             >
-              Share Business
+              Share
             </Button>
           </HStack>
         </CardFooter>
