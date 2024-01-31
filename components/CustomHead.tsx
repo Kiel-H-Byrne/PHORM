@@ -53,7 +53,7 @@ const CustomHead = ({ title }: Props) => {
         content="OJEUZfTeTwEUiclFV1wP8-_pr29LuzIbx1ldaX5jdK4"
       /> */}
       <meta
-        name="google-signin-client_id" 
+        name="google-signin-client_id"
         content={process.env.NEXT_PUBLIC_TEST_client_id}
       />
       <meta name="google-signin-cookiepolicy" content="single_host_origin" />
@@ -84,10 +84,7 @@ const CustomHead = ({ title }: Props) => {
         sizes="16x16"
         href="/img/icons/favicon-16x16.png"
       />
-      <link
-        rel="apple-touch-icon"
-        href="/img/icons/apple-touch-icon.png"
-      />
+      <link rel="apple-touch-icon" href="/img/icons/apple-touch-icon.png" />
       <link rel="apple-touch-startup-image" href="/img/Logo_TWP.jpg" />
       <link
         rel="mask-icon"

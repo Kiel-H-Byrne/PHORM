@@ -32,7 +32,8 @@ const BusinessCard = ({ activeListing }: { activeListing: IListing }) => {
   const uploaderID = creator?.id;
   const ownerID = claimantID || uploaderID;
   const fetchURI = ownerID ? `/api/users/${ownerID}` : null;
-  const { data: owner, error, isLoading } = useSWR(fetchURI);
+  const { data: owner, isLoading } = useSWR(fetchURI);
+  const ownerHasName = owner && 'name' in owner
   const handleOwnerInfoToggle = () => {
     setIsOwnerInfoOpen(!isOwnerInfoOpen);
   };
@@ -59,7 +60,7 @@ const BusinessCard = ({ activeListing }: { activeListing: IListing }) => {
             {activeListing.address}
           </Text>
           {/* Owner Information Dropdown */}
-          {owner && (
+          {ownerHasName && (
             <>
               <Flex justify="space-between" align="center" mt="2">
                 <Button
