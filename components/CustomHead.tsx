@@ -59,9 +59,9 @@ const CustomHead = ({ title }: Props) => {
       <meta name="google-signin-cookiepolicy" content="single_host_origin" />
       <meta name="google-signin-scope" content="profile email" />
 
-      <meta name="theme-color" content="#9BA17B" />
+      <meta name="theme-color" content="#edf2ff" />
       <meta name="msapplication-config" content="/browserconfig.xml" />
-      <meta name="msapplication-TileColor" content="#9BA17B" />
+      <meta name="msapplication-TileColor" content="#edf2ff" />
       <meta
         name="msapplication-TileImage"
         content="/img/icons/mstile-144x144.png"
@@ -84,15 +84,12 @@ const CustomHead = ({ title }: Props) => {
         sizes="16x16"
         href="/img/icons/favicon-16x16.png"
       />
-      <link
-        rel="apple-touch-icon"
-        href="/img/icons/apple-touch-icon-180x180.png"
-      />
+      <link rel="apple-touch-icon" href="/img/icons/apple-touch-icon.png" />
       <link rel="apple-touch-startup-image" href="/img/Logo_TWP.jpg" />
       <link
         rel="mask-icon"
         href="/img/icons/safari-pinned-tab.svg"
-        color="#9BA17B"
+        color="#edf2ff"
       />
     </Head>
   );

@@ -1,5 +1,8 @@
 import { Layout } from "@/components";
 import { ChakraProvider, extendTheme } from "@chakra-ui/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+
+import { Analytics } from "@vercel/analytics/react";
 import { SessionProvider } from "next-auth/react";
 import type { AppProps /*, AppContext */ } from "next/app";
 import { SWRConfig } from "swr";
@@ -20,6 +23,8 @@ export default function MyApp({ Component, pageProps }: AppProps) {
         <SWRConfig value={swr_config_options}>
           <Layout title="PHORM - Prince Hall Online Registry of Merchants">
             <Component {...pageProps} />
+            <Analytics />
+            <SpeedInsights />
           </Layout>
         </SWRConfig>
       </ChakraProvider>

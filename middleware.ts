@@ -7,6 +7,7 @@ export async function middleware(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith("/api/users")) {
     const token = await getToken({ req: request });
     if (!token) {
+      console.warn("auth fail", token, request.nextUrl.pathname);
       return NextResponse.json(
         { success: false, message: "auth fail" },
         {
