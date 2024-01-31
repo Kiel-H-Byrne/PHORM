@@ -33,7 +33,7 @@ const BusinessCard = ({ activeListing }: { activeListing: IListing }) => {
   const ownerID = claimantID || uploaderID;
   const fetchURI = ownerID ? `/api/users/${ownerID}` : null;
   const { data: owner, isLoading } = useSWR(fetchURI);
-  const ownerHasName = owner && 'name' in owner
+  const ownerHasName = owner && "name" in owner;
   const handleOwnerInfoToggle = () => {
     setIsOwnerInfoOpen(!isOwnerInfoOpen);
   };
