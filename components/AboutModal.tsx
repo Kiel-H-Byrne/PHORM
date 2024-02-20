@@ -14,25 +14,6 @@ import {
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { memo, useEffect } from "react";
-import { FaDraftingCompass, FaFistRaised, FaGem } from "react-icons/fa";
-import { FeatureCard } from "./";
-const feats = [
-  {
-    icon: FaGem,
-    heading: "Uncover Hidden Gems",
-    body: "Thoughtfully curated selection of businesses owned by Prince Hall Freemasons. Explore businesses that are deeply rooted in our community and embody our shared values.",
-  },
-  {
-    icon: FaDraftingCompass,
-    heading: "Verified and Trusted",
-    body: "Every business listed in PHORM can be traced back to a named member of the Craft. By engaging with these trusted businesses, you directly contribute to the growth and success of our Prince Hall Masonic community.",
-  },
-  {
-    icon: FaFistRaised,
-    heading: "Empowering Our Brotherhood",
-    body: "Actively contribute to the economic empowerment of our Prince Hall Freemasonry network. Together, we nurture entrepreneurship, create opportunities, and honor the legacy passed down to us by supporting our brethren's endeavors.",
-  },
-];
 
 function AboutModal() {
   const OverlayOne = () => (
@@ -63,7 +44,7 @@ function AboutModal() {
       <ModalContent>
         <ModalCloseButton right={1} />
         <ModalBody>
-          <VStack spacing={3}>
+          <VStack spacing={3} p={{ base: 0, small: 5 }}>
             <Heading
               textAlign="center"
               as={"h1"}
@@ -104,7 +85,8 @@ function AboutModal() {
             </Heading>
             <Stack
               direction={{ base: "column", md: "row" }}
-              spacing={5}
+              px={{ base: 3, sm: 10 }}
+              spacing={10}
               alignItems={"center"}
             >
               <Image
@@ -113,28 +95,20 @@ function AboutModal() {
                 height={{ base: 24, md: 172 }}
                 alt="logo"
               />
-              <Text fontSize="md" mb={7} fontFamily={"body"}>
+              <Text fontSize="lg" fontFamily={"body"}>
                 Welcome to{" "}
                 <Text as="span" fontWeight="bold" color="blue.600">
                   The PHORM
                 </Text>
                 , the premier online directory dedicated to promoting and
                 supporting businesses owned by individuals affiliated with
-                Prince Hall Freemasonry. Immerse yourself in a platform that
-                celebrates our shared bond while showcasing the talents and
+                Prince Hall Freemasonry. Immerse yourself in <i>the</i> platform
+                that celebrates our shared bond while showcasing the talents and
                 offerings of our esteemed PHAmily.
               </Text>
             </Stack>
           </VStack>
-          <Stack direction={{ base: "column", md: "row" }} spacing={4}>
-            {feats.map((feature, i) => {
-              return <FeatureCard key={i} feature={feature} />;
-            })}
-          </Stack>
         </ModalBody>
-        {/* <ModalFooter>
-          <Button onClick={onClose}>Close</Button>
-        </ModalFooter> */}
       </ModalContent>
     </Modal>
   );
