@@ -49,7 +49,6 @@ const MyMarker = ({
     setActiveData([markerData]);
     toggleDrawer();
   };
-  console.log( clusterer, image)
   return (
     <div className="App-marker" key={place_id}>
       <Marker

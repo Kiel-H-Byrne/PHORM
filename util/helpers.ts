@@ -62,7 +62,9 @@ export const checkForOverlaps = (data: IListing[]) => {
   const dupes = Object.values(result).find((el) => el.length > 1);
   return dupes;
 };
-
+export const phoneRegex = new RegExp(
+  /^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-]?[\s]?[0-9])+$/
+);
 const checkForDuplicates = (data: IListing[]) => {
   const result: { [key: string]: IListing[] } = data.reduce((r, a) => {
     if (a.lng && a.lat) {

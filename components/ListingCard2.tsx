@@ -28,7 +28,7 @@ const getLodgeName = ({
 const BusinessCard = ({ activeListing }: { activeListing: IListing }) => {
   const [isOwnerInfoOpen, setIsOwnerInfoOpen] = useState(false);
   const { claims, imageUri, creator } = activeListing;
-  const claimantID = claims?.[0].member.id;
+  const claimantID = claims?.[0]?.member.id;
   const uploaderID = creator?.id;
   const ownerID = claimantID || uploaderID;
   const fetchURI = ownerID ? `/api/users/${ownerID}` : null;

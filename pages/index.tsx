@@ -2,7 +2,7 @@ import { AppMap } from "@/components";
 import { Box, Button, Heading, Text, VStack } from "@chakra-ui/react";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { TbMapPinExclamation } from "react-icons/tb";
+import { TbMapPin2 } from "react-icons/tb";
 const IndexPage = () => {
   const [clientLocation, setClientLocation] = useState(null);
   const [mapInstance, setMapInstance] = useState({} as google.maps.Map);
@@ -68,8 +68,9 @@ const IndexPage = () => {
               right="10"
               top="50%"
               variant="solid"
+              colorScheme="mwphgldc.blue"
               size="lg"
-              rightIcon={TbMapPinExclamation}
+              rightIcon={<TbMapPin2 />}
             >
               View Map
             </Button>
