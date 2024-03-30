@@ -86,6 +86,10 @@ export const camelToSentenceCase = (s: string) => {
   const result = s.replace(/([A-Z])/g, " $1");
   return result.charAt(0).toUpperCase() + result.slice(1);
 };
+export const toSentenceCase = (s: string) => {
+  s = s.toLocaleLowerCase()
+  return s.charAt(0).toUpperCase() + s.slice(1);
+};
 
 function generateRandomUSGeoLocation(): { lat: number; lng: number } {
   // Define boundaries for latitude and longitude for the contiguous United States

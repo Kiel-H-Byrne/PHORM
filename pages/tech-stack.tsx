@@ -148,6 +148,7 @@ export default function TechPage() {
         </Text>
       </Box>
       <VStack spacing={6}>
+        <Section title="Methodologies" techs={methodologiesTech} />
         <Section title="Frontend Technologies" techs={frontendTechs} />
         <Section title="Backend Technologies" techs={backendTechs} />
         <Section
@@ -155,7 +156,6 @@ export default function TechPage() {
           techs={infrastructureTech}
         />
         <Section title="Tooling" techs={toolingTech} />
-        <Section title="Methodologies" techs={methodologiesTech} />
       </VStack>
     </VStack>
   );

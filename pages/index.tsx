@@ -4,6 +4,7 @@ import OnlineListings from "@/components/OnlineListings";
 import { Box, Button, Heading, Text, VStack } from "@chakra-ui/react";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { MdEmojiTransportation, MdShoppingCart } from "react-icons/md";
 import { TbMapPin2 } from "react-icons/tb";
 const IndexPage = () => {
   const [clientLocation, setClientLocation] = useState(null);
@@ -80,7 +81,7 @@ const IndexPage = () => {
         </Box>
 
         {/* Section for Service Professionals */}
-        <Box mt="8" backgroundColor={"mwphgldc.blue.200"}>
+        <Box mt="8" bgColor={"mwphgldc.blue.200"}>
           <Heading as="h2" fontSize="2xl" mb="2" textAlign={"center"} py={4}>
             Service Professionals
           </Heading>
@@ -94,6 +95,8 @@ const IndexPage = () => {
               right={10}
               variant="solid"
               size="lg"
+              rightIcon={<MdEmojiTransportation />}
+
             >
               View Service Professionals
             </Button>
@@ -101,7 +104,7 @@ const IndexPage = () => {
         </Box>
 
         {/* Section for Online Businesses */}
-        <Box mt="8" backgroundColor={"magenta"}>
+        <Box mt="8" bgColor={"mwphgldc.gold"}>
           <Heading as="h2" fontSize="2xl" mb="2" py={4} textAlign={"center"}>
             Online Businesses
           </Heading>
@@ -114,6 +117,8 @@ const IndexPage = () => {
               position={"absolute"}
               top={"50%"}
               right={10}
+              rightIcon={<MdShoppingCart />}
+
             >
               View Online Businesses
             </Button>
