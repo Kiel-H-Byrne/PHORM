@@ -9,7 +9,7 @@ const SocialSchema = z.object({
   twitter: z.string(),
 });
 const OrgSchema = z.object({
-  type: z.enum(['LODGE', 'CHAPTER', 'APPENDANT']), //"lodge" | "chapter" | "appendant"
+  type: z.enum(["LODGE", "CHAPTER", "APPENDANT"]), //"lodge" | "chapter" | "appendant"
   name: z.string(),
   number: z.string(),
   state: z.string(),
@@ -55,7 +55,6 @@ export const ClaimSchema = z.object({
   member: UserSchema,
 });
 
-
 export const ListingsSchema = z
   .object({
     name: z.z.string().min(5),
@@ -82,49 +81,65 @@ export const ListingsSchema = z
     description: z.string(),
     public: z.boolean(),
     categories: z.array(z.string()),
-    phone: z.string().regex(phoneRegex, 'Invalid Phone Number'),
-    // google_id: z.string(),// yelp_id: z.string(),// email: z.string(),// 
+    phone: z.string().regex(phoneRegex, "Invalid Phone Number"),
+    // google_id: z.string(),// yelp_id: z.string(),// email: z.string(),//
     // social: SocialSchema,creator: UserSchema,submitted: z.date(),
     //5 digits max,country: z.string(),
     // ,lng: z.number(),place_id: z.string(),// verifiers: z.array(z.string()),// verifierCount: z.number(),// deVerifiers: z.array(z.string()),// deVerifierCount: z.number(),geoHash: z.string(),imageUri: z.string(),// // places_details: z.object()
-  }).partial()
-  // Perform conditional validation to ensure either a valid email or phone number is provided.
-  .superRefine(({ type, street, zip, url, serviceRadius, city, state }, refinementContext) => {
-    //if type is RETAIL, then make address, lat/long, etc. required
-    //if type is ONLINE, then make url required, 
-    //if type is CONTRACTOR, then make zip,serviceRadius required
-    if (type === (ListingTypeEnum.RETAIL as unknown as string) && !!street && !!zip && !!city && !!state) {
-      return refinementContext.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Must include Address (Street, City, State, Zip)',
-        path: ['street', 'city', 'state', 'zip'],
-      });
-    }
-    if (type === (ListingTypeEnum.ONLINE as unknown as string) && !!url) {
-      return refinementContext.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Must include Url',
-        path: ['url'],
-      });
-    }
-    if (type === (ListingTypeEnum.CONTRACTOR as unknown as string) && !!serviceRadius && !!zip) {
-      return refinementContext.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Must include Zip and Service Radius',
-        path: ['zip', 'serviceRadius'],
-      });
-    }
   })
+  .partial()
+  // Perform conditional validation to ensure either a valid email or phone number is provided.
+  .superRefine(
+    (
+      { type, street, zip, url, serviceRadius, city, state },
+      refinementContext
+    ) => {
+      //if type is RETAIL, then make address, lat/long, etc. required
+      //if type is ONLINE, then make url required,
+      //if type is CONTRACTOR, then make zip,serviceRadius required
+      if (
+        type === (ListingTypeEnum.RETAIL as unknown as string) &&
+        !!street &&
+        !!zip &&
+        !!city &&
+        !!state
+      ) {
+        return refinementContext.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Must include Address (Street, City, State, Zip)",
+          path: ["street", "city", "state", "zip"],
+        });
+      }
+      if (type === (ListingTypeEnum.ONLINE as unknown as string) && !!url) {
+        return refinementContext.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Must include Url",
+          path: ["url"],
+        });
+      }
+      if (
+        type === (ListingTypeEnum.CONTRACTOR as unknown as string) &&
+        !!serviceRadius &&
+        !!zip
+      ) {
+        return refinementContext.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Must include Zip and Service Radius",
+          path: ["zip", "serviceRadius"],
+        });
+      }
+    }
+  )
   .transform((data, ctx) => {
     //make address, and location? and....
-    console.log(ctx)
+    console.log(ctx);
     const { street, city, state, zip } = data;
     const address = `${street} ${city} ${state} ${zip}`;
     data["submitted"] = new Date();
     data["address"] = address;
     // data["geoHash"] = geoHash;
     return data;
-  })
+  });
 
 export const ContractorSchema = z.object({
   name: z.string().min(5),

@@ -60,7 +60,7 @@ const MarkersLayer = async (props: Props) => {
               // icon:
             })
           : null;
-          console.log(marker)
+      console.log(marker);
       // marker.addListener("click", () => {
       //   updateInfoWindow(el.message, marker);
       // });

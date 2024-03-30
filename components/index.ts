@@ -28,6 +28,5 @@ export {
   MyInfoWindow,
   MyMarker,
   MyNav,
-  SingleInfoContent
+  SingleInfoContent,
 };
-

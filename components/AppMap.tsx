@@ -149,7 +149,7 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
         toggleDrawer,
         setWindowOpen,
         isLoaded,
-        isLoading
+        isLoading,
       ]
     );
 

@@ -12,7 +12,7 @@ import {
   query,
   setDoc,
   startAt,
-  where
+  where,
 } from "firebase/firestore";
 import { distanceBetween, geohashQueryBounds } from "geofire-common";
 import { IListing } from "../types";
@@ -21,10 +21,14 @@ import { generateRandomBusinesses } from "./mockData";
 
 const listingsRef = appFsdb ? collection(appFsdb, "listings") : undefined;
 
-export enum ListingTypeEnum { RETAIL = "RETAIL", ONLINE = "ONLINE", CONTRACTOR = "CONTRACTOR" }
+export enum ListingTypeEnum {
+  RETAIL = "RETAIL",
+  ONLINE = "ONLINE",
+  CONTRACTOR = "CONTRACTOR",
+}
 export const ListingTypeList = Object.values(ListingTypeEnum)
   .filter((value) => typeof value === "string")
-  .map((value) => (value as string));
+  .map((value) => value as string);
 
 // == LISTINGS == //
 
@@ -49,20 +53,17 @@ const listingsFetchAll = async function () {
 const listingsFetchByType = async (type: ListingTypeEnum) => {
   console.log("Fetching listings by type", type);
 
-  if (!type || !listingsRef) return
+  if (!type || !listingsRef) return;
   const q = query(listingsRef, where("type", "==", type));
   const querySnapshot = await getDocs(q);
   const returnData: DocumentData[] = [];
   if (!querySnapshot.empty) {
-    querySnapshot.forEach(snapshot =>
-      returnData.push(snapshot.data())
-    )
+    querySnapshot.forEach((snapshot) => returnData.push(snapshot.data()));
+  } else {
+    console.log("NO RESULTS");
   }
-  else {
-    console.log('NO RESULTS')
-  }
-  return returnData
-}
+  return returnData;
+};
 
 const listingsFetchAnonymous = async function () {
   console.log("Fetching anonymous docs", new Date());
@@ -70,7 +71,7 @@ const listingsFetchAnonymous = async function () {
   //push listings with an array of x random businesses, fake data?
   const listings = generateRandomBusinesses(25);
   return listings;
-}
+};
 const listingsFetchById = async function (uid: string) {
   if (!listingsRef) return;
 
@@ -114,7 +115,7 @@ const getListingsWithinRadius = async (
   return listings;
 };
 
-const listingsDelete = function (uid: string) { };
+const listingsDelete = function (uid: string) {};
 
 //  const getMylistings = (uid, dispatch) => {
 //   // eslint-disable-next-line
@@ -140,7 +141,9 @@ const listingsDelete = function (uid: string) { };
 export {
   getListingsWithinRadius,
   listingCreate,
-  listingsDelete, listingsFetchAll,
-  listingsFetchAnonymous, listingsFetchById, listingsFetchByType
+  listingsDelete,
+  listingsFetchAll,
+  listingsFetchAnonymous,
+  listingsFetchById,
+  listingsFetchByType,
 };
-

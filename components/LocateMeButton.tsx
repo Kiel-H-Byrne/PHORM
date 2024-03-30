@@ -32,9 +32,13 @@ import AddListingForm from "./AddListingForm";
 const FloatingButtons = (props: ILocateMe) => {
   // const [clientLocation, setClientLocation] = useState(null); //hoisted
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [closestMarker, setClosestMarker] = useState({} as google.maps.marker.AdvancedMarkerElement);
+  const [closestMarker, setClosestMarker] = useState(
+    {} as google.maps.marker.AdvancedMarkerElement
+  );
   const [geoWatchId, setGeoWatchId] = useState(0);
-  const [clientMarker, setClientMarker] = useState({} as google.maps.marker.AdvancedMarkerElement);
+  const [clientMarker, setClientMarker] = useState(
+    {} as google.maps.marker.AdvancedMarkerElement
+  );
   const [toggleDisplay, setToggleDisplay] = useState(false);
   const { data: session, status } = useSession();
   const { mapInstance, setClientLocation, clientLocation } = props;
@@ -55,9 +59,9 @@ const FloatingButtons = (props: ILocateMe) => {
     title: "User Location:",
     description: `Searching...`,
   });
-// const MarkerIconImg = <Image src="/img/orange_dot_sm_2.png" alt="Orange Marker" /> 
-const markerImg = document.createElement('img');
-markerImg.src="/img/orange_dot_sm_2.png";
+  // const MarkerIconImg = <Image src="/img/orange_dot_sm_2.png" alt="Orange Marker" />
+  const markerImg = document.createElement("img");
+  markerImg.src = "/img/orange_dot_sm_2.png";
   const handleGetLocation = useCallback(() => {
     // const googleWindow: typeof google = (window as any).google;
     //when clicked, find users location. keep finding every x minutes or as position changes. if position doesn't change after x minutes. turn off
@@ -151,7 +155,7 @@ markerImg.src="/img/orange_dot_sm_2.png";
     searchingToast,
     setClientLocation,
     toggleDisplay,
-    markerImg
+    markerImg,
   ]);
 
   const handleOpen = useCallback(() => {

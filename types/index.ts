@@ -22,7 +22,7 @@ export interface IAppMap {
   mapInstance: GoogleMapProps & any;
 }
 export interface ILocateMe {
-  mapInstance: google.maps.Map //| google.maps.StreetViewPanorama;
+  mapInstance: google.maps.Map; //| google.maps.StreetViewPanorama;
   setClientLocation: any; //a usestate fxn returning {latlng};
   clientLocation: GLocation | null;
 }

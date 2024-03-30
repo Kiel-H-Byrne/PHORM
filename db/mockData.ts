@@ -20,17 +20,44 @@ function getRandomInt(min: number, max: number) {
 
 // Function to generate a random business
 function generateRandomBusiness(): any {
-  const cityOptions = ["Baltimore", "Washington", "Arlington", "Alexandria", "Silver Spring"];
+  const cityOptions = [
+    "Baltimore",
+    "Washington",
+    "Arlington",
+    "Alexandria",
+    "Silver Spring",
+  ];
   const stateOptions = ["MD", "DC", "VA"];
-  const streetOptions = ["Main St", "Broadway", "Washington St", "Market St", "Elm St"];
-  const nameOptions = ["ABC Company", "XYZ Corporation", "123 Enterprises", "Smith & Sons", "Johnson LLC"];
-  const descriptionOptions = ["Best in town", "Quality products", "Excellent service", "Family-owned", "Eco-friendly"];
+  const streetOptions = [
+    "Main St",
+    "Broadway",
+    "Washington St",
+    "Market St",
+    "Elm St",
+  ];
+  const nameOptions = [
+    "ABC Company",
+    "XYZ Corporation",
+    "123 Enterprises",
+    "Smith & Sons",
+    "Johnson LLC",
+  ];
+  const descriptionOptions = [
+    "Best in town",
+    "Quality products",
+    "Excellent service",
+    "Family-owned",
+    "Eco-friendly",
+  ];
 
   const randomCity = cityOptions[getRandomInt(0, cityOptions.length - 1)];
   const randomState = stateOptions[getRandomInt(0, stateOptions.length - 1)];
-  const randomStreet = `${getRandomInt(100, 999)} ${streetOptions[getRandomInt(0, streetOptions.length - 1)]}`;
+  const randomStreet = `${getRandomInt(100, 999)} ${
+    streetOptions[getRandomInt(0, streetOptions.length - 1)]
+  }`;
   const randomName = nameOptions[getRandomInt(0, nameOptions.length - 1)];
-  const randomDescription = descriptionOptions[getRandomInt(0, descriptionOptions.length - 1)];
+  const randomDescription =
+    descriptionOptions[getRandomInt(0, descriptionOptions.length - 1)];
 
   return {
     name: randomName,
@@ -61,4 +88,3 @@ function generateRandomBusinesses(count: number): IListing[] {
 }
 
 export { generateRandomBusinesses };
-

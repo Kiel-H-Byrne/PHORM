@@ -107,11 +107,17 @@ const IndexPage = () => {
           </Heading>
           <Box height={"300px"} position={"relative"}>
             <OnlineListings />
-          <Button float="right" variant="solid" size="lg" position={"absolute"} top={"50%"} right={10}>
-            View Online Businesses
-          </Button>
+            <Button
+              float="right"
+              variant="solid"
+              size="lg"
+              position={"absolute"}
+              top={"50%"}
+              right={10}
+            >
+              View Online Businesses
+            </Button>
           </Box>
-
         </Box>
       </Box>
     </Box>
