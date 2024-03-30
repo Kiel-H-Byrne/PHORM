@@ -123,10 +123,7 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
               lng && (
                 <MyMarker
                   key={`${lat}, ${lng}-${markerData.name}`}
-                  //what data can i set on marker?
                   markerData={markerData}
-                  // label={}
-                  // title={}
                   clusterer={clusterer}
                   activeData={activeData}
                   setActiveData={setActiveData}

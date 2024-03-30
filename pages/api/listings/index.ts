@@ -1,12 +1,24 @@
-import { listingCreate, listingsFetchAll } from "@/db/listings";
+import { listingCreate, listingsFetchAll, listingsFetchAnonymous } from "@/db/listings";
 import { MAX_AGE } from "@/util/constants";
+import console from "console";
+import { NextApiRequest, NextApiResponse } from "next";
+import { getToken } from "next-auth/jwt";
 import { IListing } from "../../../types";
 
-const handler = async (req: any, res: any) => {
+const ALLOWED_METHODS = ['GET', 'POST'];
+
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+  const token = await getToken({ req })
+
   const {
     query: { by, limit, lat, lng },
     method,
   } = req;
+  // If the req.method isn't included in the list of allowed methods we return a 405
+  if (!ALLOWED_METHODS.includes(method!) || method == 'OPTIONS') {
+    return res.status(405).send({ message: 'Method not allowed.' });
+  }
+  console.log("token", token);
   switch (method) {
     case "GET":
       const listings =
@@ -14,8 +26,10 @@ const handler = async (req: any, res: any) => {
         //   ? await getListingsWithinRadius(
         //     15, [Number(lat),Number(lng)] ,
         //   ) :
-        await listingsFetchAll();
+        //if not logged in, get randomized data
+        token ? await listingsFetchAll() : await listingsFetchAnonymous();
       if (listings?.length == 0) {
+
         console.log("NO LISTINGS");
       }
       res.setHeader(
@@ -35,7 +49,7 @@ const handler = async (req: any, res: any) => {
       return res.json({ listing: req.body });
       break;
     default:
-      res.setHeader("Allow", ["GET", "POST"]);
+      res.setHeader("Allow", ALLOWED_METHODS);
       res.status(405).end(`Method ${method} Not Allowed`);
   }
 };

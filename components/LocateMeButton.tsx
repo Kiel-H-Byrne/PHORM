@@ -32,9 +32,9 @@ import AddListingForm from "./AddListingForm";
 const FloatingButtons = (props: ILocateMe) => {
   // const [clientLocation, setClientLocation] = useState(null); //hoisted
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [closestMarker, setClosestMarker] = useState({} as google.maps.Marker);
+  const [closestMarker, setClosestMarker] = useState({} as google.maps.marker.AdvancedMarkerElement);
   const [geoWatchId, setGeoWatchId] = useState(0);
-  const [clientMarker, setClientMarker] = useState({} as google.maps.Marker);
+  const [clientMarker, setClientMarker] = useState({} as google.maps.marker.AdvancedMarkerElement);
   const [toggleDisplay, setToggleDisplay] = useState(false);
   const { data: session, status } = useSession();
   const { mapInstance, setClientLocation, clientLocation } = props;
@@ -62,7 +62,7 @@ const FloatingButtons = (props: ILocateMe) => {
     //zoom to position
     //calculate closest listing(s)
     //when user clicks again, turn tracking off.
-    let oldMarker: google.maps.Marker;
+    let oldMarker: google.maps.marker.AdvancedMarkerElement;
     if (!geoWatchId || !clientLocation) {
       searchingToast();
       const location = window.navigator && window.navigator.geolocation;
@@ -75,7 +75,7 @@ const FloatingButtons = (props: ILocateMe) => {
             };
 
             if (Object.keys(clientMarker).length == 0) {
-              let marker = new google.maps.Marker({
+              let marker = new google.maps.marker.AdvancedMarkerElement({
                 position: new google.maps.LatLng(positionObject),
                 map: mapInstance,
                 icon: { url: "/img/orange_dot_sm_2.png" },

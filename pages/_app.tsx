@@ -21,7 +21,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
     <SessionProvider session={pageProps.session}>
       <ChakraProvider theme={theme}>
         <SWRConfig value={swr_config_options}>
-          <Layout title="PHORM - Prince Hall Online Registry of Merchants">
+          <Layout>
             <Component {...pageProps} />
             <Analytics />
             <SpeedInsights />

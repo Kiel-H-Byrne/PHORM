@@ -15,6 +15,7 @@ import {
 import { distanceBetween, geohashQueryBounds } from "geofire-common";
 import { IListing } from "../types";
 import { appFsdb } from "./firebase";
+import { generateRandomBusinesses } from "./mockData";
 
 const listingsRef = appFsdb ? collection(appFsdb, "listings") : undefined;
 
@@ -28,7 +29,7 @@ const listingCreate = async function (data: IListing) {
 
 const listingsFetchAll = async function () {
   if (!listingsRef) return;
-  console.log("Fetching doc", new Date());
+  console.log("Fetching auth docs", new Date());
 
   const querySnapshot = await getDocs(listingsRef);
   const listings: IListing[] = [];
@@ -37,6 +38,15 @@ const listingsFetchAll = async function () {
   });
   return listings;
 };
+
+
+const listingsFetchAnonymous = async function () {
+  console.log("Fetching anonymous docs", new Date());
+  // const listings: IListing[] = [];
+  //push listings with an array of x random businesses, fake data?
+  const listings = generateRandomBusinesses(25);
+  return listings;
+}
 const listingsFetch = async function (query: any) {
   if (!listingsRef) return;
 
@@ -109,4 +119,6 @@ export {
   listingsDelete,
   listingsFetch,
   listingsFetchAll,
+  listingsFetchAnonymous
 };
+

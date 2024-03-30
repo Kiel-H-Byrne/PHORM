@@ -84,3 +84,17 @@ export const camelToSentenceCase = (s: string) => {
   const result = s.replace(/([A-Z])/g, " $1");
   return result.charAt(0).toUpperCase() + result.slice(1);
 };
+
+function generateRandomUSGeoLocation(): { lat: number; lng: number } {
+  // Define boundaries for latitude and longitude for the contiguous United States
+  const minLat = 24.396308; // Southernmost point (Key West, Florida)
+  const maxLat = 49.384358; // Northernmost point (Angle Inlet, Minnesota)
+  const minLng = -125.0; // Westernmost point (Point Arena, California)
+  const maxLng = -66.93457; // Easternmost point (West Quoddy Head, Maine)
+
+  // Generate random latitude and longitude within the defined boundaries
+  const lat = Math.random() * (maxLat - minLat) + minLat;
+  const lng = Math.random() * (maxLng - minLng) + minLng;
+
+  return { lat, lng };
+}
