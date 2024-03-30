@@ -80,7 +80,7 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
   let { center, zoom, options } = default_props;
   const FETCH_MAPPED_LOCATIONS_URI = client_location
     ? `/api/listings?type=RETAIL&lat=${client_location.lat}&lng=${client_location.lng}`
-    : "/api/listings?type=RETAIL&5";
+    : "/api/listings?type=RETAIL";
 
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",

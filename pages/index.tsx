@@ -1,4 +1,6 @@
 import { AppMap } from "@/components";
+import Contractors from "@/components/Contractors";
+import OnlineListings from "@/components/OnlineListings";
 import { Box, Button, Heading, Text, VStack } from "@chakra-ui/react";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -85,7 +87,7 @@ const IndexPage = () => {
           {/* Gallery of service professionals */}
 
           <Box height={"300px"} position={"relative"}>
-            Gallery of Professionals
+            <Contractors radius={10} />
             <Button
               position={"absolute"}
               top={"50%"}
@@ -103,8 +105,8 @@ const IndexPage = () => {
           <Heading as="h2" fontSize="2xl" mb="2" py={4} textAlign={"center"}>
             Online Businesses
           </Heading>
-          {/* Gallery of online businesses */}
-          <Box height={"300px"} position={"relative"}>Gallery of Online
+          <Box height={"300px"} position={"relative"}>
+            <OnlineListings />
           <Button float="right" variant="solid" size="lg" position={"absolute"} top={"50%"} right={10}>
             View Online Businesses
           </Button>

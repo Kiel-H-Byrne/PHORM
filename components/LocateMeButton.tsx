@@ -55,7 +55,9 @@ const FloatingButtons = (props: ILocateMe) => {
     title: "User Location:",
     description: `Searching...`,
   });
-
+// const MarkerIconImg = <Image src="/img/orange_dot_sm_2.png" alt="Orange Marker" /> 
+const markerImg = document.createElement('img');
+markerImg.src="/img/orange_dot_sm_2.png";
   const handleGetLocation = useCallback(() => {
     // const googleWindow: typeof google = (window as any).google;
     //when clicked, find users location. keep finding every x minutes or as position changes. if position doesn't change after x minutes. turn off
@@ -78,7 +80,7 @@ const FloatingButtons = (props: ILocateMe) => {
               let marker = new google.maps.marker.AdvancedMarkerElement({
                 position: new google.maps.LatLng(positionObject),
                 map: mapInstance,
-                icon: { url: "/img/orange_dot_sm_2.png" },
+                content: markerImg,
                 title: "My Location",
                 // animation: googleWindow.maps.Animation.BOUNCE,
               });
@@ -95,8 +97,8 @@ const FloatingButtons = (props: ILocateMe) => {
               setClientMarker(marker);
             } else {
               //MARKER EXISTS, SO WE MOVE IT TO NEW POSITION.
-              clientMarker.setMap(mapInstance);
-              clientMarker.setPosition(positionObject);
+              // clientMarker.setMap(mapInstance);
+              // clientMarker.setPosition(positionObject);
             }
             setClientLocation(positionObject);
             targetClient(mapInstance, positionObject);
@@ -149,6 +151,7 @@ const FloatingButtons = (props: ILocateMe) => {
     searchingToast,
     setClientLocation,
     toggleDisplay,
+    markerImg
   ]);
 
   const handleOpen = useCallback(() => {

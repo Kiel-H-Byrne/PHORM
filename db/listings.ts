@@ -21,10 +21,10 @@ import { generateRandomBusinesses } from "./mockData";
 
 const listingsRef = appFsdb ? collection(appFsdb, "listings") : undefined;
 
-export enum ListingTypeEnum { "RETAIL", "ONLINE", "SERVICE_AREA" }
+export enum ListingTypeEnum { RETAIL = "RETAIL", ONLINE = "ONLINE", CONTRACTOR = "CONTRACTOR" }
 export const ListingTypeList = Object.values(ListingTypeEnum)
   .filter((value) => typeof value === "string")
-  .map((value) => ({ value: value }));
+  .map((value) => (value as string));
 
 // == LISTINGS == //
 
