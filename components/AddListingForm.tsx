@@ -1,20 +1,38 @@
 "use client";
 
+import { ListingTypeEnum, ListingTypeList } from "@/db/listings";
 import { ListingsSchema } from "@/db/schemas";
+import { toSentenceCase } from "@/util/helpers";
 import {
   Box,
   Button,
   FormLabel,
+  HStack,
   Input,
+  Radio,
+  RadioGroup,
   Select,
+  SlideFade,
+  Text,
   useToast,
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { geohashForLocation } from "geofire-common";
 import { useSession } from "next-auth/react";
-import { memo, useCallback, useEffect, useRef } from "react";
-import { Form, useForm } from "react-hook-form";
+import { ReactNode, memo, useCallback, useEffect, useRef } from "react";
+import { FieldError, FieldErrorsImpl, Form, Merge, useForm } from "react-hook-form";
+import { mutate } from "swr";
 import { IListing, StatesEnum } from "../types";
+
+const ValidationMessage = ({
+  children,
+}: {
+  children: ReactNode | FieldError | Merge<FieldError, FieldErrorsImpl<any>>;
+}) => (
+  <Text fontSize={10} color={"red"}>
+    {children}
+  </Text>
+);
 
 const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
   const {
@@ -22,6 +40,8 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
     reset,
     formState: { errors, isSubmitting, isSubmitSuccessful },
     control,
+    watch,
+    setValue,
   } = useForm({
     resolver: zodResolver(ListingsSchema),
     mode: "all",
@@ -33,7 +53,6 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
     //   zip: 12345
     // }
   });
-
   const submitToast = useToast({
     colorScheme: "yellow",
     status: "info",
@@ -94,6 +113,9 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
       const details = await getPlaceDetails(address);
       //combine
       const submitData = { ...data, ...{ creator }, ...details };
+
+      mutate("/api/listings", JSON.stringify(submitData));
+
       await fetch("/api/listings", {
         method: "POST",
         body: JSON.stringify(submitData),
@@ -118,16 +140,24 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
     successToast,
     errors,
   ]);
+  const { onChange } = register("type");
+  const listingTypeValue = watch("type");
+  const valueIsRetail = listingTypeValue === ListingTypeEnum.RETAIL;
+  const valueIsContractor = listingTypeValue === ListingTypeEnum.CONTRACTOR;
+  const valueIsNotOnline = listingTypeValue !== ListingTypeEnum.ONLINE;
 
+  const handleChange = (type: ListingTypeEnum) => {
+    setValue("type", type);
+  };
   return (
     <Box
       borderWidth="1px"
       rounded="lg"
       shadow="1px 1px 3px rgba(0,0,0,0.3)"
-      maxWidth={800}
-      p={6}
-      m="10px auto"
+      p={2}
+      m="0 auto"
     >
+      {/* form fields based on value of "type" */}
       <Form
         onSubmit={submitData}
         encType={"application/json"}
@@ -135,60 +165,134 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
         onError={() => alertToast()}
         control={control}
       >
-        <FormLabel htmlFor="name"> Name</FormLabel>
-        {errors.name && <span>{errors.name.message as string as string}</span>}
+        <FormLabel htmlFor="type">Business Type</FormLabel>
+        <RadioGroup
+          id="type"
+          {...register("type")}
+          onChange={handleChange}
+          aria-invalid={errors.type ? "true" : "false"}
+        >
+          <HStack spacing={2}>
+            {ListingTypeList.map((type) => (
+              <Radio value={type} key={type}>
+                {toSentenceCase(type)}
+              </Radio>
+            ))}
+          </HStack>
+        </RadioGroup>
+
+        <FormLabel htmlFor="name">Business Name</FormLabel>
+        {errors.name && (
+          <ValidationMessage>{errors.name.message}</ValidationMessage>
+        )}
         <Input
           id="name"
           autoComplete={"true"}
           {...register("name")}
           aria-invalid={errors.name ? "true" : "false"}
         />
+        <Box>
+          <FormLabel htmlFor="url">URL</FormLabel>
+          {errors.url && (
+            <ValidationMessage>
+              {errors.url.message as string}
+            </ValidationMessage>
+          )}
 
-        <FormLabel htmlFor="street"> Street</FormLabel>
-        {errors.street && <span>{errors.street.message as string}</span>}
-        <Input
-          id="street"
-          {...register("street")}
-          aria-invalid={errors.street ? "true" : "false"}
-        />
+          <Input
+            id="url"
+            type="number"
+            {...register("url", {
+              valueAsNumber: true,
+            })}
+            aria-invalid={errors.url ? "true" : "false"}
+          />
+        </Box>
+        {valueIsRetail && (
+          <SlideFade in={valueIsRetail}>
+            <FormLabel htmlFor="street">Street</FormLabel>
+            {errors.street && (
+              <ValidationMessage>
+                {errors.street.message as string}
+              </ValidationMessage>
+            )}
+            <Input
+              id="street"
+              {...register("street")}
+              aria-invalid={errors.street ? "true" : "false"}
+            />
 
-        <FormLabel htmlFor="city"> City</FormLabel>
-        {errors.city && <span>{errors.city.message as string}</span>}
-        <Input
-          id="city"
-          {...register("city")}
-          aria-invalid={errors.city ? "true" : "false"}
-        />
+            <FormLabel htmlFor="city">City</FormLabel>
+            {errors.city && (
+              <ValidationMessage>
+                {errors.city.message as string}
+              </ValidationMessage>
+            )}
+            <Input
+              id="city"
+              {...register("city")}
+              aria-invalid={errors.city ? "true" : "false"}
+            />
 
-        <FormLabel htmlFor="state"> State</FormLabel>
-        {errors.state && <span>{errors.state.message as string}</span>}
-        <Select
-          id="state"
-          maxLength={2}
-          autoComplete={"true"}
-          {...register("state")}
-          aria-invalid={errors.state ? "true" : "false"}
-        >
-          {StatesEnum.options.map((state) => (
-            <option value={state} key={state}>
-              {state}
-            </option>
-          ))}
-        </Select>
+            <FormLabel htmlFor="state">State</FormLabel>
+            {errors.state && (
+              <ValidationMessage>
+                {errors.state.message as string}
+              </ValidationMessage>
+            )}
+            <Select
+              id="state"
+              maxLength={2}
+              autoComplete={"true"}
+              {...register("state")}
+              aria-invalid={errors.state ? "true" : "false"}
+            >
+              {StatesEnum.options.map((state) => (
+                <option value={state} key={state}>
+                  {state}
+                </option>
+              ))}
+            </Select>
+          </SlideFade>
+        )}
+        {valueIsNotOnline && (
+          <SlideFade in={valueIsNotOnline}>
+            <FormLabel htmlFor="zip">Zip</FormLabel>
+            {errors.zip && (
+              <ValidationMessage>
+                {errors.zip.message as string}
+              </ValidationMessage>
+            )}
 
-        <FormLabel htmlFor="zip"> Zip</FormLabel>
-        {errors.zip && <span>{errors.zip.message as string}</span>}
-
-        <Input
-          id="zip"
-          type="number"
-          {...register("zip", {
-            valueAsNumber: true,
-          })}
-          aria-invalid={errors.zip ? "true" : "false"}
-        />
-
-        <Box justifyContent={"space-around"}>
+            <Input
+              id="zip"
+              type="number"
+              {...register("zip", {
+                valueAsNumber: true,
+              })}
+              aria-invalid={errors.zip ? "true" : "false"}
+            />
+          </SlideFade>
+        )}
+        {valueIsContractor && (
+          <SlideFade in={valueIsContractor}>
+            <FormLabel htmlFor="serviceRadius">
+              Service Area (in miles from zipcode)
+            </FormLabel>
+            {errors.serviceRadius && (
+              <ValidationMessage>
+                {errors.serviceRadius.message as string}
+              </ValidationMessage>
+            )}
+            <Input
+              id="serviceRadius"
+              {...register("serviceRadius")}
+              type="number"
+              aria-invalid={errors.serviceRadius ? "true" : "false"}
+            />
+          </SlideFade>
+        )}
+        <Box justifyContent={"space-between"} margin="auto">
           <Button type="reset" colorScheme="mwphgldc.blue" variant={"outline"}>
             Reset
           </Button>

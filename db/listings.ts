@@ -28,7 +28,7 @@ export enum ListingTypeEnum {
 }
 export const ListingTypeList = Object.values(ListingTypeEnum)
   .filter((value) => typeof value === "string")
-  .map((value) => value as string);
+  .map((value) => value as ListingTypeEnum);
 
 // == LISTINGS == //
 
@@ -145,5 +145,6 @@ export {
   listingsFetchAll,
   listingsFetchAnonymous,
   listingsFetchById,
-  listingsFetchByType,
+  listingsFetchByType
 };
+

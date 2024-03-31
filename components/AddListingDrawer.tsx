@@ -39,7 +39,7 @@ function AddListingDrawer({
           Add Your Business{" "}
         </DrawerHeader>
 
-        <DrawerBody>
+        <DrawerBody p={2}>
           <AddListingForm onDrawerClose={onDrawerClose} />
         </DrawerBody>
 
