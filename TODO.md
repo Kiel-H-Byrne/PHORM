@@ -1,8 +1,12 @@
-map/browse
-auth
-add biz form (if auth'd)
-edit biz form (if auth'd && entered/owned business)
-edit profile form (if auth'd)
+# TODOs
+
+- [ ] map/browse
+- [-] auth
+- [ ] add biz form (if auth'd)
+- [ ] edit biz form (if auth'd && entered/owned business)
+- [ ] edit profile form (if auth'd)
+- [ ] On Profile page; list other members of your 'class' (year) if registered.
+
 
 <!--
 [Header]
