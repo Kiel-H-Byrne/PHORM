@@ -2,7 +2,7 @@ import MemberFilter from "@/components/MemberFilter";
 import MemberList from "@/components/MemberList";
 import { MemberQuery } from "@/types";
 import fetcher from "@/util/fetch";
-import { CircularProgress, Container, Heading, VStack } from "@chakra-ui/react";
+import { CircularProgress, Container, VStack } from "@chakra-ui/react";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 import useSWR, { mutate } from "swr";
@@ -24,20 +24,23 @@ export default function MemberDirectory() {
     // Trigger revalidate
     mutate("/api/users");
   }
-  return status == "authenticated" ? (
-    <VStack spacing={3} p={4}>
-      <MemberFilter
-        searchParams={searchParams}
-        setSearchParams={setSearchParams}
-        handleSearch={handleSearch}
-      />
-
-      {isLoading && <CircularProgress isIndeterminate />}
-      {!isLoading && <MemberList members={data} />}
-    </VStack>
-  ) : (
+  const isAuthenticated = status == "authenticated";
+  return (
+    <>
     <Container py={10}>
-      <Heading textAlign={"center"}>You must be Logged In</Heading>
+      {isLoading && <CircularProgress isIndeterminate w="full" size={"lg"} m="auto" />}
+      {isAuthenticated && !isLoading && (
+      <VStack spacing={3} p={4}>
+        <MemberFilter
+          searchParams={searchParams}
+          setSearchParams={setSearchParams}
+          handleSearch={handleSearch}
+        />
+        <MemberList members={data} />
+      </VStack>
+      )}
     </Container>
+
+    </>
   );
 }

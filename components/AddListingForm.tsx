@@ -20,7 +20,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { geohashForLocation } from "geofire-common";
 import { useSession } from "next-auth/react";
 import { ReactNode, memo, useCallback, useEffect, useRef } from "react";
-import { FieldError, FieldErrorsImpl, Form, Merge, useForm } from "react-hook-form";
+import {
+  FieldError,
+  FieldErrorsImpl,
+  Form,
+  Merge,
+  useForm,
+} from "react-hook-form";
 import { mutate } from "swr";
 import { IListing, StatesEnum } from "../types";
 
@@ -44,14 +50,7 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
     setValue,
   } = useForm({
     resolver: zodResolver(ListingsSchema),
-    mode: "all",
-    // defaultValues: {
-    //   street: "33 Compass Lane",
-    //   name: "The Square Club",
-    //   city: "Luxe",
-    //   state: "XX",
-    //   zip: 12345
-    // }
+    mode: "onBlur",
   });
   const submitToast = useToast({
     colorScheme: "yellow",
@@ -143,12 +142,14 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
   const { onChange } = register("type");
   const listingTypeValue = watch("type");
   const valueIsRetail = listingTypeValue === ListingTypeEnum.RETAIL;
+  const valueIsNull = listingTypeValue === null;
   const valueIsContractor = listingTypeValue === ListingTypeEnum.CONTRACTOR;
   const valueIsNotOnline = listingTypeValue !== ListingTypeEnum.ONLINE;
 
   const handleChange = (type: ListingTypeEnum) => {
     setValue("type", type);
   };
+  console.log(errors);
   return (
     <Box
       borderWidth="1px"
@@ -166,8 +167,14 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
         control={control}
       >
         <FormLabel htmlFor="type">Business Type</FormLabel>
+        {/* <Box>
+          {Object.values(errors).map((error, i) => (
+            <ValidationMessage key={i}>{error?.message} </ValidationMessage>
+          ))}
+        </Box> */}
         <RadioGroup
           id="type"
+          defaultValue={ListingTypeEnum.RETAIL}
           {...register("type")}
           onChange={handleChange}
           aria-invalid={errors.type ? "true" : "false"}
@@ -201,14 +208,13 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
 
           <Input
             id="url"
-            type="number"
-            {...register("url", {
-              valueAsNumber: true,
-            })}
+            type="url"
+            inputMode="url"
+            {...register("url")}
             aria-invalid={errors.url ? "true" : "false"}
           />
         </Box>
-        {valueIsRetail && (
+        {valueIsRetail && valueIsNull && (
           <SlideFade in={valueIsRetail}>
             <FormLabel htmlFor="street">Street</FormLabel>
             {errors.street && (
@@ -267,6 +273,7 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
             <Input
               id="zip"
               type="number"
+              inputMode="numeric"
               {...register("zip", {
                 valueAsNumber: true,
               })}
@@ -286,7 +293,10 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
             )}
             <Input
               id="serviceRadius"
-              {...register("serviceRadius")}
+              inputMode="numeric"
+              {...register("serviceRadius", {
+                valueAsNumber: true,
+              })}
               type="number"
               aria-invalid={errors.serviceRadius ? "true" : "false"}
             />

@@ -3,9 +3,8 @@ import {
   Button,
   FormControl,
   Input,
-  Select,
   Text,
-  VStack,
+  VStack
 } from "@chakra-ui/react";
 import { useState } from "react";
 export default function MemberFilter({
@@ -20,15 +19,15 @@ export default function MemberFilter({
   const [location, setLocation] = useState("");
 
   return (
-    <VStack>
-      <Text as={"h2"}>Search Member Directory</Text>
+    <VStack spacing={2}>
+      <Text as={"h2"} fontWeight={600} fontSize={'md'}>Search Member Directory</Text>
       <FormControl>
         <Input
           placeholder="Search members"
           value={searchParams.email}
           onChange={(e) => setSearchParams({ email: e.target.value })}
         />
-        <Select
+        {/* <Select
           placeholder="Select location"
           value={location}
           onChange={(e) => setLocation(e.target.value)}
@@ -36,9 +35,9 @@ export default function MemberFilter({
           <option value="DC">Washington, DC</option>
           <option value="MD">Maryland</option>
           <option value="VA">Virginia</option>
-        </Select>
-        <Button onClick={handleSearch}>Search</Button>
+        </Select> */}
       </FormControl>
+        <Button onClick={handleSearch} w="full">Search</Button>
     </VStack>
   );
 }

@@ -70,7 +70,7 @@ export const default_props = {
     gestureHandling: "greedy",
     scrollwheel: true,
     maxZoom: 18,
-    minZoom: 4,
+    minZoom: 9,
     // Map styles; snippets from 'Snazzy Maps'.
     styles: MAP_STYLES.whiteMono,
   },

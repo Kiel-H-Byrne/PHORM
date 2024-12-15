@@ -43,7 +43,7 @@ const IndexPage = () => {
       <Box mx="auto" px="4">
         {/* Description */}
         <VStack spacing="8">
-          <Heading as="h1" fontSize="3xl" textAlign="center" py={4}>
+          <Heading as="h1" fontSize="3xl" textAlign="center" py={3}>
             Welcome to The P.H.O.R.M
           </Heading>
           <Text fontSize="lg" textAlign="center">
@@ -55,11 +55,22 @@ const IndexPage = () => {
         </VStack>
 
         {/* Section for Google Map */}
-        <Box mt="8" backgroundColor={"mwphgldc.blue.100"} width="full">
-          <Heading as="h2" fontSize="2xl" mb="2" textAlign={"center"} py={4}>
+        <Box mt="8">
+          <Heading as="h2" fontSize="2xl" textAlign={"center"} py={3}>
             Physical Retail Locations
           </Heading>
-          <Box position="relative" height={"500px"} width={"full"}>
+          <Text as={"p"} m={"auto"} p={3}>
+            Browse the Brick & Mortar locations of businesses owned (or managed)
+            by PHAmily.
+          </Text>
+          <Box
+            position="relative"
+            height={"500px"}
+            width={"full"}
+            border={"1px solid black"}
+            borderRadius={"md"}
+            p={5}
+          >
             <AppMap
               client_location={clientLocation}
               mapInstance={mapInstance}
@@ -81,13 +92,19 @@ const IndexPage = () => {
         </Box>
 
         {/* Section for Service Professionals */}
-        <Box mt="8" bgColor={"mwphgldc.blue.200"}>
-          <Heading as="h2" fontSize="2xl" mb="2" textAlign={"center"} py={4}>
+        <Box mt="8">
+          <Heading as="h2" fontSize="2xl" mb="2" textAlign={"center"} py={3}>
             Service Professionals
           </Heading>
           {/* Gallery of service professionals */}
 
-          <Box height={"300px"} position={"relative"}>
+          <Box
+            height={"300px"}
+            position={"relative"}
+            border={"1px solid black"}
+            borderRadius={"md"}
+            p={5}
+          >
             <Contractors radius={10} />
             <Button
               position={"absolute"}
@@ -96,7 +113,6 @@ const IndexPage = () => {
               variant="solid"
               size="lg"
               rightIcon={<MdEmojiTransportation />}
-
             >
               View Service Professionals
             </Button>
@@ -104,11 +120,17 @@ const IndexPage = () => {
         </Box>
 
         {/* Section for Online Businesses */}
-        <Box mt="8" bgColor={"mwphgldc.gold"}>
-          <Heading as="h2" fontSize="2xl" mb="2" py={4} textAlign={"center"}>
+        <Box mt="8">
+          <Heading as="h2" fontSize="2xl" mb="2" py={3} textAlign={"center"}>
             Online Businesses
           </Heading>
-          <Box height={"300px"} position={"relative"}>
+          <Box
+            height={"300px"}
+            position={"relative"}
+            border={"1px solid black"}
+            borderRadius={"md"}
+            p={5}
+          >
             <OnlineListings />
             <Button
               float="right"
@@ -118,7 +140,6 @@ const IndexPage = () => {
               top={"50%"}
               right={10}
               rightIcon={<MdShoppingCart />}
-
             >
               View Online Businesses
             </Button>
