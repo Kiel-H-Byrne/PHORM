@@ -22,7 +22,7 @@ const MyMarker = ({
   toggleDrawer,
 }: IMyMarker) => {
   const { lat, lng, place_id } = markerData;
-  if (!lat || !lng) return;
+  if (!lat || !lng) return null;
   let image = {
     url: "/img/orange_marker_sm.png",
   };

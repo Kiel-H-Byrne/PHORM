@@ -124,19 +124,16 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
           fetchData.map((markerData: IListing) => {
             const { lat, lng } = markerData;
             return (
-              lat &&
-              lng && (
-                <MyMarker
-                  key={`${lat}, ${lng}-${markerData.name}`}
-                  markerData={markerData}
-                  clusterer={clusterer}
-                  activeData={activeData}
-                  setActiveData={setActiveData}
-                  setWindowClosed={setWindowClosed}
-                  setWindowOpen={setWindowOpen}
-                  toggleDrawer={toggleDrawer}
-                />
-              )
+              <MyMarker
+                key={`${lat}, ${lng}-${markerData.name}`}
+                markerData={markerData}
+                // clusterer={clusterer}
+                activeData={activeData}
+                setActiveData={setActiveData}
+                setWindowClosed={setWindowClosed}
+                setWindowOpen={setWindowOpen}
+                toggleDrawer={toggleDrawer}
+              />
             );
             // }
           })
@@ -152,7 +149,6 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
         isLoading,
       ]
     );
-
   const handleMouseOverClusterOrMarker = useCallback(
     (e: Cluster) => {
       // detect mouse or touch event, then handle display or not
@@ -223,7 +219,7 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
           />
         )} */}
         {/* {!fetchData && toast(searchToastData)} */}
-        {isLoaded && fetchData?.length !== 0 ? (
+        {isLoaded && fetchData?.length !== 0 && (
           <MarkerClusterer
             styles={CLUSTER_STYLE}
             averageCenter
@@ -231,12 +227,12 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
             onClick={handleClickCluster}
             // onMouseOver={handleMouseOutClusterOrMarker}
             // onMouseOut={handleMouseOutClusterOrMarker}
-            gridSize={2}
-            minimumClusterSize={2}
+            gridSize={60}
+            minimumClusterSize={1}
           >
             {useRenderMarkers}
           </MarkerClusterer>
-        ) : null}
+        )}
 
         {activeData && isWindowOpen && (
           <MyInfoWindow
@@ -317,7 +313,7 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
       {/* <Flex style={{ height: "calc(100% - 106px)" }} /> */}
     </>
   ) : (
-    <Progress />
+    <Progress hasStripe isIndeterminate />
   );
 };
 

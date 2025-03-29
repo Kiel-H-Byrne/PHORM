@@ -25,11 +25,24 @@
 
 ## Discover and Support Local Businesses Owned by PHAmily Members
 
+PHORM is a platform designed to connect users with local businesses owned by members of the Prince Hall community. By fostering visibility and accessibility, PHORM empowers users to discover, support, and celebrate businesses that are part of this vibrant network. Whether you're looking for a specific service or exploring new opportunities to shop locally, PHORM is your gateway to a thriving community of entrepreneurs.
+
+### Key Features
+
+- **Business Directory**: A comprehensive registry of businesses categorized for easy navigation.
+- **Search and Filter**: Quickly find businesses based on location, category, or keywords.
+- **Responsive Design**: Optimized for seamless use across devices, from desktops to smartphones.
+- **Community Engagement**: Highlight and promote businesses o
+
+---
+
+
 <img width="80%" src="https://github.com/Kiel-H-Byrne/PHORM/assets/955269/15413aec-606d-4b9d-bc9b-c7f1d72b8b25" />
+
 
 ## Technologies
 
-The table below gives an overview of the technologies used in this project, as well as places to learn more about them.
+PHORM leverages a modern tech stack to deliver a fast, reliable, and user-friendly experience. Below is an overview of the technologies powering the platform:
 
 | Name            | Links                                                                                                                                                                                                           |
 | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -49,3 +62,11 @@ The table below gives an overview of the technologies used in this project, as w
 | Yarn            | [Website](https://yarnpkg.com/) - [CLI Docs](https://yarnpkg.com/cli) - [GitHub](https://github.com/yarnpkg/berry)                                                                                              |
 | GitHub Actions  | [Website](https://github.com/features/actions) - [Docs](https://docs.github.com/en/actions) - [Workflow syntax](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions)                |
 | Vercel          | [Website](https://vercel.com/) - [Docs](https://vercel.com/docs) - [CLI Docs](https://vercel.com/docs/cli)                                                                                                      |
+
+---
+
+## Why PHORM?
+
+PHORM is more than just a directory—it's a movement to uplift and support a community. By using PHORM, you're not only discovering great businesses but also contributing to the growth and success of Prince Hall entrepreneurs.
+
+Join us in building a stronger, more connected community!

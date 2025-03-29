@@ -30,10 +30,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         lat && lng
           ? await getListingsWithinRadius(15, [Number(lat), Number(lng)])
           : //if not logged in, get randomized data
-          // token &&
-          type
-          ? await listingsFetchByType(type as unknown as ListingTypeEnum)
-          : await listingsFetchAnonymous();
+          token && type
+            ? await listingsFetchByType(type as unknown as ListingTypeEnum)
+            : await listingsFetchAnonymous();
       if (listings?.length == 0) {
         console.log("NO LISTINGS");
       }

@@ -72,6 +72,7 @@ const listingsFetchAnonymous = async function () {
   const listings = generateRandomBusinesses(25);
   return listings;
 };
+
 const listingsFetchById = async function (uid: string) {
   if (!listingsRef) return;
 
@@ -87,6 +88,7 @@ const getListingsWithinRadius = async (
   radiusInM: number,
   center: [number, number]
 ) => {
+  console.log('Fetching within radius')
   const bounds = geohashQueryBounds(center, radiusInM);
   if (!listingsRef) return;
 
@@ -115,7 +117,7 @@ const getListingsWithinRadius = async (
   return listings;
 };
 
-const listingsDelete = function (uid: string) {};
+const listingsDelete = function (uid: string) { };
 
 //  const getMylistings = (uid, dispatch) => {
 //   // eslint-disable-next-line
@@ -145,5 +147,6 @@ export {
   listingsFetchAll,
   listingsFetchAnonymous,
   listingsFetchById,
-  listingsFetchByType,
+  listingsFetchByType
 };
+

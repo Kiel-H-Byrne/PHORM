@@ -1,7 +1,15 @@
 import { AppMap } from "@/components";
 import Contractors from "@/components/Contractors";
 import OnlineListings from "@/components/OnlineListings";
-import { Box, Button, Heading, Text, VStack } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Flex,
+  Heading,
+  Stack,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { MdEmojiTransportation, MdShoppingCart } from "react-icons/md";
@@ -55,7 +63,7 @@ const IndexPage = () => {
         </VStack>
 
         {/* Section for Google Map */}
-        <Box mt="8" backgroundColor={"mwphgldc.blue.100"} width="full">
+        <Box mt="8" backgroundColor={"mwphgldc.blue.100"} width="full" >
           <Heading as="h2" fontSize="2xl" mb="2" textAlign={"center"} py={4}>
             Physical Retail Locations
           </Heading>
@@ -81,14 +89,13 @@ const IndexPage = () => {
         </Box>
 
         {/* Section for Service Professionals */}
-        <Box mt="8" bgColor={"mwphgldc.blue.200"}>
+        <Stack mt="8" bgColor={"mwphgldc.blue.200"}>
           <Heading as="h2" fontSize="2xl" mb="2" textAlign={"center"} py={4}>
             Service Professionals
           </Heading>
           {/* Gallery of service professionals */}
-
-          <Box height={"300px"} position={"relative"}>
-            <Contractors radius={10} />
+          <Contractors radius={10} />
+          <Flex height={"300px"} position={"relative"}>
             <Button
               position={"absolute"}
               top={"50%"}
@@ -96,20 +103,19 @@ const IndexPage = () => {
               variant="solid"
               size="lg"
               rightIcon={<MdEmojiTransportation />}
-
             >
               View Service Professionals
             </Button>
-          </Box>
-        </Box>
+          </Flex>
+        </Stack>
 
         {/* Section for Online Businesses */}
-        <Box mt="8" bgColor={"mwphgldc.gold"}>
+        <Stack mt="8" bgColor={"mwphgldc.gold"} >
           <Heading as="h2" fontSize="2xl" mb="2" py={4} textAlign={"center"}>
             Online Businesses
           </Heading>
-          <Box height={"300px"} position={"relative"}>
-            <OnlineListings />
+          <OnlineListings />
+          <Flex position={"relative"}>
             <Button
               float="right"
               variant="solid"
@@ -118,12 +124,11 @@ const IndexPage = () => {
               top={"50%"}
               right={10}
               rightIcon={<MdShoppingCart />}
-
             >
               View Online Businesses
             </Button>
-          </Box>
-        </Box>
+          </Flex>
+        </Stack>
       </Box>
     </Box>
   );

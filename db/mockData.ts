@@ -52,15 +52,14 @@ function generateRandomBusiness(): any {
 
   const randomCity = cityOptions[getRandomInt(0, cityOptions.length - 1)];
   const randomState = stateOptions[getRandomInt(0, stateOptions.length - 1)];
-  const randomStreet = `${getRandomInt(100, 999)} ${
-    streetOptions[getRandomInt(0, streetOptions.length - 1)]
-  }`;
+  const randomStreet = `${getRandomInt(100, 999)} ${streetOptions[getRandomInt(0, streetOptions.length - 1)]
+    }`;
   const randomName = nameOptions[getRandomInt(0, nameOptions.length - 1)];
   const randomDescription =
     descriptionOptions[getRandomInt(0, descriptionOptions.length - 1)];
 
   return {
-    name: randomName,
+    name: randomName + getRandomInt(100, 999),
     address: `${randomStreet}, ${randomCity}, ${randomState}`,
     street: randomStreet,
     city: randomCity,
@@ -71,7 +70,7 @@ function generateRandomBusiness(): any {
     place_id: `${getRandomInt(1000, 9999)}-${getRandomInt(1000, 9999)}`,
     claims: [],
     claimsCount: getRandomInt(0, 10),
-    imageUri: "https://example.com/image.jpg", // Placeholder image URL
+    imageUri: "https://picsum.photos/seed/357/100/100", // Placeholder image URL
     creator: {}, // Placeholder for user object
     zip: getRandomInt(20000, 29999), // Rough zip code range for the MD/DC/VA area
     description: randomDescription,
