@@ -8,7 +8,9 @@ import FeatureCard from "./FeatureCard";
 import FirebaseAuthUI from "./FirebaseAuthUI";
 import MyInfoWindow from "./InfoWindow";
 import Layout from "./Layout";
+import ListingCard from "./ListingCard";
 import FloatingButtons from "./LocateMeButton";
+import MapSearch from "./MapSearch";
 import MultipleInfoContent from "./MultipleInfoContent";
 import MyAvatar from "./MyAvatar";
 import MyFooter from "./MyFooter";
@@ -16,6 +18,7 @@ import MyMarker from "./MyMarker";
 import MyNav from "./MyNav";
 import ProtectedRoute from "./ProtectedRoute";
 import SingleInfoContent from "./SingleInfoContent";
+import UserDashboard from "./UserDashboard";
 export {
   AboutModal,
   AddListingDrawer,
@@ -26,7 +29,9 @@ export {
   FeatureCard,
   FirebaseAuthUI,
   Layout,
+  ListingCard,
   FloatingButtons as LocateMeButton,
+  MapSearch,
   MultipleInfoContent,
   MyAvatar,
   MyFooter,
@@ -34,6 +39,7 @@ export {
   MyMarker,
   MyNav,
   ProtectedRoute,
-  SingleInfoContent
+  SingleInfoContent,
+  UserDashboard
 };
 

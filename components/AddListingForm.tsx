@@ -1,13 +1,18 @@
 "use client";
 
-import { ListingsSchema } from "@/db/schemas";
 import { useAuth } from "@/contexts/AuthContext";
+import { ListingsSchema } from "@/db/schemas";
 import {
   Box,
   Button,
+  FormControl,
+  FormErrorMessage,
   FormLabel,
+  Grid,
+  Heading,
   Input,
   Select,
+  Textarea,
   useToast,
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -53,6 +58,8 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
     status: "error",
     title: "Form Error",
     description: `Form Error`,
+    duration: 5000,
+    isClosable: true,
   });
 
   const formRef = useRef();
@@ -95,18 +102,49 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
 
   const submitData = useCallback(
     async ({ data }: { data: IListing }) => {
-      //date data, transform, then send.
-      const { city, state, zip, street } = data;
-      const address = `${street} ${city} ${state} ${zip} `;
-      const details = await getPlaceDetails(address);
-      //combine
-      const submitData = { ...data, ...{ creator }, ...details };
-      await fetch("/api/listings", {
-        method: "POST",
-        body: JSON.stringify(submitData),
-      });
+      try {
+        submitToast();
+        //date data, transform, then send.
+        const { city, state, zip, street } = data;
+        const address = `${street} ${city} ${state} ${zip} `;
+        const details = await getPlaceDetails(address);
+
+        // Add description if not provided
+        const description =
+          data.description || `${data.name} located in ${city}, ${state}`;
+
+        //combine
+        const submitData = {
+          ...data,
+          description,
+          creator,
+          ...details,
+          submitted: new Date(),
+          claimsCount: 0,
+          claims: [],
+        };
+
+        const response = await fetch("/api/listings", {
+          method: "POST",
+          body: JSON.stringify(submitData),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error creating listing: ${response.statusText}`);
+        }
+
+        return await response.json();
+      } catch (error) {
+        console.error("Error submitting listing:", error);
+        alertToast({
+          title: "Form Error",
+          description:
+            error instanceof Error ? error.message : "Failed to create listing",
+        });
+        throw error;
+      }
     },
-    [getPlaceDetails, creator]
+    [getPlaceDetails, creator, submitToast, alertToast]
   );
 
   useEffect(() => {
@@ -135,74 +173,131 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
       p={6}
       m="10px auto"
     >
+      <Heading as="h2" size="md" mb={4} textAlign="center">
+        Add New Business Listing
+      </Heading>
+
       <Form
         onSubmit={submitData}
         encType={"application/json"}
-        onSuccess={() => console.log("Firing at all?")}
+        onSuccess={() => console.log("Form submitted successfully")}
         onError={() => alertToast()}
         control={control}
       >
-        <FormLabel htmlFor="name"> Name</FormLabel>
-        {errors.name && <span>{errors.name.message as string as string}</span>}
-        <Input
-          id="name"
-          autoComplete={"true"}
-          {...register("name")}
-          aria-invalid={errors.name ? "true" : "false"}
-        />
+        <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
+          {/* Business Name */}
+          <FormControl isInvalid={!!errors.name} mb={3}>
+            <FormLabel htmlFor="name">Business Name</FormLabel>
+            <Input
+              id="name"
+              placeholder="Enter business name"
+              autoComplete={"true"}
+              {...register("name")}
+            />
+            <FormErrorMessage>
+              {errors.name?.message as string}
+            </FormErrorMessage>
+          </FormControl>
 
-        <FormLabel htmlFor="street"> Street</FormLabel>
-        {errors.street && <span>{errors.street.message as string}</span>}
-        <Input
-          id="street"
-          {...register("street")}
-          aria-invalid={errors.street ? "true" : "false"}
-        />
+          {/* Description */}
+          <FormControl
+            isInvalid={!!errors.description}
+            mb={3}
+            gridColumn={{ md: "span 2" }}
+          >
+            <FormLabel htmlFor="description">Description</FormLabel>
+            <Textarea
+              id="description"
+              placeholder="Enter a brief description of the business"
+              {...register("description")}
+              rows={3}
+            />
+            <FormErrorMessage>
+              {errors.description?.message as string}
+            </FormErrorMessage>
+          </FormControl>
 
-        <FormLabel htmlFor="city"> City</FormLabel>
-        {errors.city && <span>{errors.city.message as string}</span>}
-        <Input
-          id="city"
-          {...register("city")}
-          aria-invalid={errors.city ? "true" : "false"}
-        />
+          {/* Address Section */}
+          <Heading
+            as="h3"
+            size="sm"
+            mb={2}
+            mt={2}
+            gridColumn={{ md: "span 2" }}
+          >
+            Business Address
+          </Heading>
 
-        <FormLabel htmlFor="state"> State</FormLabel>
-        {errors.state && <span>{errors.state.message as string}</span>}
-        <Select
-          id="state"
-          maxLength={2}
-          autoComplete={"true"}
-          {...register("state")}
-          aria-invalid={errors.state ? "true" : "false"}
-        >
-          {StatesEnum.options.map((state) => (
-            <option value={state} key={state}>
-              {state}
-            </option>
-          ))}
-        </Select>
+          {/* Street */}
+          <FormControl
+            isInvalid={!!errors.street}
+            mb={3}
+            gridColumn={{ md: "span 2" }}
+          >
+            <FormLabel htmlFor="street">Street Address</FormLabel>
+            <Input
+              id="street"
+              placeholder="123 Main St"
+              {...register("street")}
+            />
+            <FormErrorMessage>
+              {errors.street?.message as string}
+            </FormErrorMessage>
+          </FormControl>
 
-        <FormLabel htmlFor="zip"> Zip</FormLabel>
-        {errors.zip && <span>{errors.zip.message as string}</span>}
+          {/* City */}
+          <FormControl isInvalid={!!errors.city} mb={3}>
+            <FormLabel htmlFor="city">City</FormLabel>
+            <Input id="city" placeholder="City name" {...register("city")} />
+            <FormErrorMessage>
+              {errors.city?.message as string}
+            </FormErrorMessage>
+          </FormControl>
 
-        <Input
-          id="zip"
-          type="number"
-          {...register("zip", {
-            valueAsNumber: true,
-          })}
-          aria-invalid={errors.zip ? "true" : "false"}
-        />
+          {/* State */}
+          <FormControl isInvalid={!!errors.state} mb={3}>
+            <FormLabel htmlFor="state">State</FormLabel>
+            <Select
+              id="state"
+              placeholder="Select state"
+              {...register("state")}
+            >
+              {StatesEnum.options.map((state) => (
+                <option value={state} key={state}>
+                  {state}
+                </option>
+              ))}
+            </Select>
+            <FormErrorMessage>
+              {errors.state?.message as string}
+            </FormErrorMessage>
+          </FormControl>
 
-        <Box justifyContent={"space-around"}>
-          <Button type="reset" colorScheme="mwphgldc.blue" variant={"outline"}>
+          {/* Zip */}
+          <FormControl isInvalid={!!errors.zip} mb={3}>
+            <FormLabel htmlFor="zip">Zip Code</FormLabel>
+            <Input
+              id="zip"
+              type="number"
+              placeholder="12345"
+              {...register("zip", {
+                valueAsNumber: true,
+              })}
+            />
+            <FormErrorMessage>{errors.zip?.message as string}</FormErrorMessage>
+          </FormControl>
+        </Grid>
+
+        <Box display="flex" justifyContent="space-between" mt={6}>
+          <Button type="reset" colorScheme="gray" variant="outline" width="48%">
             Reset
           </Button>
           <Button
             type="submit"
-            colorScheme="mwphgldc.blue"
+            colorScheme="blue"
+            isLoading={isSubmitting}
             isDisabled={Object.keys(errors).length > 0}
+            width="48%"
           >
             Submit
           </Button>

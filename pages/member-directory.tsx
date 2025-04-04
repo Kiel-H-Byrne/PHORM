@@ -9,8 +9,7 @@ import useSWR, { mutate } from "swr";
 
 export default function MemberDirectory() {
   const [searchParams, setSearchParams] = useState({} as MemberQuery);
-  const { user,  } = useAuth();
-  console.log(user)
+  const { user } = useAuth();
   const { data, isLoading, error } = useSWR(() => {
     const params = new URLSearchParams(searchParams as Record<string, string>);
     return `/api/users?${params}`;
