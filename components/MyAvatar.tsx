@@ -1,3 +1,4 @@
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Avatar,
   Box,
@@ -16,7 +17,6 @@ import {
   PopoverTrigger,
   useDisclosure,
 } from "@chakra-ui/react";
-import { signIn, signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { memo } from "react";
 import {
@@ -28,21 +28,21 @@ import { TbProgress } from "react-icons/tb";
 import { EditProfileModal } from "./EditProfileModal";
 
 const MyAvatar = () => {
-  const { data: session, status } = useSession();
+  const { user, loading, signOut } = useAuth();
   const { push } = useRouter();
-  const { isOpen, onToggle, onOpen, onClose } = useDisclosure();
-  const handleSignOut = () => {
+  const { isOpen, onToggle, onClose } = useDisclosure();
+  const handleSignOut = async () => {
+    await signOut();
     push("/");
-    signOut();
   };
-  const isLoggedIn = status === "authenticated";
+  const isLoggedIn = !!user;
   return (
     <Popover placement="top-start">
       <PopoverTrigger>
         <Box>
-          {isLoggedIn && session?.user?.image ? (
-            <Avatar loading="lazy" src={session.user.image} />
-          ) : status === "loading" ? (
+          {isLoggedIn && user?.photoURL ? (
+            <Avatar loading="lazy" src={user.photoURL} />
+          ) : loading ? (
             <CircularProgress isIndeterminate>
               <CircularProgressLabel>
                 <Icon as={TbProgress} />
@@ -78,11 +78,11 @@ const MyAvatar = () => {
           <HStack justify="space-evenly">
             {isLoggedIn ? (
               <>
-              <Button onClick={handleSignOut}>Sign Out</Button>
-              <Button onClick={onToggle}>Edit Profile</Button>
+                <Button onClick={handleSignOut}>Sign Out</Button>
+                <Button onClick={onToggle}>Edit Profile</Button>
               </>
             ) : (
-              <Button onClick={() => signIn()}>Sign In</Button>
+              <Button onClick={() => push("/auth/login")}>Sign In</Button>
             )}
           </HStack>
           <EditProfileModal

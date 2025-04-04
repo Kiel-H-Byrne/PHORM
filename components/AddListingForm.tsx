@@ -1,6 +1,7 @@
 "use client";
 
 import { ListingsSchema } from "@/db/schemas";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Box,
   Button,
@@ -11,7 +12,6 @@ import {
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { geohashForLocation } from "geofire-common";
-import { useSession } from "next-auth/react";
 import { memo, useCallback, useEffect, useRef } from "react";
 import { Form, useForm } from "react-hook-form";
 import { IListing, StatesEnum } from "../types";
@@ -56,8 +56,15 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
   });
 
   const formRef = useRef();
-  const { data } = useSession();
-  const creator = data?.user;
+  const { user } = useAuth();
+  const creator = user
+    ? {
+        id: user.uid,
+        name: user.displayName,
+        email: user.email,
+        image: user.photoURL,
+      }
+    : null;
   const getPlaceDetails = useCallback(async (address: string) => {
     //  const if all fields filled, make address, pass to geo, create lat/long
     const geocoder = new google.maps.Geocoder();

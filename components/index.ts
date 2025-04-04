@@ -5,6 +5,7 @@ import AppMap from "./AppMap";
 import CondensedCard from "./CondensedCard";
 import CustomHead from "./CustomHead";
 import FeatureCard from "./FeatureCard";
+import FirebaseAuthUI from "./FirebaseAuthUI";
 import MyInfoWindow from "./InfoWindow";
 import Layout from "./Layout";
 import FloatingButtons from "./LocateMeButton";
@@ -13,6 +14,7 @@ import MyAvatar from "./MyAvatar";
 import MyFooter from "./MyFooter";
 import MyMarker from "./MyMarker";
 import MyNav from "./MyNav";
+import ProtectedRoute from "./ProtectedRoute";
 import SingleInfoContent from "./SingleInfoContent";
 export {
   AboutModal,
@@ -22,6 +24,7 @@ export {
   CondensedCard,
   CustomHead,
   FeatureCard,
+  FirebaseAuthUI,
   Layout,
   FloatingButtons as LocateMeButton,
   MultipleInfoContent,
@@ -30,5 +33,7 @@ export {
   MyInfoWindow,
   MyMarker,
   MyNav,
-  SingleInfoContent,
+  ProtectedRoute,
+  SingleInfoContent
 };
+

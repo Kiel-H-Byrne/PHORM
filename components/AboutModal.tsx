@@ -1,3 +1,4 @@
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Heading,
   Image,
@@ -11,7 +12,6 @@ import {
   VStack,
   useDisclosure,
 } from "@chakra-ui/react";
-import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { memo, useEffect } from "react";
 
@@ -24,8 +24,8 @@ function AboutModal() {
   );
 
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { status } = useSession();
-  const isLoggedIn = status === "authenticated";
+  const { user } = useAuth();
+  const isLoggedIn = !!user;
   const currentPath = usePathname();
   const isMainPage = currentPath === "/";
   useEffect(() => {

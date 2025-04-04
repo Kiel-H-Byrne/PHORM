@@ -1,3 +1,4 @@
+import { useAuth } from "@/contexts/AuthContext";
 import { AddIcon, CloseIcon, HamburgerIcon } from "@chakra-ui/icons";
 import {
   Box,
@@ -11,7 +12,7 @@ import {
   useColorModeValue,
   useDisclosure,
 } from "@chakra-ui/react";
-import { signIn, useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 import { memo, useRef } from "react";
 import { AboutModal, AddListingDrawer, MyAvatar } from "./";
 import { AvatarDropdown } from "./AvatarDropdown";
@@ -39,10 +40,11 @@ const MyNav = () => {
   } = useDisclosure();
   const firstField = useRef().current;
 
-  const { status } = useSession();
+  const { user, loading } = useAuth();
+  const router = useRouter();
   const isPrivateLink = (link: { isPrivate: boolean }) => link.isPrivate;
-  const isLoggedIn = status === "authenticated";
-  const isLoading = status === "loading";
+  const isLoggedIn = !!user;
+  const isLoading = loading;
   return (
     <>
       <Box
@@ -83,8 +85,8 @@ const MyNav = () => {
               colorScheme={"mwphgldc.blue"}
               color="#fff"
               onClick={() =>
-                //logged in? add form else signIn
-                isLoggedIn ? onDrawerOpen() : signIn()
+                //logged in? add form else go to login page
+                isLoggedIn ? onDrawerOpen() : router.push("/auth/login")
               }
               size={"sm"}
               mr={4}

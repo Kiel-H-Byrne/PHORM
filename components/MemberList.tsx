@@ -1,18 +1,19 @@
 import { IUser } from "@/types";
 import { AddIcon } from "@chakra-ui/icons";
 import { Button, Card, Heading, Icon, Stack, VStack } from "@chakra-ui/react";
-import { signIn } from "next-auth/react";
+import { useRouter } from "next/router";
 import { BsCollection } from "react-icons/bs";
 import MemberCard from "./MemberCard";
 
 export default function MemberList({ members }: { members: IUser[] }) {
+  const router = useRouter();
   return !members ? (
     <Card align="center" p={3}>
       <Heading pb={3}>No Members Yet...</Heading>
       <Button
         variant={"solid"}
         colorScheme={"mwphgldc.blue"}
-        onClick={() => signIn()}
+        onClick={() => router.push("/auth/login")}
         size={"sm"}
         mr={4}
         leftIcon={<AddIcon />}
