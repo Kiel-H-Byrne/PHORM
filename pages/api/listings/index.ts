@@ -1,6 +1,7 @@
 import { listingCreate, listingsFetchAll } from "@/db/listings";
 import { MAX_AGE } from "@/util/constants";
 import { IListing } from "../../../types";
+import { mockListings } from "../mock-data";
 
 const handler = async (req: any, res: any) => {
   const {
@@ -9,15 +10,21 @@ const handler = async (req: any, res: any) => {
   } = req;
   switch (method) {
     case "GET":
-      const listings =
+      let listings =
         // lat && lng
         //   ? await getListingsWithinRadius(
         //     15, [Number(lat),Number(lng)] ,
         //   ) :
         await listingsFetchAll();
-      if (listings?.length == 0) {
-        console.log("NO LISTINGS");
+
+      // If no listings are found, use mock data
+      if (!listings || listings.length === 0) {
+        console.log("NO LISTINGS, USING MOCK DATA");
+        listings = mockListings;
       }
+
+      // Log the listings for debugging
+      console.log(`Returning ${listings.length} listings`);
       res.setHeader(
         "Cache-Control",
         `public, max-age=${MAX_AGE}, s-maxage=${2 * MAX_AGE}`

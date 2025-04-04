@@ -1,6 +1,7 @@
-import { memo, useCallback, useState } from "react";
+import React, { memo, useCallback, useEffect, useState } from "react";
 
 import fetcher from "@/util/fetch";
+import { loaderOptions } from "@/util/mapLoader";
 import {
   Box,
   Drawer,
@@ -82,10 +83,7 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
     ? `api/listings?lat=${client_location.lat}&lng=${client_location.lng}`
     : "api/listings";
 
-  const { isLoaded } = useJsApiLoader({
-    id: "google-map-script",
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY!,
-  });
+  const { isLoaded } = useJsApiLoader(loaderOptions);
 
   const {
     isOpen: isDrawerOpen,
@@ -107,6 +105,23 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
     loadingTimeout: 1000,
     errorRetryCount: 2,
   });
+
+  // Debug logging
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      console.log("AppMap - fetchData:", fetchData);
+      console.log("AppMap - error:", error);
+
+      if (fetchData && fetchData.length > 0) {
+        console.log("AppMap - First item:", fetchData[0]);
+        console.log(
+          "AppMap - Lat/Lng type:",
+          typeof fetchData[0].lat,
+          typeof fetchData[0].lng
+        );
+      }
+    }
+  }, [fetchData, error]);
 
   const { ToastContainer, toast } = createStandaloneToast();
 
@@ -189,6 +204,33 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
   };
   const responsivePlacement: SlideOptions["direction"] =
     useBreakpointValue({ base: "bottom", md: "left" }) || "left";
+  // Debug component to display data
+  const DebugComponent = () => {
+    if (!fetchData) return <div>No data</div>;
+    return (
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          right: 0,
+          background: "white",
+          padding: "10px",
+          zIndex: 1000,
+        }}
+      >
+        <h3>Debug Info</h3>
+        <p>Data count: {fetchData.length}</p>
+        {fetchData.map((item, index) => (
+          <div key={index}>
+            <p>
+              {item.name} - Lat: {item.lat}, Lng: {item.lng}
+            </p>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   return isLoaded ? (
     <>
       <GoogleMap
