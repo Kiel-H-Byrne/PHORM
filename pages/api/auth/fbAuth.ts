@@ -98,11 +98,20 @@ export function startFirebaseUILogin(containerId: string) {
     }
 
     try {
+        // Check if the container element exists
+        const containerElement = document.getElementById(containerId);
+        if (!containerElement) {
+            console.error(`FirebaseUI container element with ID '${containerId}' not found in the DOM`);
+            throw new Error(`Could not find the FirebaseUI widget element on the page.`);
+        }
+
+        console.log(`Found FirebaseUI container element with ID '${containerId}'`, containerElement);
+
         const ui = getUI();
         if (ui) {
             const config = getUiConfig();
             console.log('Starting FirebaseUI with config:', config);
-            ui.start(containerId, config);
+            ui.start(`#${containerId}`, config);
         } else {
             throw new Error('Firebase UI not initialized');
         }

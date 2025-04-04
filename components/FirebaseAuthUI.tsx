@@ -7,8 +7,14 @@ import { Box, Heading, Text, useToast } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useEffect, useRef } from "react";
 
-// Import CSS for FirebaseUI
-import "firebaseui/dist/firebaseui.css";
+// Import CSS for FirebaseUI - only in browser
+if (typeof window !== "undefined") {
+  try {
+    require("firebaseui/dist/firebaseui.css");
+  } catch (error) {
+    console.error('Error loading FirebaseUI CSS:', error);
+  }
+}
 
 interface FirebaseAuthUIProps {
   title?: string;
@@ -25,8 +31,8 @@ const FirebaseAuthUI = ({
 
   useEffect(() => {
     // Only initialize FirebaseUI if we're in the browser
-    if (typeof window !== "undefined" && authContainerRef.current) {
-      // Delay initialization to ensure Firebase is fully loaded
+    if (typeof window !== "undefined") {
+      // Delay initialization to ensure DOM is fully rendered and Firebase is loaded
       const initTimer = setTimeout(() => {
         try {
           // Check if Firebase Auth is initialized
@@ -36,7 +42,9 @@ const FirebaseAuthUI = ({
             );
           }
 
-          console.log("Firebase Auth initialized:", appAuth);
+          // console.log("Firebase Auth initialized:", appAuth);
+          // console.log("Auth container ref:", authContainerRef.current);
+          // console.log("DOM element by ID:", document.getElementById("firebaseui-auth-container"));
 
           // Start the FirebaseUI Auth flow
           startFirebaseUILogin("firebaseui-auth-container");
@@ -90,7 +98,7 @@ const FirebaseAuthUI = ({
             isClosable: true,
           });
         }
-      }, 500);
+      }, 1000); // Increased delay to 1000ms to ensure DOM is fully rendered
 
       // Return cleanup function for the timer
       return () => {
@@ -117,6 +125,8 @@ const FirebaseAuthUI = ({
         borderWidth="1px"
         borderRadius="lg"
         p={4}
+        minHeight="200px"
+        display="block"
       />
     </Box>
   );
