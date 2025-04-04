@@ -85,6 +85,7 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY!,
+    libraries: ["places", "geometry", "visualization"],
   });
 
   const {
@@ -104,8 +105,8 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
     [] as IListing[] & MarkerExtended[]
   );
   const { data: fetchData, error } = SWR(uri, fetcher, {
-    loadingTimeout: 1000,
-    errorRetryCount: 2,
+    loadingTimeout: 2000,
+    errorRetryCount: 1,
   });
 
   const { ToastContainer, toast } = createStandaloneToast();
@@ -223,13 +224,13 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
         {isLoaded && fetchData?.length !== 0 ? (
           <MarkerClusterer
             styles={CLUSTER_STYLE}
-            averageCenter
             enableRetinaIcons
             onClick={handleClickCluster}
-            // onMouseOver={handleMouseOutClusterOrMarker}
+            // onMouseOver={handleMouseOverClusterOrMarker}
             // onMouseOut={handleMouseOutClusterOrMarker}
-            gridSize={2}
-            minimumClusterSize={2}
+            gridSize={60}
+            minimumClusterSize={1}
+            imagePath="/img/m1.png"
           >
             {useRenderMarkers}
           </MarkerClusterer>

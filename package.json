@@ -31,6 +31,7 @@
     "eslint-config-next": "13.4.6",
     "firebase": "^9.22.2",
     "firebase-admin": "^11.9.0",
+    "firebaseui": "^6.1.0",
     "framer-motion": "^9.0.0",
     "geofire-common": "^6.0.0",
     "next": "13.4.6",

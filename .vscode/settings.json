@@ -1,5 +1,6 @@
 {
   "typescript.tsdk": "node_modules/typescript/lib",
   "cSpell.language": "en,en-US",
-  "cSpell.ignoreWords": ["Fsdb"]
+  "cSpell.ignoreWords": ["Fsdb"],
+  "cSpell.words": ["firebaseui"]
 }
