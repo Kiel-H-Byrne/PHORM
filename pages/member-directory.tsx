@@ -9,7 +9,8 @@ import useSWR, { mutate } from "swr";
 
 export default function MemberDirectory() {
   const [searchParams, setSearchParams] = useState({} as MemberQuery);
-  const { user } = useAuth();
+  const { user,  } = useAuth();
+  console.log(user)
   const { data, isLoading, error } = useSWR(() => {
     const params = new URLSearchParams(searchParams as Record<string, string>);
     return `/api/users?${params}`;
@@ -24,7 +25,7 @@ export default function MemberDirectory() {
     // Trigger revalidate
     mutate("/api/users");
   }
-  return status == "authenticated" ? (
+  return user ? (
     <VStack spacing={3} p={4}>
       <MemberFilter
         searchParams={searchParams}

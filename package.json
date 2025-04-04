@@ -29,7 +29,7 @@
     "@vercel/speed-insights": "^1.0.9",
     "eslint": "8.43.0",
     "eslint-config-next": "13.4.6",
-    "firebase": "^9.22.2",
+    "firebase": "11.6.0",
     "firebase-admin": "^11.9.0",
     "firebaseui": "^6.1.0",
     "framer-motion": "^9.0.0",

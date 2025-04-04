@@ -1,10 +1,20 @@
-import { appAuth } from '@/db/firebase';
-import { EmailAuthProvider, FacebookAuthProvider, GoogleAuthProvider, PhoneAuthProvider } from 'firebase/auth';
+import { phormApp } from '@/db/firebase';
+// Import the compat versions of Firebase
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
 
 // Import firebaseui dynamically to avoid SSR issues
 let firebaseui: any;
+
 if (typeof window !== 'undefined') {
     try {
+        // Initialize Firebase with the same config if it hasn't been initialized yet
+        if (!firebase.apps.length && phormApp) {
+            firebase.initializeApp(phormApp.options);
+            console.log('Firebase compat initialized successfully');
+        }
+
+        // Now load FirebaseUI
         firebaseui = require('firebaseui');
         console.log('FirebaseUI loaded successfully');
     } catch (error) {
@@ -22,7 +32,7 @@ export const getUiConfig = () => {
         signInOptions: [
             // Add phone authentication provider
             {
-                provider: PhoneAuthProvider.PROVIDER_ID,
+                provider: firebase.auth.PhoneAuthProvider.PROVIDER_ID,
                 recaptchaParameters: {
                     type: 'image', // 'audio' or 'image'
                     size: 'normal', // 'invisible' or 'normal'
@@ -32,9 +42,9 @@ export const getUiConfig = () => {
                 whitelistedCountries: ['US', 'CA'] // Only allow US and Canada phone numbers
             },
             // Keep existing providers
-            GoogleAuthProvider.PROVIDER_ID,
-            FacebookAuthProvider.PROVIDER_ID,
-            EmailAuthProvider.PROVIDER_ID
+            firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+            firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+            firebase.auth.EmailAuthProvider.PROVIDER_ID
         ],
         // Other UI options
         signInFlow: 'popup', // or 'redirect'
@@ -65,7 +75,7 @@ export const getUI = () => {
         return null;
     }
 
-    if (!appAuth) {
+    if (!firebase.auth()) {
         console.error('Firebase Auth is not initialized');
         return null;
     }
@@ -79,7 +89,7 @@ export const getUI = () => {
             ui = firebaseui.auth.AuthUI.getInstance(); // Reuse existing instance
         } else {
             console.log('Creating new FirebaseUI instance');
-            ui = new firebaseui.auth.AuthUI(appAuth);
+            ui = new firebaseui.auth.AuthUI(firebase.auth());
         }
 
         return ui;
@@ -117,6 +127,21 @@ export function startFirebaseUILogin(containerId: string) {
         }
     } catch (error) {
         console.error('Error starting FirebaseUI:', error);
+
+        // Log more detailed error information
+        if (error instanceof Error) {
+            console.error('Error code:', (error as any).code);
+            console.error('Error message:', error.message);
+
+            // Check for specific API blocked errors
+            if ((error as any).code === 'auth/internal-error' ||
+                error.message.includes('identitytoolkit') ||
+                error.message.includes('blocked')) {
+                console.error('API restriction error detected. Please check your Firebase project settings.');
+                console.error('This is likely due to API key restrictions in the Google Cloud Console.');
+            }
+        }
+
         throw error; // Re-throw to allow component to handle it
     }
 }
@@ -124,8 +149,8 @@ export function startFirebaseUILogin(containerId: string) {
 // Function to log out the user
 export async function logoutUser() {
     try {
-        if (appAuth) {
-            await appAuth.signOut();
+        if (firebase.auth()) {
+            await firebase.auth().signOut();
             console.log('User logged out successfully');
         }
     } catch (error) {
@@ -135,12 +160,12 @@ export async function logoutUser() {
 
 // Function to get the currently logged-in user
 export function getCurrentUser() {
-    return appAuth ? appAuth.currentUser : null;
+    return firebase.auth ? firebase.auth().currentUser : null;
 }
 
 // Function to get the current Firebase user state
 export function onAuthStateChanged(callback: (user: any) => void) {
-    if (!appAuth) return () => { };
+    if (!firebase.auth()) return () => { };
 
-    return appAuth.onAuthStateChanged(callback);
+    return firebase.auth().onAuthStateChanged(callback);
 }

@@ -11,19 +11,6 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FSDB_MEASUREMENT_ID,
 };
 
-// const firebaseCredentials = {
-//   type: process.env.NEXT_PUBLIC_TEST_type,
-//   projectId: process.env.NEXT_PUBLIC_TEST_project_id,
-//   privateKeyId: process.env.NEXT_PUBLIC_TEST_private_key_id,
-//   privateKey: process.env.NEXT_PUBLIC_TEST_private_key,
-//   clientEmail: process.env.NEXT_PUBLIC_TEST_client_email,
-//   clientId: process.env.NEXT_PUBLIC_TEST_client_id,
-//   authUri: process.env.NEXT_PUBLIC_TEST_auth_uri,
-//   tokenUri: process.env.NEXT_PUBLIC_TEST_token_uri,
-//   authProviderX509CertUrl: process.env.NEXT_PUBLIC_TEST_auth_provider_x509_cert_url,
-//   clientX509CertUrl: process.env.NEXT_PUBLIC_TEST_client_x509_cert_url,
-//   universeDomain: process.env.NEXT_PUBLIC_TEST_universe_domain,
-// }
 let appAuth: Auth | undefined,
   appFsdb: Firestore | undefined,
   phormApp: FirebaseApp | undefined;

@@ -16,6 +16,7 @@ const findUserById = async (userId: string) => {
   if (!usersRef) return;
   const userRef = doc(usersRef, userId);
   const userDoc = await getDoc(userRef);
+  console.log("userDoc", userDoc.data());
   if (userDoc.exists()) {
     return userDoc.data();
   }

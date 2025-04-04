@@ -1,6 +1,7 @@
 // 608da9f19a70cb0805c59923
 
 import { findUserById, updateUserById } from "@/db/users";
+import console from "console";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export default async function userHandler(
@@ -14,6 +15,7 @@ export default async function userHandler(
   switch (method) {
     case "GET":
       try {
+        console.log("userId", userId);
         if (typeof userId === "string") {
           const user = await findUserById(userId);
           res.status(200).json(user);

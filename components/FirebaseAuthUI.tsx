@@ -7,14 +7,8 @@ import { Box, Heading, Text, useToast } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useEffect, useRef } from "react";
 
-// Import CSS for FirebaseUI - only in browser
-if (typeof window !== "undefined") {
-  try {
-    require("firebaseui/dist/firebaseui.css");
-  } catch (error) {
-    console.error('Error loading FirebaseUI CSS:', error);
-  }
-}
+// Import CSS for FirebaseUI
+import "firebaseui/dist/firebaseui.css";
 
 interface FirebaseAuthUIProps {
   title?: string;
@@ -31,79 +25,67 @@ const FirebaseAuthUI = ({
 
   useEffect(() => {
     // Only initialize FirebaseUI if we're in the browser
-    if (typeof window !== "undefined") {
-      // Delay initialization to ensure DOM is fully rendered and Firebase is loaded
-      const initTimer = setTimeout(() => {
-        try {
-          // Check if Firebase Auth is initialized
-          if (!appAuth) {
-            throw new Error(
-              "Firebase Auth is not initialized. Check your Firebase configuration."
-            );
+    if (typeof window !== "undefined" && authContainerRef.current) {
+      try {
+        // Start the FirebaseUI Auth flow
+        startFirebaseUILogin("firebaseui-auth-container");
+
+        // Add event listener for auth state changes
+        const unsubscribe = appAuth?.onAuthStateChanged((user) => {
+          if (user) {
+            // User is signed in
+            // Set auth cookie
+            setAuthCookie(user);
+
+            toast({
+              title: "Sign in successful",
+              description: `Welcome ${
+                user.displayName || user.email || user.phoneNumber || "to PHORM"
+              }!`,
+              status: "success",
+              duration: 5000,
+              isClosable: true,
+            });
+
+            // Redirect to dashboard or home page
+            router.push("/dashboard");
           }
+        });
 
-          // console.log("Firebase Auth initialized:", appAuth);
-          // console.log("Auth container ref:", authContainerRef.current);
-          // console.log("DOM element by ID:", document.getElementById("firebaseui-auth-container"));
+        // Clean up the subscription
+        return () => {
+          if (unsubscribe) unsubscribe();
+        };
+      } catch (error) {
+        console.error("Error initializing Firebase UI:", error);
 
-          // Start the FirebaseUI Auth flow
-          startFirebaseUILogin("firebaseui-auth-container");
+        // Determine if this is an API restriction error
+        let errorMessage =
+          "There was a problem initializing the authentication system. Please try again later.";
 
-          // Add event listener for auth state changes
-          const unsubscribe = appAuth.onAuthStateChanged((user) => {
-            if (user) {
-              // User is signed in
-              // Set auth cookie
-              setAuthCookie(user);
+        if (error instanceof Error) {
+          const errorCode = (error as any).code;
+          console.error("Error code:", errorCode);
+          console.error("Error message:", error.message);
 
-              toast({
-                title: "Sign in successful",
-                description: `Welcome ${
-                  user.displayName || user.email || user.phoneNumber || "to PHORM"
-                }!`,
-                status: "success",
-                duration: 5000,
-                isClosable: true,
-              });
-
-              // Redirect to dashboard or home page
-              router.push("/dashboard");
-            }
-          });
-
-          // Return cleanup function
-          return () => {
-            if (unsubscribe) unsubscribe();
-          };
-        } catch (error) {
-          console.error("Error initializing Firebase UI:", error);
-          // Log more details about the error
-          if (error instanceof Error) {
-            console.error("Error message:", error.message);
-            console.error("Error stack:", error.stack);
+          if (
+            errorCode === "auth/internal-error" ||
+            error.message.includes("identitytoolkit") ||
+            error.message.includes("blocked")
+          ) {
+            errorMessage =
+              "Authentication API access is restricted. Please check your Firebase project settings in the Google Cloud Console.";
           }
-
-          // Log Firebase configuration status
-          console.log(
-            "Firebase Auth status:",
-            appAuth ? "Initialized" : "Not initialized"
-          );
-
-          toast({
-            title: "Authentication Error",
-            description:
-              "There was a problem initializing the authentication system. Please try again later.",
-            status: "error",
-            duration: 5000,
-            isClosable: true,
-          });
         }
-      }, 1000); // Increased delay to 1000ms to ensure DOM is fully rendered
 
-      // Return cleanup function for the timer
-      return () => {
-        clearTimeout(initTimer);
-      };
+        toast({
+          title: "Authentication Error",
+          description: errorMessage,
+          status: "error",
+          duration: 7000,
+          isClosable: true,
+        });
+      }
     }
   }, [router, toast]);
 
@@ -125,8 +107,6 @@ const FirebaseAuthUI = ({
         borderWidth="1px"
         borderRadius="lg"
         p={4}
-        minHeight="200px"
-        display="block"
       />
     </Box>
   );

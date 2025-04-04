@@ -1,3 +1,4 @@
+import { useAuth } from "@/contexts/AuthContext";
 import { ProfileSchema } from "@/db/schemas";
 import { IUser, PHA_LODGES, StatesEnum } from "@/types";
 import fetcher from "@/util/fetch";
@@ -44,13 +45,14 @@ export function EditProfileForm({ onToggle }: { onToggle: () => void }) {
   });
   const keys = Object.keys(FormSchema.keyof().Values);
   const types = FormSchema.shape;
-  console.log(types);
-  const { data: session } = useSession();
+  const { user } = useAuth();
+  console.log(user);
+
   const {
     data: userData,
     mutate,
     isLoading,
-  } = useSWR(`/api/users/${(session?.user as IUser).id}`, fetcher);
+  } = useSWR(`/api/users/${user?.uid}`, fetcher);
 
   const successToast = useToast({
     colorScheme: "green",
@@ -60,7 +62,7 @@ export function EditProfileForm({ onToggle }: { onToggle: () => void }) {
   });
 
   const onSubmit = async (data: Partial<IUser["profile"]>) => {
-    const { ok } = await fetch(`/api/users/${(session?.user as IUser).id}`, {
+    const { ok } = await fetch(`/api/users/${user?.uid}`, {
       method: "POST",
       body: JSON.stringify(data),
     });
