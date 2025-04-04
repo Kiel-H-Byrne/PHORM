@@ -66,7 +66,7 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
       function (results, status) {
         if (status == "OK" && results) {
           // map.setCenter(results[0].geometry.location);
-          // var marker = new google.maps.Marker({
+          // var marker = new google.maps.marker.AdvancedMarkerElement({
           //     map: map,
           //     position: results[0].geometry.location
           // });

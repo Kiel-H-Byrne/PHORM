@@ -1,27 +1,45 @@
-import { listingCreate, listingsFetchAll } from "@/db/listings";
-import { MAX_AGE } from "@/util/constants";
+import {
+  ListingTypeEnum,
+  getListingsWithinRadius,
+  listingCreate,
+  listingsFetchAnonymous,
+  listingsFetchByType,
+} from "@/db/listings";
+import console from "console";
+import { NextApiRequest, NextApiResponse } from "next";
+import { getToken } from "next-auth/jwt";
 import { IListing } from "../../../types";
 
-const handler = async (req: any, res: any) => {
+const ALLOWED_METHODS = ["GET", "POST"];
+
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+  const token = await getToken({ req });
+
   const {
-    query: { by, limit, lat, lng },
+    query: { by, limit, lat, lng, type },
     method,
   } = req;
+  // If the req.method isn't included in the list of allowed methods we return a 405
+  if (!ALLOWED_METHODS.includes(method!) || method == "OPTIONS") {
+    return res.status(405).send({ message: "Method not allowed." });
+  }
+
   switch (method) {
     case "GET":
       const listings =
-        // lat && lng
-        //   ? await getListingsWithinRadius(
-        //     15, [Number(lat),Number(lng)] ,
-        //   ) :
-        await listingsFetchAll();
+        lat && lng
+          ? await getListingsWithinRadius(15, [Number(lat), Number(lng)])
+          : //if not logged in, get randomized data
+          token && type
+            ? await listingsFetchByType(type as unknown as ListingTypeEnum)
+            : await listingsFetchAnonymous();
       if (listings?.length == 0) {
         console.log("NO LISTINGS");
       }
-      res.setHeader(
-        "Cache-Control",
-        `public, max-age=${MAX_AGE}, s-maxage=${2 * MAX_AGE}`
-      );
+      // res.setHeader(
+      //   "Cache-Control",
+      //   `public, max-age=${MAX_AGE}, s-maxage=${2 * MAX_AGE}`
+      // );
       res.send(listings);
       break;
     case "POST":
@@ -35,7 +53,7 @@ const handler = async (req: any, res: any) => {
       return res.json({ listing: req.body });
       break;
     default:
-      res.setHeader("Allow", ["GET", "POST"]);
+      res.setHeader("Allow", ALLOWED_METHODS);
       res.status(405).end(`Method ${method} Not Allowed`);
   }
 };

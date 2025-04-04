@@ -11,10 +11,11 @@ import {
   HStack,
   IconButton,
   Image,
+  Link,
   Text,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import { MdDirections, MdShare } from "react-icons/md";
+import { MdDirections, MdOpenInNew, MdShare } from "react-icons/md";
 import useSWR from "swr";
 
 const getLodgeName = ({
@@ -27,8 +28,8 @@ const getLodgeName = ({
 
 const BusinessCard = ({ activeListing }: { activeListing: IListing }) => {
   const [isOwnerInfoOpen, setIsOwnerInfoOpen] = useState(false);
-  const { claims, imageUri, creator } = activeListing;
-  const claimantID = claims?.[0].member.id;
+  const { claims, imageUri, creator, name, url, address } = activeListing;
+  const claimantID = claims?.[0]?.member.id;
   const uploaderID = creator?.id;
   const ownerID = claimantID || uploaderID;
   const fetchURI = ownerID ? `/api/users/${ownerID}` : null;
@@ -54,11 +55,18 @@ const BusinessCard = ({ activeListing }: { activeListing: IListing }) => {
       <Box>
         <CardBody>
           <Text fontWeight="bold" fontSize="lg">
-            {activeListing.name}
+            {name}
           </Text>
-          <Text fontSize="sm" color="gray.600">
-            {activeListing.address}
-          </Text>
+          {address && (
+            <Text fontSize="sm" color="gray.600">
+              {address}
+            </Text>
+          )}
+          {url && (
+            <Text fontSize="sm" color="gray.600">
+              {url}
+            </Text>
+          )}
           {/* Owner Information Dropdown */}
           {ownerHasName && (
             <>
@@ -96,19 +104,35 @@ const BusinessCard = ({ activeListing }: { activeListing: IListing }) => {
               </Collapse>
             </>
           )}
+          {}
         </CardBody>
         <CardFooter>
           {/* Call to Action Buttons */}
           <HStack align="center" mt="4">
-            <Button
-              leftIcon={<MdDirections />}
-              colorScheme="blue"
-              size="sm"
-              rounded="full"
-              // onClick={directions}
-            >
-              Directions
-            </Button>
+            {address && (
+              <Button
+                leftIcon={<MdDirections />}
+                colorScheme="blue"
+                size="sm"
+                rounded="full"
+                // onClick={directions}
+              >
+                Directions
+              </Button>
+            )}
+            {url && (
+              <Link href={url} target="_blank">
+                <Button
+                  leftIcon={<MdOpenInNew />}
+                  colorScheme="teal"
+                  size="sm"
+                  rounded="full"
+                  // onClick={share}
+                >
+                  Visit
+                </Button>
+              </Link>
+            )}
 
             <Button
               leftIcon={<MdShare />}

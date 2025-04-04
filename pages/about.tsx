@@ -1,5 +1,6 @@
 import { FeatureCard } from "@/components";
-import { Heading, Stack, Text } from "@chakra-ui/react";
+import { Box, Button, Heading, Stack, Text, VStack } from "@chakra-ui/react";
+import Head from "next/head";
 import { FaDraftingCompass, FaFistRaised, FaGem } from "react-icons/fa";
 
 const feats = [
@@ -22,23 +23,36 @@ const feats = [
 
 const AboutPage = () => {
   return (
-    <>
-      <Heading>About The PHORM:</Heading>
-      <Text as="p">
-        Discover more about our mission, commitment, and the unique advantages
-        of being part of our online registry.
-      </Text>
-      <Text as="p">
-        Get Listed: Are you a business owner affiliated with Prince Hall
-        Freemasonry? Join The PHORM to showcase your enterprise, connect with
-        our community, and expand your reach.
-      </Text>
-      <Stack direction={{ base: "column", md: "row" }} spacing={4}>
-            {feats.map((feature, i) => {
-              return <FeatureCard key={i} feature={feature} />;
-            })}
-          </Stack>
-    </>
+    <Box>
+      <Head>
+        <title>About The PHORM</title>
+      </Head>
+      <VStack maxW={"3xl"} mx={"auto"} my={4}>
+        <Heading as={"h2"}>About The PHORM:</Heading>
+        <Text fontSize="lg" fontFamily={"body"}>
+          The premier online directory dedicated to promoting and supporting
+          businesses owned by individuals affiliated with Prince Hall
+          Freemasonry. Immerse yourself in <i>the</i> platform that celebrates
+          our shared bond while showcasing the talents and offerings of our
+          esteemed PHAmily.
+        </Text>
+
+        <Stack direction={{ base: "column", md: "row" }} spacing={4}>
+          {feats.map((feature, i) => {
+            return <FeatureCard key={i} feature={feature} />;
+          })}
+        </Stack>
+      </VStack>
+      <VStack maxW={"3xl"} mx={"auto"} my={4}>
+        <Heading as={"h2"}> Join the PHORM:</Heading>
+        <Text as="p">
+          Are you a business owner affiliated with Prince Hall Freemasonry? Join
+          The PHORM to showcase your business, connect with our community, and
+          expand your reach.
+        </Text>
+        <Button>Get Listed</Button>
+      </VStack>
+    </Box>
   );
 };
 

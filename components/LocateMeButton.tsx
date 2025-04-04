@@ -32,9 +32,13 @@ import AddListingForm from "./AddListingForm";
 const FloatingButtons = (props: ILocateMe) => {
   // const [clientLocation, setClientLocation] = useState(null); //hoisted
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [closestMarker, setClosestMarker] = useState({} as google.maps.Marker);
+  const [closestMarker, setClosestMarker] = useState(
+    {} as google.maps.marker.AdvancedMarkerElement
+  );
   const [geoWatchId, setGeoWatchId] = useState(0);
-  const [clientMarker, setClientMarker] = useState({} as google.maps.Marker);
+  const [clientMarker, setClientMarker] = useState(
+    {} as google.maps.marker.AdvancedMarkerElement
+  );
   const [toggleDisplay, setToggleDisplay] = useState(false);
   const { data: session, status } = useSession();
   const { mapInstance, setClientLocation, clientLocation } = props;
@@ -55,14 +59,16 @@ const FloatingButtons = (props: ILocateMe) => {
     title: "User Location:",
     description: `Searching...`,
   });
-
+  // const MarkerIconImg = <Image src="/img/orange_dot_sm_2.png" alt="Orange Marker" />
+  const markerImg = document.createElement("img");
+  markerImg.src = "/img/orange_dot_sm_2.png";
   const handleGetLocation = useCallback(() => {
     // const googleWindow: typeof google = (window as any).google;
     //when clicked, find users location. keep finding every x minutes or as position changes. if position doesn't change after x minutes. turn off
     //zoom to position
     //calculate closest listing(s)
     //when user clicks again, turn tracking off.
-    let oldMarker: google.maps.Marker;
+    let oldMarker: google.maps.marker.AdvancedMarkerElement;
     if (!geoWatchId || !clientLocation) {
       searchingToast();
       const location = window.navigator && window.navigator.geolocation;
@@ -75,10 +81,10 @@ const FloatingButtons = (props: ILocateMe) => {
             };
 
             if (Object.keys(clientMarker).length == 0) {
-              let marker = new google.maps.Marker({
+              let marker = new google.maps.marker.AdvancedMarkerElement({
                 position: new google.maps.LatLng(positionObject),
                 map: mapInstance,
-                icon: { url: "/img/orange_dot_sm_2.png" },
+                content: markerImg,
                 title: "My Location",
                 // animation: googleWindow.maps.Animation.BOUNCE,
               });
@@ -95,8 +101,8 @@ const FloatingButtons = (props: ILocateMe) => {
               setClientMarker(marker);
             } else {
               //MARKER EXISTS, SO WE MOVE IT TO NEW POSITION.
-              clientMarker.setMap(mapInstance);
-              clientMarker.setPosition(positionObject);
+              // clientMarker.setMap(mapInstance);
+              // clientMarker.setPosition(positionObject);
             }
             setClientLocation(positionObject);
             targetClient(mapInstance, positionObject);
@@ -149,6 +155,7 @@ const FloatingButtons = (props: ILocateMe) => {
     searchingToast,
     setClientLocation,
     toggleDisplay,
+    markerImg,
   ]);
 
   const handleOpen = useCallback(() => {

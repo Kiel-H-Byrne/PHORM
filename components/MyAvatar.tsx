@@ -78,8 +78,8 @@ const MyAvatar = () => {
           <HStack justify="space-evenly">
             {isLoggedIn ? (
               <>
-              <Button onClick={handleSignOut}>Sign Out</Button>
-              <Button onClick={onToggle}>Edit Profile</Button>
+                <Button onClick={handleSignOut}>Sign Out</Button>
+                <Button onClick={onToggle}>Edit Profile</Button>
               </>
             ) : (
               <Button onClick={() => signIn()}>Sign In</Button>

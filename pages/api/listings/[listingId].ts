@@ -1,4 +1,4 @@
-import { listingsFetch } from "@/db/listings";
+import { listingsFetchById } from "@/db/listings";
 import { MAX_AGE } from "../../../util/constants";
 
 const handler = async (req: any, res: any) => {
@@ -11,7 +11,7 @@ const handler = async (req: any, res: any) => {
   console.log(req.query);
   switch (method) {
     case "GET":
-      const listings = await listingsFetch("0");
+      const listings = await listingsFetchById("0");
       console.log("await fetching...");
       console.log(listings);
       if (req.query.from && listings?.length > 0) {

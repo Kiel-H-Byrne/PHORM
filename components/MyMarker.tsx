@@ -22,8 +22,7 @@ const MyMarker = ({
   toggleDrawer,
 }: IMyMarker) => {
   const { lat, lng, place_id } = markerData;
-  // location ? (loc = location.split(",")) : (loc = "50.60982,-1.34987");
-  // let locObj = { lat: parseFloat(loc[0]), lng: parseFloat(loc[1]) };
+  if (!lat || !lng) return null;
   let image = {
     url: "/img/orange_marker_sm.png",
   };
@@ -53,8 +52,8 @@ const MyMarker = ({
   return (
     <div className="App-marker" key={place_id}>
       <Marker
-        position={{ lat: lat!, lng: lng! }}
-        clusterer={clusterer}
+        position={{ lat: lat, lng: lng }}
+        // clusterer={clusterer}
         icon={image}
         onMouseOver={handleMouseOverMarker}
         onMouseOut={handleMouseOut}

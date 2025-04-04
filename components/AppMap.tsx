@@ -34,7 +34,7 @@ import {
   MarkerExtended,
 } from "@react-google-maps/marker-clusterer";
 import { MdInfoOutline } from "react-icons/md";
-import SWR from "swr";
+import useSWR from "swr";
 import { GLocation, IAppMap, IListing } from "../types";
 import { CLUSTER_STYLE, GEOCENTER, MAP_STYLES } from "../util/constants";
 import { MyInfoWindow, MyMarker } from "./";
@@ -78,9 +78,9 @@ export const default_props = {
 
 const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
   let { center, zoom, options } = default_props;
-  const uri = client_location
-    ? `api/listings?lat=${client_location.lat}&lng=${client_location.lng}`
-    : "api/listings";
+  const FETCH_MAPPED_LOCATIONS_URI = client_location
+    ? `/api/listings?type=RETAIL&lat=${client_location.lat}&lng=${client_location.lng}`
+    : "/api/listings?type=RETAIL";
 
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
@@ -103,11 +103,15 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
   const [activeData, setActiveData] = useState(
     [] as IListing[] & MarkerExtended[]
   );
-  const { data: fetchData, error } = SWR(uri, fetcher, {
-    loadingTimeout: 1000,
+  const {
+    data: fetchData,
+    error,
+    isLoading,
+  } = useSWR(FETCH_MAPPED_LOCATIONS_URI, fetcher, {
+    loadingTimeout: 2000,
     errorRetryCount: 2,
   });
-
+  // if (error) console.error(error)
   const { ToastContainer, toast } = createStandaloneToast();
 
   const useRenderMarkers: (clusterer: Clusterer) => React.ReactElement =
@@ -115,26 +119,21 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
       (clusterer) => {
         return (
           isLoaded &&
+          !isLoading &&
           fetchData &&
           fetchData.map((markerData: IListing) => {
             const { lat, lng } = markerData;
             return (
-              lat &&
-              lng && (
-                <MyMarker
-                  key={`${lat}, ${lng}-${markerData.name}`}
-                  //what data can i set on marker?
-                  markerData={markerData}
-                  // label={}
-                  // title={}
-                  clusterer={clusterer}
-                  activeData={activeData}
-                  setActiveData={setActiveData}
-                  setWindowClosed={setWindowClosed}
-                  setWindowOpen={setWindowOpen}
-                  toggleDrawer={toggleDrawer}
-                />
-              )
+              <MyMarker
+                key={`${lat}, ${lng}-${markerData.name}`}
+                markerData={markerData}
+                // clusterer={clusterer}
+                activeData={activeData}
+                setActiveData={setActiveData}
+                setWindowClosed={setWindowClosed}
+                setWindowOpen={setWindowOpen}
+                toggleDrawer={toggleDrawer}
+              />
             );
             // }
           })
@@ -147,9 +146,9 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
         toggleDrawer,
         setWindowOpen,
         isLoaded,
+        isLoading,
       ]
     );
-
   const handleMouseOverClusterOrMarker = useCallback(
     (e: Cluster) => {
       // detect mouse or touch event, then handle display or not
@@ -220,7 +219,7 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
           />
         )} */}
         {/* {!fetchData && toast(searchToastData)} */}
-        {isLoaded && fetchData?.length !== 0 ? (
+        {isLoaded && fetchData?.length !== 0 && (
           <MarkerClusterer
             styles={CLUSTER_STYLE}
             averageCenter
@@ -228,12 +227,12 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
             onClick={handleClickCluster}
             // onMouseOver={handleMouseOutClusterOrMarker}
             // onMouseOut={handleMouseOutClusterOrMarker}
-            gridSize={2}
-            minimumClusterSize={2}
+            gridSize={60}
+            minimumClusterSize={1}
           >
             {useRenderMarkers}
           </MarkerClusterer>
-        ) : null}
+        )}
 
         {activeData && isWindowOpen && (
           <MyInfoWindow
@@ -314,7 +313,7 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
       {/* <Flex style={{ height: "calc(100% - 106px)" }} /> */}
     </>
   ) : (
-    <Progress />
+    <Progress hasStripe isIndeterminate />
   );
 };
 

@@ -11,12 +11,17 @@ interface Props {
 
 const InfoWindow = () => <Box width="container.sm">InfoWIndow Content</Box>;
 
-const MarkersLayer = (props: Props) => {
+const MarkersLayer = async (props: Props) => {
   const { mapInstance, clientLocation } = props;
   const [infoContent, setInfoContent] = useState("");
+  const { AdvancedMarkerElement } = (await google.maps.importLibrary(
+    "marker"
+  )) as google.maps.MarkerLibrary;
+
   //make api call using user's location
   const uri = `api/listings?lat=${clientLocation.lat}&lng=${clientLocation.lng}`;
   const { data, error } = useSWR(uri, fetcher);
+
   const infoWindow = new (window as any).google.maps.InfoWindow({
     content: infoContent,
     // content: '<div id="infoWindow" />',
@@ -24,7 +29,10 @@ const MarkersLayer = (props: Props) => {
     position: { lat: 0, lng: 0 },
   });
 
-  const updateInfoWindow = (content: string, marker: google.maps.Marker) => {
+  const updateInfoWindow = (
+    content: string,
+    marker: google.maps.marker.AdvancedMarkerElement
+  ) => {
     // infoWindow.setContent(content)
     setInfoContent(content);
     infoWindow.open({
@@ -43,12 +51,16 @@ const MarkersLayer = (props: Props) => {
   if (!clientLocation) return;
   data &&
     data.pullups.forEach((el: IListing) => {
-      const marker = new (window as any).google.maps.Marker({
-        position: { lat: el.lat, lng: el.lng },
-        map: mapInstance,
-        // title: el.title
-        // icon:
-      });
+      const marker =
+        el.lat && el.lng
+          ? new AdvancedMarkerElement({
+              position: { lat: el.lat, lng: el.lng },
+              map: mapInstance,
+              // title: el.title
+              // icon:
+            })
+          : null;
+      console.log(marker);
       // marker.addListener("click", () => {
       //   updateInfoWindow(el.message, marker);
       // });

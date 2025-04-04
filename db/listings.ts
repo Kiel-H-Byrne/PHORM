@@ -1,6 +1,7 @@
 // import * as firebase from "firebase/app"
 // import "firebase/firestore"
 
+import { DocumentData } from "firebase-admin/firestore";
 import {
   collection,
   doc,
@@ -11,12 +12,23 @@ import {
   query,
   setDoc,
   startAt,
+  where,
 } from "firebase/firestore";
 import { distanceBetween, geohashQueryBounds } from "geofire-common";
 import { IListing } from "../types";
 import { appFsdb } from "./firebase";
+import { generateRandomBusinesses } from "./mockData";
 
 const listingsRef = appFsdb ? collection(appFsdb, "listings") : undefined;
+
+export enum ListingTypeEnum {
+  RETAIL = "RETAIL",
+  ONLINE = "ONLINE",
+  CONTRACTOR = "CONTRACTOR",
+}
+export const ListingTypeList = Object.values(ListingTypeEnum)
+  .filter((value) => typeof value === "string")
+  .map((value) => value as string);
 
 // == LISTINGS == //
 
@@ -28,7 +40,7 @@ const listingCreate = async function (data: IListing) {
 
 const listingsFetchAll = async function () {
   if (!listingsRef) return;
-  console.log("Fetching doc", new Date());
+  console.log("Fetching auth docs", new Date());
 
   const querySnapshot = await getDocs(listingsRef);
   const listings: IListing[] = [];
@@ -37,10 +49,34 @@ const listingsFetchAll = async function () {
   });
   return listings;
 };
-const listingsFetch = async function (query: any) {
+
+const listingsFetchByType = async (type: ListingTypeEnum) => {
+  console.log("Fetching listings by type", type);
+
+  if (!type || !listingsRef) return;
+  const q = query(listingsRef, where("type", "==", type));
+  const querySnapshot = await getDocs(q);
+  const returnData: DocumentData[] = [];
+  if (!querySnapshot.empty) {
+    querySnapshot.forEach((snapshot) => returnData.push(snapshot.data()));
+  } else {
+    console.log("NO RESULTS");
+  }
+  return returnData;
+};
+
+const listingsFetchAnonymous = async function () {
+  console.log("Fetching anonymous docs", new Date());
+  // const listings: IListing[] = [];
+  //push listings with an array of x random businesses, fake data?
+  const listings = generateRandomBusinesses(25);
+  return listings;
+};
+
+const listingsFetchById = async function (uid: string) {
   if (!listingsRef) return;
 
-  const docRef = doc(listingsRef, query);
+  const docRef = doc(listingsRef, uid);
   const docSnap = await getDoc(docRef);
   if (docSnap.exists()) {
     return docSnap.data();
@@ -52,6 +88,7 @@ const getListingsWithinRadius = async (
   radiusInM: number,
   center: [number, number]
 ) => {
+  console.log('Fetching within radius')
   const bounds = geohashQueryBounds(center, radiusInM);
   if (!listingsRef) return;
 
@@ -80,9 +117,9 @@ const getListingsWithinRadius = async (
   return listings;
 };
 
-const listingsDelete = function (uid: string) {};
+const listingsDelete = function (uid: string) { };
 
-// export const getMylistings = (uid, dispatch) => {
+//  const getMylistings = (uid, dispatch) => {
 //   // eslint-disable-next-line
 //   let listingsRef;
 
@@ -107,6 +144,9 @@ export {
   getListingsWithinRadius,
   listingCreate,
   listingsDelete,
-  listingsFetch,
   listingsFetchAll,
+  listingsFetchAnonymous,
+  listingsFetchById,
+  listingsFetchByType
 };
+

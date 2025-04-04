@@ -9,6 +9,7 @@ import {
   VStack,
   useColorModeValue,
 } from "@chakra-ui/react";
+import { IconType } from "react-icons";
 import { DiResponsive } from "react-icons/di";
 import { GiAmericanFootballHelmet, GiSittingDog } from "react-icons/gi";
 import {
@@ -147,6 +148,7 @@ export default function TechPage() {
         </Text>
       </Box>
       <VStack spacing={6}>
+        <Section title="Methodologies" techs={methodologiesTech} />
         <Section title="Frontend Technologies" techs={frontendTechs} />
         <Section title="Backend Technologies" techs={backendTechs} />
         <Section
@@ -154,7 +156,6 @@ export default function TechPage() {
           techs={infrastructureTech}
         />
         <Section title="Tooling" techs={toolingTech} />
-        <Section title="Methodologies" techs={methodologiesTech} />
       </VStack>
     </VStack>
   );
@@ -165,7 +166,7 @@ export function Section({
   techs,
 }: {
   title: string;
-  techs: string[][];
+  techs: (string | IconType)[][];
 }) {
   const bg_color = useColorModeValue("purple.50", "purple.900");
   const bg_fg_color = useColorModeValue("purple.200", "purple.50");

@@ -9,7 +9,7 @@ beforeEach(() => {
 });
 
 // Mock the necessary dependencies and props
-// jest.mock('google.maps.Marker', () => jest.fn());
+// jest.mock('google.maps.marker.AdvancedMarkerElement', () => jest.fn());
 // jest.mock('google.maps.Circle', () => jest.fn());
 
 const mockSetClientLocation = jest.fn(); // Mock the setClientLocation prop

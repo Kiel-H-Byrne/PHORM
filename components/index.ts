@@ -3,7 +3,6 @@ import AddListingDrawer from "./AddListingDrawer";
 import AddListingForm from "./AddListingForm";
 import AppMap from "./AppMap";
 import CondensedCard from "./CondensedCard";
-import CustomHead from "./CustomHead";
 import FeatureCard from "./FeatureCard";
 import MyInfoWindow from "./InfoWindow";
 import Layout from "./Layout";
@@ -20,7 +19,6 @@ export {
   AddListingForm,
   AppMap,
   CondensedCard,
-  CustomHead,
   FeatureCard,
   Layout,
   FloatingButtons as LocateMeButton,
