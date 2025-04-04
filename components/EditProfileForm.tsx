@@ -46,7 +46,6 @@ export function EditProfileForm({ onToggle }: { onToggle: () => void }) {
   const keys = Object.keys(FormSchema.keyof().Values);
   const types = FormSchema.shape;
   const { user } = useAuth();
-  console.log(user);
 
   const {
     data: userData,
@@ -62,19 +61,50 @@ export function EditProfileForm({ onToggle }: { onToggle: () => void }) {
   });
 
   const onSubmit = async (data: Partial<IUser["profile"]>) => {
-    const { ok } = await fetch(`/api/users/${user?.uid}`, {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
+    try {
+      console.log("Submitting profile data:", data);
+      const response = await fetch(`/api/users/${user?.uid}`, {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
 
-    mutate({ data });
-    if (ok) {
+      if (!response.ok) {
+        console.error("Error updating profile:", response.statusText);
+        return;
+      }
+
+      // Update the local data
+      mutate();
+
+      // Close the form and show success message
       onToggle();
       successToast();
+    } catch (error) {
+      console.error("Error in profile update:", error);
     }
   };
 
-  return !isLoading && <Form1 />;
+  // Initialize form with user data when it's loaded
+  React.useEffect(() => {
+    if (userData && userData.profile) {
+      console.log("Setting form values from user data:", userData.profile);
+      // Reset form with user profile data
+      reset(userData.profile);
+    } else if (!isLoading) {
+      console.log("No profile data found, using defaults");
+      // Set default values if no profile exists
+      reset({
+        firstName: "",
+        lastName: "",
+        location: "",
+        bio: "",
+        orgs: [],
+      });
+    }
+  }, [userData, isLoading, reset]);
+
+  // Show loading state or form
+  return !isLoading ? <Form1 /> : <div>Loading profile data...</div>;
 
   function Form1() {
     return (
@@ -126,7 +156,8 @@ export function EditProfileForm({ onToggle }: { onToggle: () => void }) {
                 <Input
                   id={field}
                   autoComplete={"true"}
-                  defaultValue={userData.profile?.[field]}
+                  // Use controlled inputs instead of defaultValue for better handling of undefined values
+                  value={getValues(field) || ""}
                   {...register(field)}
                   aria-invalid={errors.name ? "true" : "false"}
                 />

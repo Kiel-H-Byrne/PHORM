@@ -1,6 +1,7 @@
 "use client";
 
 import { appAuth } from "@/db/firebase";
+import { findOrCreateUser } from "@/db/users";
 import { startFirebaseUILogin } from "@/pages/api/auth/fbAuth";
 import { setAuthCookie } from "@/util/authCookies";
 import { Box, Heading, Text, useToast } from "@chakra-ui/react";
@@ -31,24 +32,56 @@ const FirebaseAuthUI = ({
         startFirebaseUILogin("firebaseui-auth-container");
 
         // Add event listener for auth state changes
-        const unsubscribe = appAuth?.onAuthStateChanged((user) => {
+        const unsubscribe = appAuth?.onAuthStateChanged(async (user) => {
           if (user) {
-            // User is signed in
-            // Set auth cookie
-            setAuthCookie(user);
+            try {
+              // User is signed in
+              // Set auth cookie
+              setAuthCookie(user);
 
-            toast({
-              title: "Sign in successful",
-              description: `Welcome ${
-                user.displayName || user.email || user.phoneNumber || "to PHORM"
-              }!`,
-              status: "success",
-              duration: 5000,
-              isClosable: true,
-            });
+              // Create or find user in the users collection
+              // This ensures phone auth users have a record in the users table
+              const userData = {
+                id: user.uid,
+                name: user.displayName || user.phoneNumber || "New User",
+                email: user.email || "",
+                image: user.photoURL || "",
+                emailVerified: user.emailVerified
+                  ? new Date().toISOString()
+                  : undefined,
+                profile: {
+                  firstName: user.displayName?.split(" ")[0] || "",
+                  lastName:
+                    user.displayName?.split(" ").slice(1).join(" ") || "",
+                  contact: {
+                    email: user.email || "",
+                    phone: user.phoneNumber || "",
+                  },
+                  orgs: [],
+                },
+              };
 
-            // Redirect to dashboard or home page
-            router.push("/dashboard");
+              // Find or create the user
+              await findOrCreateUser(user.uid, userData);
+
+              toast({
+                title: "Sign in successful",
+                description: `Welcome ${
+                  user.displayName ||
+                  user.email ||
+                  user.phoneNumber ||
+                  "to PHORM"
+                }!`,
+                status: "success",
+                duration: 5000,
+                isClosable: true,
+              });
+
+              // Redirect to dashboard or home page
+              router.push("/dashboard");
+            } catch (error) {
+              console.error("Error creating user record:", error);
+            }
           }
         });
 
@@ -58,31 +91,12 @@ const FirebaseAuthUI = ({
         };
       } catch (error) {
         console.error("Error initializing Firebase UI:", error);
-
-        // Determine if this is an API restriction error
-        let errorMessage =
-          "There was a problem initializing the authentication system. Please try again later.";
-
-        if (error instanceof Error) {
-          const errorCode = (error as any).code;
-          console.error("Error code:", errorCode);
-          console.error("Error message:", error.message);
-
-          if (
-            errorCode === "auth/internal-error" ||
-            error.message.includes("identitytoolkit") ||
-            error.message.includes("blocked")
-          ) {
-            errorMessage =
-              "Authentication API access is restricted. Please check your Firebase project settings in the Google Cloud Console.";
-          }
-        }
-
         toast({
           title: "Authentication Error",
-          description: errorMessage,
+          description:
+            "There was a problem initializing the authentication system. Please try again later.",
           status: "error",
-          duration: 7000,
+          duration: 5000,
           isClosable: true,
         });
       }
