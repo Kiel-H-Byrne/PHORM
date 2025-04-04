@@ -1,3 +1,5 @@
+"use client";
+
 import { Box } from "@chakra-ui/react";
 import { useState } from "react";
 import useSWR from "swr";

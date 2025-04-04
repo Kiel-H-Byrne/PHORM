@@ -1,3 +1,5 @@
+"use client";
+
 import { appAuth } from '@/db/firebase';
 import { User } from 'firebase/auth';
 import Cookies from 'js-cookie';

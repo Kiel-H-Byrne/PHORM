@@ -1,3 +1,5 @@
+"use client"
+
 import { appAuth } from '@/db/firebase';
 import { EmailAuthProvider, FacebookAuthProvider, GoogleAuthProvider, PhoneAuthProvider } from 'firebase/auth';
 import * as firebaseui from 'firebaseui';
@@ -78,7 +80,7 @@ export function getCurrentUser() {
 
 // Function to get the current Firebase user state
 export function onAuthStateChanged(callback: (user: any) => void) {
-    if (!appAuth) return () => {};
-    
+    if (!appAuth) return () => { };
+
     return appAuth.onAuthStateChanged(callback);
 }

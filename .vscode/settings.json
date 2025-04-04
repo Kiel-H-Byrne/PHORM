@@ -1,5 +1,52 @@
 {
   "typescript.tsdk": "node_modules/typescript/lib",
   "cSpell.language": "en,en-US",
-  "cSpell.ignoreWords": ["Fsdb"]
+  "cSpell.ignoreWords": ["Fsdb"],
+
+  // Performance optimizations
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/**": true,
+    "**/.next/**": true,
+    "**/dist/**": true,
+    "**/build/**": true
+  },
+  "search.exclude": {
+    "**/.git": true,
+    "**/node_modules": true,
+    "**/.next": true,
+    "**/dist": true,
+    "**/build": true
+  },
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/node_modules": false,
+    "**/.next": false
+  },
+
+  // Editor optimizations
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+
+  // JavaScript/TypeScript optimizations
+  "typescript.disableAutomaticTypeAcquisition": true,
+  "typescript.tsserver.maxTsServerMemory": 4096,
+  "typescript.tsserver.watchOptions": {
+    "watchFile": "useFsEvents",
+    "watchDirectory": "useFsEvents",
+    "fallbackPolling": "dynamicPriority"
+  },
+  "js/ts.implicitProjectConfig.checkJs": false,
+
+  // Extension optimizations
+  "extensions.ignoreRecommendations": true,
+  "npm.packageManager": "npm",
+  "npm.autoDetect": "off",
+  "git.enabled": true,
+  "git.autofetch": false,
+  "cSpell.words": ["firebaseui"]
 }

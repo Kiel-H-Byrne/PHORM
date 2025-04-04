@@ -23,7 +23,11 @@
       {
         "name": "next"
       }
-    ]
+    ],
+    // Performance optimizations
+    "disableSizeLimit": true,
+    "importsNotUsedAsValues": "remove",
+    "disableSourceOfProjectReferenceRedirect": true
   },
   "include": [
     "next-env.d.ts",
@@ -32,5 +36,5 @@
     "types.d.ts",
     ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", ".next", "out"]
 }

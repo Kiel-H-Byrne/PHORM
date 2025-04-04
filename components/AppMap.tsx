@@ -1,3 +1,5 @@
+"use client";
+
 import { memo, useCallback, useState } from "react";
 
 import fetcher from "@/util/fetch";

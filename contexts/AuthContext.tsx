@@ -1,3 +1,5 @@
+"use client";
+
 import { logoutUser, onAuthStateChanged } from "@/pages/api/auth/fbAuth";
 import { removeAuthCookie, setupAuthCookieListener } from "@/util/authCookies";
 import { User } from "firebase/auth";

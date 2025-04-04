@@ -1,3 +1,5 @@
+"use client";
+
 import { appAuth } from "@/db/firebase";
 import { startFirebaseUILogin } from "@/pages/api/auth/fbAuth";
 import { setAuthCookie } from "@/util/authCookies";
