@@ -56,7 +56,7 @@ export const getUiConfig = () => {
                 // User successfully signed in
                 console.log('User signed in successfully:', authResult);
                 // Don't redirect automatically, we'll handle it
-                return false;
+                return true;
             }
         }
     };
