@@ -1,11 +1,19 @@
 "use client";
 
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import {
+  memo,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import fetcher from "@/util/fetch";
 import { findClosestMarker } from "@/utils/helpers";
 import {
   Button,
+  createStandaloneToast,
   Drawer,
   DrawerBody,
   DrawerCloseButton,
@@ -25,7 +33,6 @@ import {
   Tabs,
   Text,
   Tooltip,
-  createStandaloneToast,
   useBreakpointValue,
   useDisclosure,
 } from "@chakra-ui/react";
@@ -116,7 +123,7 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
   } | null>(null);
   const markersRef = useRef<google.maps.Marker[]>([]);
 
-  const { data: fetchData } = SWR(uri, fetcher, {
+  const { data: fetchData } = SWR<IListing[]>(uri, fetcher, {
     loadingTimeout: 1000,
     errorRetryCount: 2,
     revalidateOnFocus: false,
@@ -204,41 +211,28 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
     }
   }, [activeData]);
 
-  const useRenderMarkers: (clusterer: Clusterer) => React.ReactElement =
-    useCallback(
-      (clusterer) => {
-        return (
-          isLoaded &&
-          fetchData?.listings &&
-          fetchData.listings.map((markerData: IListing) => {
-            const { lat, lng } = markerData;
-            return (
-              lat &&
-              lng && (
-                <MyMarker
-                  key={`${lat}, ${lng}-${markerData.name}`}
-                  markerData={markerData}
-                  clusterer={clusterer}
-                  activeData={activeData}
-                  setActiveData={setActiveData}
-                  setWindowClosed={setWindowClosed}
-                  setWindowOpen={setWindowOpen}
-                  toggleDrawer={toggleDrawer}
-                />
-              )
-            );
-          })
+  const useRenderMarkers: (clusterer: Clusterer) => ReactNode[] = useCallback(
+    (clusterer) => {
+      return fetchData!.map((markerData) => {
+        const { lat, lng } = markerData;
+        return lat && lng ? (
+          <MyMarker
+            key={`${lat}, ${lng}-${markerData.name}`}
+            markerData={markerData}
+            clusterer={clusterer}
+            activeData={activeData}
+            setActiveData={setActiveData}
+            setWindowClosed={setWindowClosed}
+            setWindowOpen={setWindowOpen}
+            toggleDrawer={toggleDrawer}
+          />
+        ) : (
+          <></>
         );
-      },
-      [
-        fetchData,
-        activeData,
-        setWindowClosed,
-        toggleDrawer,
-        setWindowOpen,
-        isLoaded,
-      ]
-    );
+      });
+    },
+    [fetchData, activeData, setWindowClosed, toggleDrawer, setWindowOpen]
+  );
 
   // Handle cluster click
   const handleClickCluster = useCallback(() => {
@@ -261,8 +255,11 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
         mapRef.setZoom(15);
 
         // Find and highlight closest marker
-        if (fetchData?.listings.length > 0) {
-          const closest = findClosestMarker(userPos, fetchData.listings);
+        if (fetchData && fetchData.length > 0) {
+          const closest = findClosestMarker(
+            userPos,
+            (fetchData as any).map((o) => ({ lat: o.lat, lng: o.lng }))
+          );
           setSelectedListing(closest);
           setActiveData([closest as IListing & MarkerExtended]);
           toggleDrawer();
@@ -303,7 +300,7 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
           />
         )} */}
         {/* {!fetchData && toast(searchToastData)} */}
-        {isLoaded && fetchData?.listings && fetchData.listings.length > 0 ? (
+        {isLoaded && fetchData && fetchData.length > 0 ? (
           <MarkerClusterer
             styles={CLUSTER_STYLE}
             averageCenter
@@ -312,7 +309,7 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
             gridSize={2}
             minimumClusterSize={2}
           >
-            {useRenderMarkers}
+            {useRenderMarkers as any}
           </MarkerClusterer>
         ) : null}
 
