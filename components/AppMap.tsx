@@ -1,8 +1,9 @@
 "use client";
 
-import { memo, useCallback, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 
 import fetcher from "@/util/fetch";
+import { findClosestMarker } from "@/utils/helpers";
 import {
   Button,
   Drawer,
@@ -14,6 +15,7 @@ import {
   DrawerOverlay,
   Flex,
   Icon,
+  IconButton,
   Progress,
   SlideOptions,
   Tab,
@@ -22,6 +24,7 @@ import {
   TabPanels,
   Tabs,
   Text,
+  Tooltip,
   createStandaloneToast,
   useBreakpointValue,
   useDisclosure,
@@ -33,7 +36,7 @@ import {
 } from "@react-google-maps/api";
 import { Clusterer, MarkerExtended } from "@react-google-maps/marker-clusterer";
 import { FaDirections, FaHeart, FaShare } from "react-icons/fa";
-import { MdInfoOutline } from "react-icons/md";
+import { MdInfoOutline, MdMyLocation } from "react-icons/md";
 import SWR from "swr";
 import { IAppMap, IListing } from "../types";
 import { CLUSTER_STYLE, GEOCENTER, MAP_STYLES } from "../util/constants";
@@ -77,6 +80,8 @@ export const default_props = {
   },
 };
 
+const WASHINGTON_DC = { lat: 38.9072, lng: -77.0369 };
+
 const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
   let { center, zoom, options } = default_props;
   const uri = client_location
@@ -105,6 +110,11 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
   const [mapRef, setMapRef] = useState<google.maps.Map | null>(null);
   const [selectedListing, setSelectedListing] = useState<IListing | null>(null);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [userLocation, setUserLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+  const markersRef = useRef<google.maps.Marker[]>([]);
 
   const { data: fetchData } = SWR(uri, fetcher, {
     loadingTimeout: 1000,
@@ -236,6 +246,34 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
   }, [setWindowClosed]);
   const responsivePlacement: SlideOptions["direction"] =
     useBreakpointValue({ base: "bottom", md: "left" }) || "left";
+
+  const handleLocateMe = () => {
+    if (!mapRef || !navigator.geolocation) return;
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const userPos = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
+        setUserLocation(userPos);
+        mapRef.panTo(userPos);
+        mapRef.setZoom(15);
+
+        // Find and highlight closest marker
+        if (fetchData?.listings.length > 0) {
+          const closest = findClosestMarker(userPos, fetchData.listings);
+          setSelectedListing(closest);
+          setActiveData([closest as IListing & MarkerExtended]);
+          toggleDrawer();
+        }
+      },
+      (error) => {
+        console.error("Error getting location:", error);
+      }
+    );
+  };
+
   return isLoaded ? (
     <>
       <GoogleMap
@@ -378,6 +416,17 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
 
         {/* <HeatmapLayer map={this.state.map && this.state.map} data={data.map(x => {x.location})} /> */}
       </GoogleMap>
+      <Tooltip label="Locate me">
+        <IconButton
+          aria-label="Get my location"
+          icon={<MdMyLocation />}
+          position="absolute"
+          bottom={4}
+          right={4}
+          colorScheme="blue"
+          onClick={handleLocateMe}
+        />
+      </Tooltip>
       {/* 100% - header hight + footer height */}
       {/* <Flex style={{ height: "calc(100% - 106px)" }} /> */}
     </>

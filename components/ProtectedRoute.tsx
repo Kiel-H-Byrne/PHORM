@@ -1,36 +1,40 @@
-import { useAuth } from '@/contexts/AuthContext';
-import { Box, Center, Spinner, Text } from '@chakra-ui/react';
-import { useRouter } from 'next/router';
-import { ReactNode, useEffect } from 'react';
+import { useAuth } from "@/contexts/AuthContext";
+import { Center, Spinner, useToast } from "@chakra-ui/react";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
 
-interface ProtectedRouteProps {
-  children: ReactNode;
-}
-
-const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+export default function ProtectedRoute({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const toast = useToast();
 
   useEffect(() => {
     if (!loading && !user) {
-      // Redirect to login page if not authenticated
-      router.push('/auth/login');
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to access this page",
+        status: "warning",
+        duration: 5000,
+        isClosable: true,
+      });
+      router.push({
+        pathname: "/login",
+        query: { returnUrl: router.asPath },
+      });
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, toast]);
 
   if (loading) {
     return (
       <Center h="100vh">
-        <Box textAlign="center">
-          <Spinner size="xl" color="blue.500" mb={4} />
-          <Text>Loading...</Text>
-        </Box>
+        <Spinner size="xl" color="blue.500" thickness="4px" />
       </Center>
     );
   }
 
-  // If not loading and user exists, render children
   return user ? <>{children}</> : null;
-};
-
-export default ProtectedRoute;
+}

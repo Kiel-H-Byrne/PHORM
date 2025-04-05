@@ -1,191 +1,249 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { ProfileSchema } from "@/db/schemas";
-import { IUser, PHA_LODGES, StatesEnum } from "@/types";
-import fetcher from "@/util/fetch";
-import { camelToSentenceCase } from "@/util/helpers";
-import { DeleteIcon } from "@chakra-ui/icons";
+import { Member } from "@/types";
 import {
+  Box,
   Button,
   FormControl,
   FormLabel,
+  Grid,
   HStack,
-  Icon,
+  IconButton,
   Input,
+  InputGroup,
+  InputRightElement,
   Select,
+  Tag,
+  TagCloseButton,
+  TagLabel,
+  Textarea,
+  VStack,
   useToast,
 } from "@chakra-ui/react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import React from "react";
-import { useForm } from "react-hook-form";
-import { MdSave } from "react-icons/md";
-import useSWR from "swr";
+import { useState } from "react";
+import { MdAdd } from "react-icons/md";
 
-const FormSchema = ProfileSchema.omit({
-  roles: true,
-  skills: true,
-  email: true,
-  deverifiedListings: true,
-  verifiedListings: true,
-  favorites: true,
-  ownedListings: true,
-  contact: true,
-  social: true,
-});
-
-export function EditProfileForm({ onToggle }: { onToggle: () => void }) {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting, isSubmitSuccessful, isSubmitted },
-    reset,
-    getValues,
-    setValue,
-  } = useForm({
-    resolver: zodResolver(FormSchema),
-  });
-  const keys = Object.keys(FormSchema.keyof().Values);
-  const types = FormSchema.shape;
+export default function EditProfileForm({
+  member,
+  onUpdate,
+}: {
+  member: Member;
+  onUpdate: undefined;
+}) {
   const { user } = useAuth();
-
-  const {
-    data: userData,
-    mutate,
-    isLoading,
-  } = useSWR(`/api/users/${user?.uid}`, fetcher);
-
-  const successToast = useToast({
-    colorScheme: "green",
-    status: "success",
-    title: "Profile Updated",
-    description: `Successfully submitted form.`,
+  const toast = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  const [newSpecialty, setNewSpecialty] = useState("");
+  const [formData, setFormData] = useState({
+    firstName: member.firstName,
+    lastName: member.lastName,
+    email: member.email,
+    phone: member.phone || "",
+    bio: member.bio || "",
+    location: member.location || "",
+    specialties: member.specialties || [],
+    experienceLevel: member.experienceLevel || "",
+    availability: member.availability || "",
+    socialLinks: member.socialLinks || {},
   });
 
-  const onSubmit = async (data: Partial<IUser["profile"]>) => {
-    try {
-      console.log("Submitting profile data:", data);
-      const response = await fetch(`/api/users/${user?.uid}`, {
-        method: "POST",
-        body: JSON.stringify(data),
+  const handleAddSpecialty = () => {
+    if (newSpecialty && !formData.specialties.includes(newSpecialty)) {
+      setFormData({
+        ...formData,
+        specialties: [...formData.specialties, newSpecialty],
       });
-
-      if (!response.ok) {
-        console.error("Error updating profile:", response.statusText);
-        return;
-      }
-
-      // Update the local data
-      mutate();
-
-      // Close the form and show success message
-      onToggle();
-      successToast();
-    } catch (error) {
-      console.error("Error in profile update:", error);
+      setNewSpecialty("");
     }
   };
 
-  // Initialize form with user data when it's loaded
-  React.useEffect(() => {
-    if (userData && userData.profile) {
-      console.log("Setting form values from user data:", userData.profile);
-      // Reset form with user profile data
-      reset(userData.profile);
-    } else if (!isLoading) {
-      console.log("No profile data found, using defaults");
-      // Set default values if no profile exists
-      reset({
-        firstName: "",
-        lastName: "",
-        location: "",
-        bio: "",
-        orgs: [],
+  const handleRemoveSpecialty = (specialty: string) => {
+    setFormData({
+      ...formData,
+      specialties: formData.specialties.filter((s) => s !== specialty),
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const res = await fetch(`/api/members/${user?.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
       });
+
+      if (!res.ok) throw new Error("Failed to update profile");
+
+      toast({
+        title: "Profile updated",
+        status: "success",
+        duration: 3000,
+      });
+      onUpdate();
+    } catch (error) {
+      toast({
+        title: "Error updating profile",
+        status: "error",
+        duration: 3000,
+      });
+    } finally {
+      setIsLoading(false);
     }
-  }, [userData, isLoading, reset]);
+  };
 
-  // Show loading state or form
-  return !isLoading ? <Form1 /> : <div>Loading profile data...</div>;
+  return (
+    <Box as="form" onSubmit={handleSubmit}>
+      <VStack spacing={6}>
+        <Grid
+          templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}
+          gap={6}
+          w="full"
+        >
+          <FormControl isRequired>
+            <FormLabel>First Name</FormLabel>
+            <Input
+              value={formData.firstName}
+              onChange={(e) =>
+                setFormData({ ...formData, firstName: e.target.value })
+              }
+            />
+          </FormControl>
 
-  function Form1() {
-    return (
-      <form onSubmit={handleSubmit(onSubmit)}>
-        {keys.map((field) => {
-          return (
-            <React.Fragment key={field}>
-              <FormControl isInvalid={!!errors[field]?.message}></FormControl>
-              <FormLabel htmlFor={field}>
-                {" "}
-                {camelToSentenceCase(field)}
-              </FormLabel>
-              {errors[field] && <span>{errors[field]?.message as string}</span>}
-              {field === "state" ? (
-                <Select
-                  key={field}
-                  id={field}
-                  maxLength={2}
-                  autoComplete={"true"}
-                  defaultValue={"DC"}
-                  {...register(field)}
-                  aria-invalid={errors.state ? "true" : "false"}
-                >
-                  {StatesEnum.options.map((state) => (
-                    <option value={state} key={state}>
-                      {state}
-                    </option>
-                  ))}
-                </Select>
-              ) : field === "number" ? (
-                <Select
-                  key={field}
-                  id={field}
-                  maxLength={2}
-                  autoComplete={"true"}
-                  {...register(field)}
-                  aria-invalid={errors.state ? "true" : "false"}
-                >
-                  {Object.keys(PHA_LODGES["DC"]).map((number) => {
-                    let val = parseInt(number);
-                    return (
-                      <option value={val} key={val}>
-                        {val}
-                      </option>
-                    );
-                  })}
-                </Select>
-              ) : (
-                <Input
-                  id={field}
-                  autoComplete={"true"}
-                  // Use controlled inputs instead of defaultValue for better handling of undefined values
-                  value={getValues(field) || ""}
-                  {...register(field)}
-                  aria-invalid={errors.name ? "true" : "false"}
-                />
-              )}
-            </React.Fragment>
-          );
-        })}
-        <HStack justify={"space-evenly"} p={3}>
-          {isSubmitting ? (
-            <Button>Submitting...</Button>
-          ) : !isSubmitted ? (
-            <Button
-              type="submit"
-              disabled={Object.keys(errors).length > 0 || isSubmitting}
-              leftIcon={<Icon as={MdSave} />}
+          <FormControl isRequired>
+            <FormLabel>Last Name</FormLabel>
+            <Input
+              value={formData.lastName}
+              onChange={(e) =>
+                setFormData({ ...formData, lastName: e.target.value })
+              }
+            />
+          </FormControl>
+
+          <FormControl isRequired>
+            <FormLabel>Email</FormLabel>
+            <Input
+              type="email"
+              value={formData.email}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
+            />
+          </FormControl>
+
+          <FormControl>
+            <FormLabel>Phone</FormLabel>
+            <Input
+              type="tel"
+              value={formData.phone}
+              onChange={(e) =>
+                setFormData({ ...formData, phone: e.target.value })
+              }
+            />
+          </FormControl>
+
+          <FormControl>
+            <FormLabel>Location</FormLabel>
+            <Select
+              value={formData.location}
+              onChange={(e) =>
+                setFormData({ ...formData, location: e.target.value })
+              }
             >
-              Save
-            </Button>
-          ) : null}
-          <Button
-            type="reset"
-            disabled={isSubmitting}
-            leftIcon={<Icon as={DeleteIcon} />}
-          >
-            Reset
-          </Button>
-        </HStack>
-      </form>
-    );
-  }
+              <option value="">Select location</option>
+              <option value="DC">Washington, DC</option>
+              <option value="MD">Maryland</option>
+              <option value="VA">Virginia</option>
+              <option value="OTHER">Other</option>
+            </Select>
+          </FormControl>
+
+          <FormControl>
+            <FormLabel>Experience Level</FormLabel>
+            <Select
+              value={formData.experienceLevel}
+              onChange={(e) =>
+                setFormData({ ...formData, experienceLevel: e.target.value })
+              }
+            >
+              <option value="">Select experience level</option>
+              <option value="entry">Entry Level</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="expert">Expert</option>
+            </Select>
+          </FormControl>
+
+          <FormControl>
+            <FormLabel>Availability</FormLabel>
+            <Select
+              value={formData.availability}
+              onChange={(e) =>
+                setFormData({ ...formData, availability: e.target.value })
+              }
+            >
+              <option value="">Select availability</option>
+              <option value="fulltime">Full Time</option>
+              <option value="parttime">Part Time</option>
+              <option value="contract">Contract</option>
+            </Select>
+          </FormControl>
+
+          <FormControl>
+            <FormLabel>Specialties</FormLabel>
+            <InputGroup>
+              <Input
+                value={newSpecialty}
+                onChange={(e) => setNewSpecialty(e.target.value)}
+                placeholder="Add a specialty"
+              />
+              <InputRightElement>
+                <IconButton
+                  aria-label="Add specialty"
+                  icon={<MdAdd />}
+                  size="sm"
+                  onClick={handleAddSpecialty}
+                />
+              </InputRightElement>
+            </InputGroup>
+            <HStack spacing={2} mt={2} wrap="wrap">
+              {formData.specialties.map((specialty: string) => (
+                <Tag
+                  key={specialty}
+                  size="md"
+                  borderRadius="full"
+                  variant="solid"
+                  colorScheme="blue"
+                >
+                  <TagLabel>{specialty}</TagLabel>
+                  <TagCloseButton
+                    onClick={() => handleRemoveSpecialty(specialty)}
+                  />
+                </Tag>
+              ))}
+            </HStack>
+          </FormControl>
+        </Grid>
+
+        <FormControl>
+          <FormLabel>Bio</FormLabel>
+          <Textarea
+            value={formData.bio}
+            onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+            rows={4}
+          />
+        </FormControl>
+
+        <Button
+          type="submit"
+          colorScheme="blue"
+          isLoading={isLoading}
+          loadingText="Updating..."
+          w={{ base: "full", md: "auto" }}
+        >
+          Update Profile
+        </Button>
+      </VStack>
+    </Box>
+  );
 }

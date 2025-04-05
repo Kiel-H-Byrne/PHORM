@@ -1,14 +1,13 @@
 import MemberCard from "@/components/MemberCard";
-import fetcher from "@/util/fetch";
+import { useFetchUser } from "@/util/userHooks";
 import { useRouter } from "next/router";
-import useSWR from "swr";
 
 const MemberPage = () => {
   const {
     query: { uid },
   } = useRouter();
-  const { data } = useSWR(`/api/users/${uid}`, fetcher);
-  return data && <MemberCard user={data} />;
+  const user = useFetchUser(uid);
+  return user ? <MemberCard user={user} /> : <>No UsEr INFo</>;
 };
 
 export default MemberPage;
