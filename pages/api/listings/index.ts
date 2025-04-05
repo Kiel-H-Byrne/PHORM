@@ -55,14 +55,15 @@ export default async function handler(
   res: NextApiResponse
 ) {
   const user = getUserFromCookie();
-  if (!user) {
-    return res.status(200).json(generateMockListings(50));
-  }
 
   const listingsRef = collection(appFsdb!, "listings");
 
   switch (req.method) {
     case "GET":
+      if (!user) {
+        return res.status(200).json({ listings: generateMockListings(50) });
+      }
+
       try {
         const {
           searchQuery,
@@ -108,7 +109,7 @@ export default async function handler(
           ...doc.data(),
         }));
 
-        res.status(200).json(listings);
+        res.status(200).json({ listings });
       } catch (error) {
         console.error("List Listings Error:", error);
         res.status(500).json({ error: "Failed to fetch listings" });
