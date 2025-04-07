@@ -68,7 +68,9 @@ export const ListingsSchema = z
     claimsCount: z.number(),
     imageUri: z.string(),
     creator: z.string(),
-    zip: z.number().min(10000).max(99999), //5 digits max,country: z.string(),phone: z.string(),url: z.string().url(),,lng: z.number(),place_id: z.string(),// verifiers: z.array(z.string()),// verifierCount: z.number(),// deVerifiers: z.array(z.string()),// deVerifierCount: z.number(),geoHash: z.string(),imageUri: z.string(),// // places_details: z.object()
+    phone: z.string(),
+    url: z.string().url(),
+    zip: z.number().min(10000).max(99999), //5 digits max,country: z.string(),place_id: z.string(),// verifiers: z.array(z.string()),// verifierCount: z.number(),// deVerifiers: z.array(z.string()),// deVerifierCount: z.number(),geoHash: z.string(), // places_details: z.object()
     description: z.string(), // google_id: z.string(),// yelp_id: z.string(),// email: z.string(),// categories: z.array(z.string()),social: SocialSchema,creator: UserSchema,submitted: z.date(),
   })
   .partial()

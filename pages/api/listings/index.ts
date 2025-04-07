@@ -34,7 +34,7 @@ const generateMockListings = (count: number = 50) => {
     const listing: IListing = {
       // uid: faker.string.uuid(),
       name: faker.company.name(),
-      description: faker.company.catchPhraseDescriptor(),
+      description: faker.company.catchPhrase(),
       // category: faker.helpers.arrayElement(categories),
       lat: faker.location.latitude({ min: 37.8, max: 39.7 }), // MD/DC bounds
       lng: faker.location.longitude({ min: -79.5, max: -75.0 }), // MD/DC bounds

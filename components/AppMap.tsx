@@ -47,7 +47,7 @@ import { MdInfoOutline, MdMyLocation } from "react-icons/md";
 import SWR from "swr";
 import { IAppMap, IListing } from "../types";
 import { CLUSTER_STYLE, GEOCENTER, MAP_STYLES } from "../util/constants";
-import { MyInfoWindow, MyMarker } from "./";
+import { MyMarker } from "./";
 import ListingCard from "./ListingCard";
 import MapSearch from "./MapSearch";
 
@@ -313,12 +313,12 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
           </MarkerClusterer>
         ) : null}
 
-        {activeData && activeData.length > 0 && isWindowOpen && (
+        {/* {activeData && activeData.length > 0 && isWindowOpen && (
           <MyInfoWindow
             activeData={activeData}
             position={{ lat: activeData[0]?.lat!, lng: activeData[0]?.lng! }}
           />
-        )}
+        )} */}
 
         {activeData && (
           <Drawer
@@ -332,7 +332,6 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
             <DrawerContent>
               <DrawerCloseButton />
               <DrawerHeader bgColor={"gray.200"} pl={1} display={"flex"}>
-                {" "}
                 <Icon boxSize={7} mx={2} as={MdInfoOutline} />
                 Listing Information
               </DrawerHeader>

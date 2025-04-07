@@ -40,10 +40,10 @@ const AnimatedCard = chakra(Card, {
 });
 
 export default function ListingCard2({
-  listing,
+  activeListing: listing,
   onFavorite,
 }: {
-  listing: IListing;
+  activeListing: IListing;
   onFavorite?: (listing: IListing) => void;
 }) {
   const { user } = useAuth();
@@ -122,12 +122,12 @@ export default function ListingCard2({
       >
         <Box position="relative">
           <Image
-            src={listing.imageUri || "/placeholder-business.jpg"}
+            src={listing.imageUri || "/placeholder-business.png"}
             alt={listing.name}
             height="200px"
             width="100%"
             objectFit="cover"
-            fallbackSrc="/placeholder-business.jpg"
+            fallbackSrc="/placeholder-business.png"
           />
           {listing.isPremium && (
             <Badge
@@ -238,7 +238,7 @@ export default function ListingCard2({
           <ModalCloseButton />
           <ModalBody pb={6}>
             <Image
-              src={listing.imageUri || "/placeholder-business.jpg"}
+              src={listing.imageUri || "/placeholder-business.png"}
               alt={listing.name}
               width="100%"
               height="300px"
