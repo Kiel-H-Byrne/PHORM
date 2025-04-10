@@ -6,8 +6,9 @@ const SocialSchema = z.object({
   instagram: z.string(),
   twitter: z.string(),
 });
+const reserved_orgs = ["lodge", "chapter", "appendant"] as const;
 const OrgSchema = z.object({
-  type: z.string(), //"lodge" | "chapter" | "appendant"
+  type: z.enum(reserved_orgs),
   name: z.string(),
   number: z.string(),
   state: z.string(),
@@ -70,8 +71,15 @@ export const ListingsSchema = z
     creator: z.string(),
     phone: z.string(),
     url: z.string().url(),
-    zip: z.number().min(10000).max(99999), //5 digits max,country: z.string(),place_id: z.string(),// verifiers: z.array(z.string()),// verifierCount: z.number(),// deVerifiers: z.array(z.string()),// deVerifierCount: z.number(),geoHash: z.string(), // places_details: z.object()
-    description: z.string(), // google_id: z.string(),// yelp_id: z.string(),// email: z.string(),// categories: z.array(z.string()),social: SocialSchema,creator: UserSchema,submitted: z.date(),
+    isPremium: z.boolean(),
+    zip: z.number().min(10000).max(99999), //5 digits max,
+    // country: z.string(), // verifiers: z.array(z.string()),// verifierCount: z.number(),// deVerifiers: z.array(z.string()),// deVerifierCount: z.number(),geoHash: z.string(), // places_details: z.object()
+    description: z.string(),
+    businessHours: z.string(),
+    // google_id: z.string(),// yelp_id: z.string(),//
+    email: z.string(),
+    categories: z.array(z.string()),
+    social: SocialSchema,
   })
   .partial()
   .transform((data, ctx) => {

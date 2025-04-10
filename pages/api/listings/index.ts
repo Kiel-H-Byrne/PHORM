@@ -27,7 +27,7 @@ const categories = [
   "Art",
 ];
 
-const generateMockListings = (count: number = 50) => {
+const generateMockListings = (count: number = 100) => {
   const listings: IListing[] = [];
 
   for (let i = 0; i < count; i++) {
@@ -35,9 +35,9 @@ const generateMockListings = (count: number = 50) => {
       // uid: faker.string.uuid(),
       name: faker.company.name(),
       description: faker.company.catchPhrase(),
-      // category: faker.helpers.arrayElement(categories),
-      lat: faker.location.latitude({ min: 37.8, max: 39.7 }), // MD/DC bounds
-      lng: faker.location.longitude({ min: -79.5, max: -75.0 }), // MD/DC bounds
+      // category: f.helpers.arrayElement(categories),
+      lat: faker.location.latitude({ min: 37.75, max: 39.5 }), // MD/DC bounds
+      lng: faker.location.longitude({ min: -79.6, max: -74.0 }), // MD/DC bounds
       imageUri: faker.image.url(),
       submitted: faker.date.past(),
       // status: "active",

@@ -7,14 +7,14 @@ import {
   Collapse,
   Divider,
   Flex,
-  Heading,
   HStack,
+  Heading,
   Icon,
   Link,
   Text,
   Tooltip,
-  useToast,
   VStack,
+  useToast,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import {
@@ -29,14 +29,12 @@ import {
 
 interface ListingCardProps {
   activeListing: IListing;
-  onFavorite?: (listing: IListing) => void;
   onVerify?: (listing: IListing) => void;
   showActions?: boolean;
 }
 
 const ListingCard = ({
   activeListing,
-  onFavorite,
   onVerify,
   showActions = true,
 }: ListingCardProps) => {
@@ -51,16 +49,13 @@ const ListingCard = ({
 
   const handleFavorite = () => {
     setIsFavorite(!isFavorite);
-    if (onFavorite) {
-      onFavorite(activeListing);
-    } else {
-      toast({
-        title: isFavorite ? "Removed from favorites" : "Added to favorites",
-        status: "success",
-        duration: 2000,
-        isClosable: true,
-      });
-    }
+
+    toast({
+      title: isFavorite ? "Removed from favorites" : "Added to favorites",
+      status: "success",
+      duration: 2000,
+      isClosable: true,
+    });
   };
 
   const handleShare = () => {

@@ -23,7 +23,6 @@ import {
   DrawerOverlay,
   Flex,
   Icon,
-  IconButton,
   Progress,
   SlideOptions,
   Tab,
@@ -32,7 +31,6 @@ import {
   TabPanels,
   Tabs,
   Text,
-  Tooltip,
   useBreakpointValue,
   useDisclosure,
 } from "@chakra-ui/react";
@@ -43,7 +41,7 @@ import {
 } from "@react-google-maps/api";
 import { Clusterer, MarkerExtended } from "@react-google-maps/marker-clusterer";
 import { FaDirections, FaHeart, FaShare } from "react-icons/fa";
-import { MdInfoOutline, MdMyLocation } from "react-icons/md";
+import { MdInfoOutline } from "react-icons/md";
 import SWR from "swr";
 import { IAppMap, IListing } from "../types";
 import { CLUSTER_STYLE, GEOCENTER, MAP_STYLES } from "../util/constants";
@@ -306,7 +304,7 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
             averageCenter
             enableRetinaIcons
             onClick={handleClickCluster}
-            gridSize={2}
+            gridSize={60}
             minimumClusterSize={2}
           >
             {useRenderMarkers as any}
@@ -409,22 +407,8 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
             </DrawerContent>
           </Drawer>
         )}
-
         {/* <HeatmapLayer map={this.state.map && this.state.map} data={data.map(x => {x.location})} /> */}
       </GoogleMap>
-      <Tooltip label="Locate me">
-        <IconButton
-          aria-label="Get my location"
-          icon={<MdMyLocation />}
-          position="absolute"
-          bottom={4}
-          right={4}
-          colorScheme="blue"
-          onClick={handleLocateMe}
-        />
-      </Tooltip>
-      {/* 100% - header hight + footer height */}
-      {/* <Flex style={{ height: "calc(100% - 106px)" }} /> */}
     </>
   ) : (
     <Progress />

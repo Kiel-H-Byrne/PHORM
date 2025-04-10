@@ -40,11 +40,9 @@ const AnimatedCard = chakra(Card, {
 });
 
 export default function ListingCard2({
-  activeListing: listing,
-  onFavorite,
+  activeListing,
 }: {
   activeListing: IListing;
-  onFavorite?: (listing: IListing) => void;
 }) {
   const { user } = useAuth();
   const [isFavorited, setIsFavorited] = useState(false);
@@ -57,7 +55,6 @@ export default function ListingCard2({
 
   const handleFavorite = () => {
     setIsFavorited(!isFavorited);
-    onFavorite?.(listing);
     toast({
       title: isFavorited ? "Removed from favorites" : "Added to favorites",
       status: "success",
@@ -66,23 +63,23 @@ export default function ListingCard2({
   };
 
   const handleContact = async (method: "phone" | "email") => {
-    if (method === "phone" && listing.phone) {
-      window.location.href = `tel:${listing.phone}`;
-    } else if (method === "email" && listing.email) {
-      window.location.href = `mailto:${listing.email}`;
+    if (method === "phone" && activeListing.phone) {
+      window.location.href = `tel:${activeListing.phone}`;
+    } else if (method === "email" && activeListing.email) {
+      window.location.href = `mailto:${activeListing.email}`;
     }
   };
 
   const handleDirections = () => {
-    if (listing.lat && listing.lng) {
+    if (activeListing.lat && activeListing.lng) {
       window.open(
-        `https://www.google.com/maps/dir/?api=1&destination=${listing.lat},${listing.lng}`,
+        `https://www.google.com/maps/dir/?api=1&destination=${activeListing.lat},${activeListing.lng}`,
         "_blank"
       );
-    } else {
+    } else if (activeListing.address) {
       window.open(
         `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-          listing.address
+          activeListing.address
         )}`,
         "_blank"
       );
@@ -93,8 +90,8 @@ export default function ListingCard2({
     try {
       if (navigator.share) {
         await navigator.share({
-          title: listing.name,
-          text: listing.description,
+          title: activeListing.name,
+          text: activeListing.description,
           url: window.location.href,
         });
       } else {
@@ -109,7 +106,6 @@ export default function ListingCard2({
       console.error("Error sharing:", err);
     }
   };
-
   return (
     <>
       <AnimatedCard
@@ -118,18 +114,20 @@ export default function ListingCard2({
         borderColor={borderColor}
         borderRadius="lg"
         overflow="hidden"
+        maxW={"xs"}
+        height={"sm"}
         _hover={{ transform: "translateY(-4px)", boxShadow: "lg" }}
       >
         <Box position="relative">
           <Image
-            src={listing.imageUri || "/placeholder-business.png"}
-            alt={listing.name}
+            src={activeListing.imageUri || "/img/placeholder-business.png"}
+            alt={activeListing.name}
             height="200px"
             width="100%"
             objectFit="cover"
-            fallbackSrc="/placeholder-business.png"
+            fallbackSrc="/img/placeholder-business.png"
           />
-          {listing.isPremium && (
+          {activeListing.isPremium && (
             <Badge
               position="absolute"
               top={2}
@@ -146,10 +144,10 @@ export default function ListingCard2({
           <Flex justify="space-between" align="start" mb={2}>
             <Box>
               <Text fontSize="xl" fontWeight="bold" mb={1}>
-                {listing.name}
+                {activeListing.name}
               </Text>
               <Text color={textColor} fontSize="sm" noOfLines={2}>
-                {listing.description}
+                {activeListing.description}
               </Text>
             </Box>
             {user && (
@@ -166,11 +164,11 @@ export default function ListingCard2({
           </Flex>
 
           <Text fontSize="sm" color={textColor} mb={3}>
-            {listing.address}
+            {activeListing.address}
           </Text>
 
           <Flex wrap="wrap" gap={2} mb={4}>
-            {listing.categories?.map((category) => (
+            {activeListing.categories?.map((category) => (
               <Badge key={category} colorScheme="blue" variant="subtle">
                 {category}
               </Badge>
@@ -178,7 +176,7 @@ export default function ListingCard2({
           </Flex>
 
           <HStack spacing={2} justify="flex-end">
-            {listing.phone && (
+            {activeListing.phone && (
               <Tooltip label="Call">
                 <IconButton
                   aria-label="Call business"
@@ -189,7 +187,7 @@ export default function ListingCard2({
                 />
               </Tooltip>
             )}
-            {listing.email && (
+            {activeListing.email && (
               <Tooltip label="Email">
                 <IconButton
                   aria-label="Email business"
@@ -234,31 +232,35 @@ export default function ListingCard2({
       <Modal isOpen={isOpen} onClose={onClose} size="xl">
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>{listing.name}</ModalHeader>
+          <ModalHeader>{activeListing.name}</ModalHeader>
           <ModalCloseButton />
           <ModalBody pb={6}>
             <Image
-              src={listing.imageUri || "/placeholder-business.png"}
-              alt={listing.name}
+              src={activeListing.imageUri || "/img/placeholder-business.png"}
+              alt={activeListing.name}
               width="100%"
               height="300px"
               objectFit="cover"
               borderRadius="md"
               mb={4}
             />
-            <Text mb={4}>{listing.description}</Text>
+            <Text mb={4}>{activeListing.description}</Text>
             <Text fontWeight="bold" mb={2}>
               Contact Information:
             </Text>
-            {listing.phone && <Text mb={2}>📞 {listing.phone}</Text>}
-            {listing.email && <Text mb={2}>📧 {listing.email}</Text>}
-            <Text mb={4}>📍 {listing.address}</Text>
-            {listing.businessHours && (
+            {activeListing.phone && (
+              <Text mb={2}>📞 {activeListing.phone}</Text>
+            )}
+            {activeListing.email && (
+              <Text mb={2}>📧 {activeListing.email}</Text>
+            )}
+            <Text mb={4}>📍 {activeListing.address}</Text>
+            {activeListing.businessHours && (
               <>
                 <Text fontWeight="bold" mb={2}>
                   Business Hours:
                 </Text>
-                <Text whiteSpace="pre-line">{listing.businessHours}</Text>
+                <Text whiteSpace="pre-line">{activeListing.businessHours}</Text>
               </>
             )}
           </ModalBody>

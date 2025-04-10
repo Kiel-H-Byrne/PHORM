@@ -15,7 +15,7 @@ const AppList = () => {
       <HStack flexWrap={"wrap"} spacing={5}>
         {fetchData &&
           fetchData.map((listing: IListing) => (
-            <BusinessCard listing={listing} key={listing.name} />
+            <BusinessCard activeListing={listing} key={listing.name} />
           ))}
       </HStack>
     </VStack>
