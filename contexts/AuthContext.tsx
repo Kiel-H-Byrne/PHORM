@@ -5,8 +5,8 @@ import { removeAuthCookie, setupAuthCookieListener } from "@/util/authCookies";
 import { User } from "firebase/auth";
 import { useRouter } from "next/router";
 import {
-  createContext,
   ReactNode,
+  createContext,
   useContext,
   useEffect,
   useState,

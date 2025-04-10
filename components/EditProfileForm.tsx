@@ -1,5 +1,4 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { Member } from "@/types";
 import {
   Box,
   Button,
@@ -23,27 +22,26 @@ import { useState } from "react";
 import { MdAdd } from "react-icons/md";
 
 export default function EditProfileForm({
-  member,
   onUpdate,
 }: {
-  member: Member;
-  onUpdate: undefined;
+  onUpdate: () => void;
 }) {
-  const { user } = useAuth();
+  const { user: member } = useAuth();
+  console.log(member);
   const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [newSpecialty, setNewSpecialty] = useState("");
   const [formData, setFormData] = useState({
-    firstName: member.firstName,
-    lastName: member.lastName,
-    email: member.email,
-    phone: member.phone || "",
-    bio: member.bio || "",
-    location: member.location || "",
-    specialties: member.specialties || [],
-    experienceLevel: member.experienceLevel || "",
-    availability: member.availability || "",
-    socialLinks: member.socialLinks || {},
+    // firstName: member?.profile.firstName|| "",
+    // lastName: member?.profile.lastName|| "",
+    // email: member?.profile.email|| "",
+    // phone: member?.profile.phone || "",
+    // bio: member?.profile.bio || "",
+    // location: member?.profile.location || "",
+    // specialties: member.profile.specialties || [],
+    // experienceLevel: member.profile.experienceLevel || "",
+    // availability: member.profile.availability || "",
+    // socialLinks: member.profile.socialLinks || "",
   });
 
   const handleAddSpecialty = () => {

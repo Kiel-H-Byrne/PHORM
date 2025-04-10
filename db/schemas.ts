@@ -56,6 +56,7 @@ export const ClaimSchema = z.object({
 
 export const ListingsSchema = z
   .object({
+    id: z.string(),
     name: z.string().min(5),
     address: z.string(),
     street: z.string().min(5),

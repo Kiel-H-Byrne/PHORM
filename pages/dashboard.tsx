@@ -1,11 +1,8 @@
 import { ProtectedRoute, UserDashboard } from "@/components";
-import { useAuth } from "@/contexts/AuthContext";
 import { Container } from "@chakra-ui/react";
 import Head from "next/head";
 
 const Dashboard = () => {
-  const { user } = useAuth();
-
   return (
     <ProtectedRoute>
       <Head>
@@ -13,7 +10,7 @@ const Dashboard = () => {
       </Head>
 
       <Container maxW="container.xl" py={8}>
-        <UserDashboard userId={user?.uid} />
+        <UserDashboard />
       </Container>
     </ProtectedRoute>
   );

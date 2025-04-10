@@ -15,7 +15,6 @@ import {
   PopoverContent,
   PopoverHeader,
   PopoverTrigger,
-  useDisclosure,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { memo } from "react";
@@ -25,12 +24,10 @@ import {
   FaTwitterSquare,
 } from "react-icons/fa";
 import { TbProgress } from "react-icons/tb";
-import { EditProfileModal } from "./EditProfileModal";
 
 const MyAvatar = () => {
   const { user, loading, signOut } = useAuth();
   const { push } = useRouter();
-  const { isOpen, onToggle, onClose } = useDisclosure();
   const handleSignOut = async () => {
     await signOut();
     push("/");
@@ -79,17 +76,14 @@ const MyAvatar = () => {
             {isLoggedIn ? (
               <>
                 <Button onClick={handleSignOut}>Sign Out</Button>
-                <Button onClick={onToggle}>Edit Profile</Button>
+                <Link href="/dashboard">
+                  <Button>Dashboard</Button>
+                </Link>
               </>
             ) : (
               <Button onClick={() => push("/auth/login")}>Sign In</Button>
             )}
           </HStack>
-          <EditProfileModal
-            isOpen={isOpen}
-            onClose={onClose}
-            onToggle={onToggle}
-          />
         </PopoverBody>
       </PopoverContent>
     </Popover>

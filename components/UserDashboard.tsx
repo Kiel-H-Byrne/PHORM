@@ -22,9 +22,10 @@ import {
   Text,
   VStack,
   useColorModeValue,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   FaBuilding,
   FaHeart,
@@ -32,6 +33,7 @@ import {
   FaPlus,
   FaUser,
 } from "react-icons/fa";
+import { EditProfileModal } from "./EditProfileModal";
 import ListingCard from "./ListingCard";
 
 interface UserDashboardProps {
@@ -45,46 +47,18 @@ const UserDashboard = ({ userId }: UserDashboardProps) => {
   const [userListings, setUserListings] = useState<IListing[]>([]);
   const [favoriteListings, setFavoriteListings] = useState<IListing[]>([]);
 
+  const { isOpen, onToggle, onClose } = useDisclosure();
+
   const bgColor = useColorModeValue("white", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.700");
 
-  // Fetch user's listings and favorites
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        setIsLoading(true);
-
-        // In a real app, you would fetch this data from your API
-        // For now, we'll simulate a delay and use mock data
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        // Mock data for demonstration
-        setUserListings([]);
-        setFavoriteListings([]);
-
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-        setIsLoading(false);
-      }
-    };
-
-    fetchUserData();
-  }, [userId, user]);
-
   const handleAddListing = () => {
     // Open the add listing drawer or navigate to add listing page
-    router.push("/?addListing=true");
-  };
-
-  const handleEditProfile = () => {
-    // Navigate to profile edit page or open modal
-    router.push("/profile/edit");
+    // router.push("/?addListing=true");
   };
 
   return (
     <Box p={4} maxW="1200px" mx="auto">
-      {/* User Profile Section */}
       <Box
         bg={bgColor}
         p={6}
@@ -121,10 +95,15 @@ const UserDashboard = ({ userId }: UserDashboardProps) => {
                 size="sm"
                 variant="outline"
                 mt={2}
-                onClick={handleEditProfile}
+                onClick={onToggle}
               >
                 Edit Profile
               </Button>
+              <EditProfileModal
+                isOpen={isOpen}
+                onClose={onClose}
+                onToggle={onToggle}
+              />
             </VStack>
           </Flex>
 

@@ -22,7 +22,7 @@ export default function ProtectedRoute({
         isClosable: true,
       });
       router.push({
-        pathname: "/login",
+        pathname: "/auth/login",
         query: { returnUrl: router.asPath },
       });
     }
