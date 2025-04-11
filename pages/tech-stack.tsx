@@ -1,5 +1,4 @@
 import {
-  As,
   Box,
   Heading,
   ListIcon,
@@ -9,7 +8,8 @@ import {
   VStack,
   useColorModeValue,
 } from "@chakra-ui/react";
-import { DiResponsive } from "react-icons/di";
+import { IconType } from "react-icons";
+import { DiResponsive, DiVisualstudio } from "react-icons/di";
 import { GiAmericanFootballHelmet, GiSittingDog } from "react-icons/gi";
 import {
   SiChakraui,
@@ -31,7 +31,6 @@ import {
   SiStyledcomponents,
   SiTypescript,
   SiVercel,
-  SiVisualstudio,
   SiVitest,
   SiZod,
 } from "react-icons/si";
@@ -81,7 +80,7 @@ const toolingTech = [
     "Identifying and reporting on patterns in JavaScript",
     GiSittingDog,
   ],
-  ["Visual Studio Code", "A code editor for web development", SiVisualstudio],
+  ["Visual Studio Code", "A code editor for web development", DiVisualstudio],
   [
     "Prettier",
     "An opinionated code formatter enforcing consistencies",
@@ -165,7 +164,7 @@ export function Section({
   techs,
 }: {
   title: string;
-  techs: string[][];
+  techs: (string | IconType)[][];
 }) {
   const bg_color = useColorModeValue("purple.50", "purple.900");
   const bg_fg_color = useColorModeValue("purple.200", "purple.50");

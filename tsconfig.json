@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -16,19 +12,14 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "sourceMap": true,
     "jsx": "preserve",
     // "incremental": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"]
     },
-    "types": [
-      "jest",
-      "node",
-      "@testing-library/jest-dom"
-    ],
+    "types": ["jest", "node", "@testing-library/jest-dom"],
     "plugins": [
       {
         "name": "next"
@@ -37,7 +28,6 @@
     // Performance optimizations
     "disableSizeLimit": true,
     "importsNotUsedAsValues": "remove",
-    "disableSourceOfProjectReferenceRedirect": true,
     "forceConsistentCasingInFileNames": true,
     "incremental": true
   },
@@ -48,9 +38,5 @@
     "types.d.ts",
     ".next/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules",
-    ".next",
-    "out"
-  ]
+  "exclude": ["node_modules", ".next", "out"]
 }

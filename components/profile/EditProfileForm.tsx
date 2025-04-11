@@ -36,7 +36,11 @@ const profileSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   contact: z.object({
-    email: z.string().email("Invalid email address").optional().or(z.literal("")),
+    email: z
+      .string()
+      .email("Invalid email address")
+      .optional()
+      .or(z.literal("")),
     phone: z.string().optional().or(z.literal("")),
   }),
   bio: z.string().optional().or(z.literal("")),
@@ -59,18 +63,22 @@ export default function EditProfileForm({
   const { user } = useAuth();
   const [newSpecialty, setNewSpecialty] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const toast = useToast();
-  
+
   // Fetch user data
-  const { data: userData, error: fetchError, isLoading } = useSWR<IUser | null>(
+  const {
+    data: userData,
+    error: fetchError,
+    isLoading,
+  } = useSWR<IUser | null>(
     user?.uid ? `/api/users/${user.uid}` : null,
     async () => {
       if (!user?.uid) return null;
       return await findUserById(user.uid);
     }
   );
-  
+
   // Setup form with validation
   const {
     register,
@@ -97,26 +105,28 @@ export default function EditProfileForm({
       orgs: [],
     },
   });
-  
+
   // Setup mutation for updating profile
-  const { trigger, error: updateError } = useSWRMutation(
-    user?.uid ? `/api/users/${user.uid}` : null,
-    async (url, { arg }) => {
-      const res = await fetch(url, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(arg),
-      });
-      
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to update profile");
-      }
-      
-      return res.json();
+  const { trigger, error: updateError } = useSWRMutation<
+    any,
+    Error,
+    string,
+    ProfileFormData
+  >(user?.uid ? `/api/users/${user.uid}` : null, async (url, { arg }) => {
+    const res = await fetch(url, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(arg),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || "Failed to update profile");
     }
-  );
-  
+
+    return res.json();
+  });
+
   // Initialize form with user data when it's loaded
   useEffect(() => {
     if (userData?.profile) {
@@ -138,25 +148,27 @@ export default function EditProfileForm({
       });
     }
   }, [userData, reset]);
-  
+
   // Handle adding a specialty
   const handleAddSpecialty = () => {
-    if (newSpecialty && !getValues("specialties")?.includes(newSpecialty)) {
+    if (newSpecialty) {
       const currentSpecialties = getValues("specialties") || [];
-      setValue("specialties", [...currentSpecialties, newSpecialty]);
-      setNewSpecialty("");
+      if (!currentSpecialties.includes(newSpecialty)) {
+        setValue("specialties", [...currentSpecialties, newSpecialty]);
+        setNewSpecialty("");
+      }
     }
   };
-  
+
   // Handle removing a specialty
   const handleRemoveSpecialty = (specialty: string) => {
     const currentSpecialties = getValues("specialties") || [];
     setValue(
       "specialties",
-      currentSpecialties.filter((s) => s !== specialty)
+      currentSpecialties.filter((s: string) => s !== specialty)
     );
   };
-  
+
   // Handle form submission
   const onSubmit = async (data: ProfileFormData) => {
     if (!user) {
@@ -169,24 +181,25 @@ export default function EditProfileForm({
       });
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     try {
       await trigger(data);
-      
+
       toast({
         title: "Profile updated",
         status: "success",
         duration: 3000,
         isClosable: true,
       });
-      
+
       onUpdate();
     } catch (error) {
       toast({
         title: "Error updating profile",
-        description: error instanceof Error ? error.message : "An error occurred",
+        description:
+          error instanceof Error ? error.message : "An error occurred",
         status: "error",
         duration: 3000,
         isClosable: true,
@@ -195,7 +208,7 @@ export default function EditProfileForm({
       setIsSubmitting(false);
     }
   };
-  
+
   // Show loading state
   if (isLoading) {
     return (
@@ -215,7 +228,7 @@ export default function EditProfileForm({
       </Box>
     );
   }
-  
+
   // Show error state
   if (fetchError) {
     return (
@@ -228,13 +241,17 @@ export default function EditProfileForm({
             ? fetchError.message
             : "Failed to load profile data. Please try again."}
         </Text>
-        <Button mt={4} colorScheme="blue" onClick={() => window.location.reload()}>
+        <Button
+          mt={4}
+          colorScheme="blue"
+          onClick={() => window.location.reload()}
+        >
           Retry
         </Button>
       </Box>
     );
   }
-  
+
   return (
     <Box as="form" onSubmit={handleSubmit(onSubmit)}>
       <VStack spacing={6}>
@@ -245,30 +262,19 @@ export default function EditProfileForm({
         >
           <FormControl isRequired isInvalid={!!errors.firstName}>
             <FormLabel>First Name</FormLabel>
-            <Input
-              {...register("firstName")}
-            />
-            <FormErrorMessage>
-              {errors.firstName?.message}
-            </FormErrorMessage>
+            <Input {...register("firstName")} />
+            <FormErrorMessage>{errors.firstName?.message}</FormErrorMessage>
           </FormControl>
 
           <FormControl isRequired isInvalid={!!errors.lastName}>
             <FormLabel>Last Name</FormLabel>
-            <Input
-              {...register("lastName")}
-            />
-            <FormErrorMessage>
-              {errors.lastName?.message}
-            </FormErrorMessage>
+            <Input {...register("lastName")} />
+            <FormErrorMessage>{errors.lastName?.message}</FormErrorMessage>
           </FormControl>
 
           <FormControl isInvalid={!!errors.contact?.email}>
             <FormLabel>Email</FormLabel>
-            <Input
-              type="email"
-              {...register("contact.email")}
-            />
+            <Input type="email" {...register("contact.email")} />
             <FormErrorMessage>
               {errors.contact?.email?.message}
             </FormErrorMessage>
@@ -276,10 +282,7 @@ export default function EditProfileForm({
 
           <FormControl isInvalid={!!errors.contact?.phone}>
             <FormLabel>Phone</FormLabel>
-            <Input
-              type="tel"
-              {...register("contact.phone")}
-            />
+            <Input type="tel" {...register("contact.phone")} />
             <FormErrorMessage>
               {errors.contact?.phone?.message}
             </FormErrorMessage>
@@ -287,25 +290,19 @@ export default function EditProfileForm({
 
           <FormControl isInvalid={!!errors.location}>
             <FormLabel>Location</FormLabel>
-            <Select
-              {...register("location")}
-            >
+            <Select {...register("location")}>
               <option value="">Select location</option>
               <option value="DC">Washington, DC</option>
               <option value="MD">Maryland</option>
               <option value="VA">Virginia</option>
               <option value="OTHER">Other</option>
             </Select>
-            <FormErrorMessage>
-              {errors.location?.message}
-            </FormErrorMessage>
+            <FormErrorMessage>{errors.location?.message}</FormErrorMessage>
           </FormControl>
 
           <FormControl isInvalid={!!errors.experienceLevel}>
             <FormLabel>Experience Level</FormLabel>
-            <Select
-              {...register("experienceLevel")}
-            >
+            <Select {...register("experienceLevel")}>
               <option value="">Select experience level</option>
               <option value="entry">Entry Level</option>
               <option value="intermediate">Intermediate</option>
@@ -318,19 +315,15 @@ export default function EditProfileForm({
 
           <FormControl isInvalid={!!errors.availability}>
             <FormLabel>Availability</FormLabel>
-            <Select
-              {...register("availability")}
-            >
+            <Select {...register("availability")}>
               <option value="">Select availability</option>
               <option value="fulltime">Full Time</option>
               <option value="parttime">Part Time</option>
               <option value="contract">Contract</option>
             </Select>
-            <FormErrorMessage>
-              {errors.availability?.message}
-            </FormErrorMessage>
+            <FormErrorMessage>{errors.availability?.message}</FormErrorMessage>
           </FormControl>
-          
+
           <FormControl isInvalid={!!errors.classYear}>
             <FormLabel>Class Year</FormLabel>
             <Input
@@ -340,12 +333,13 @@ export default function EditProfileForm({
                 valueAsNumber: true,
               })}
             />
-            <FormErrorMessage>
-              {errors.classYear?.message}
-            </FormErrorMessage>
+            <FormErrorMessage>{errors.classYear?.message}</FormErrorMessage>
           </FormControl>
 
-          <FormControl isInvalid={!!errors.specialties} gridColumn={{ md: "span 2" }}>
+          <FormControl
+            isInvalid={!!errors.specialties}
+            gridColumn={{ md: "span 2" }}
+          >
             <FormLabel>Specialties</FormLabel>
             <InputGroup>
               <Input
@@ -378,21 +372,14 @@ export default function EditProfileForm({
                 </Tag>
               ))}
             </HStack>
-            <FormErrorMessage>
-              {errors.specialties?.message}
-            </FormErrorMessage>
+            <FormErrorMessage>{errors.specialties?.message}</FormErrorMessage>
           </FormControl>
         </Grid>
 
         <FormControl isInvalid={!!errors.bio}>
           <FormLabel>Bio</FormLabel>
-          <Textarea
-            {...register("bio")}
-            rows={4}
-          />
-          <FormErrorMessage>
-            {errors.bio?.message}
-          </FormErrorMessage>
+          <Textarea {...register("bio")} rows={4} />
+          <FormErrorMessage>{errors.bio?.message}</FormErrorMessage>
         </FormControl>
 
         <Button

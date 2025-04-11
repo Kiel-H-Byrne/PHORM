@@ -13,14 +13,23 @@ import { memo } from "react";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import { GLocation, IListing } from "../types";
 
+interface InfoWindowOptions {
+  position: google.maps.LatLng | google.maps.LatLngLiteral;
+  pixelOffset?: google.maps.Size | null;
+  disableAutoPan?: boolean;
+  maxWidth?: number;
+  zIndex?: number;
+}
+
 const MultipleInfoContent = ({
   data,
   options,
 }: {
   data: IListing[];
-  options: any;
+  options: InfoWindowOptions;
 }) => {
-  const { position }: { position: GLocation } = options;
+  // Extract position from options
+  const position = options.position as GLocation;
 
   // Validate data
   if (!data || data.length === 0) {

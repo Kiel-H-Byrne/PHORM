@@ -1,5 +1,5 @@
 import { memo, useCallback } from "react";
-import { ErrorBoundary } from "react-error-boundary";
+import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 import { GLocation, IListing } from "../types";
 import { MultipleInfoContent, SingleInfoContent } from "./";
 
@@ -7,10 +7,7 @@ import { MultipleInfoContent, SingleInfoContent } from "./";
 const InfoWindowErrorFallback = ({
   error,
   resetErrorBoundary,
-}: {
-  error: Error;
-  resetErrorBoundary: () => void;
-}) => {
+}: FallbackProps) => {
   return (
     <div
       style={{
@@ -62,7 +59,7 @@ const MyInfoWindow = ({
 
   // Configure InfoWindow options
   const options = {
-    pixelOffset: { height: -40, width: 0, equals: undefined },
+    pixelOffset: { height: -40, width: 0, equals: () => false },
     disableAutoPan: true,
     position:
       hasOneItem && activeData[0].lat && activeData[0].lng

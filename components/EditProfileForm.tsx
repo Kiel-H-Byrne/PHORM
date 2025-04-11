@@ -108,12 +108,13 @@ export default function EditProfileForm({
     try {
       console.log("I want to send", JSON.stringify(formData));
 
-      trigger(formData);
+      trigger(formData as any);
 
       onUpdate();
     } catch (error) {
       toast({
         title: "Error updating profile",
+        description: error instanceof Error ? error.message : "",
         status: "error",
         duration: 3000,
       });

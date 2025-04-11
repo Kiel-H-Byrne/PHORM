@@ -37,6 +37,7 @@ export const ProfileSchema = z.object({
   favorites: z.array(z.string()),
   social: SocialSchema,
   roles: z.array(z.string()),
+  classYear: z.number().optional(),
 });
 
 export const UserSchema = z.object({

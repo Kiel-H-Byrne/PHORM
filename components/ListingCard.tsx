@@ -99,7 +99,7 @@ const ListingCard = ({
         `https://www.google.com/maps/dir/?api=1&destination=${activeListing.lat},${activeListing.lng}`,
         "_blank"
       );
-    } else {
+    } else if (activeListing.address) {
       window.open(
         `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
           activeListing.address
@@ -195,14 +195,14 @@ const ListingCard = ({
             <Collapse in={isOpen} animateOpacity>
               <Box mt={2} p={3} bg="gray.50" borderRadius="md">
                 <Text fontSize="sm">Verified business owner</Text>
-                {ownerInfo?.member?.contact?.phone && (
+                {ownerInfo?.member?.profile?.contact?.phone && (
                   <Flex align="center" mt={1}>
                     <Icon as={FaPhone} color="gray.500" mr={2} />
                     <Link
-                      href={`tel:${ownerInfo.member.contact.phone}`}
+                      href={`tel:${ownerInfo.member.profile.contact.phone}`}
                       fontSize="sm"
                     >
-                      {ownerInfo.member.contact.phone}
+                      {ownerInfo.member.profile.contact.phone}
                     </Link>
                   </Flex>
                 )}

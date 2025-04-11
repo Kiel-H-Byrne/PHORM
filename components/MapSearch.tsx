@@ -78,13 +78,16 @@ const MapSearch = ({
         }
 
         if (filters.location) {
-          filteredResults = filteredResults.filter(
-            (listing) =>
+          filteredResults = filteredResults.filter((listing) => {
+            if (!filters.location) return;
+            return (
               listing.state === filters.location ||
-              listing.city
+              (listing.city
                 ?.toLowerCase()
-                .includes(filters.location.toLowerCase())
-          );
+                .includes(filters.location.toLowerCase()) ??
+                false)
+            );
+          });
         }
 
         // Apply sorting
