@@ -14,11 +14,13 @@ import {
   Text,
   Tooltip,
   VStack,
+  useDisclosure,
   useToast,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import {
   FaDirections,
+  FaEdit,
   FaHeart,
   FaMapMarkerAlt,
   FaPhone,
@@ -26,11 +28,13 @@ import {
   FaStar,
   FaUser,
 } from "react-icons/fa";
+import { EditListingModal } from "./forms";
 
 interface ListingCardProps {
   activeListing: IListing;
   onVerify?: (listing: IListing) => void;
   showActions?: boolean;
+  onEdit?: () => void;
 }
 
 const ListingCard = ({
@@ -42,6 +46,14 @@ const ListingCard = ({
   const [isFavorite, setIsFavorite] = useState(false);
   const { user } = useAuth();
   const toast = useToast();
+  const {
+    isOpen: isEditModalOpen,
+    onOpen: onOpenEditModal,
+    onClose: onCloseEditModal,
+  } = useDisclosure();
+
+  // Check if the current user is the creator of this listing
+  const isCreator = user && activeListing.creator?.id === user.uid;
 
   const toggleCollapse = () => {
     setIsOpen(!isOpen);
@@ -201,44 +213,72 @@ const ListingCard = ({
 
         {/* Action Buttons */}
         {showActions && (
-          <HStack spacing={2} mt={2} justify="space-between">
-            <Tooltip label="Get Directions">
-              <Button
-                leftIcon={<Icon as={FaDirections} />}
-                colorScheme="blue"
-                size="sm"
-                flex={1}
-                onClick={handleGetDirections}
-              >
-                Directions
-              </Button>
-            </Tooltip>
+          <>
+            <HStack spacing={2} mt={2} justify="space-between">
+              <Tooltip label="Get Directions">
+                <Button
+                  leftIcon={<Icon as={FaDirections} />}
+                  colorScheme="blue"
+                  size="sm"
+                  flex={1}
+                  onClick={handleGetDirections}
+                >
+                  Directions
+                </Button>
+              </Tooltip>
 
-            <Tooltip
-              label={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
-            >
-              <Button
-                leftIcon={<Icon as={FaHeart} />}
-                colorScheme={isFavorite ? "red" : "gray"}
-                variant={isFavorite ? "solid" : "outline"}
-                size="sm"
-                onClick={handleFavorite}
+              <Tooltip
+                label={
+                  isFavorite ? "Remove from Favorites" : "Add to Favorites"
+                }
               >
-                {isFavorite ? "Saved" : "Save"}
-              </Button>
-            </Tooltip>
+                <Button
+                  leftIcon={<Icon as={FaHeart} />}
+                  colorScheme={isFavorite ? "red" : "gray"}
+                  variant={isFavorite ? "solid" : "outline"}
+                  size="sm"
+                  onClick={handleFavorite}
+                >
+                  {isFavorite ? "Saved" : "Save"}
+                </Button>
+              </Tooltip>
 
-            <Tooltip label="Share">
+              <Tooltip label="Share">
+                <Button
+                  leftIcon={<Icon as={FaShare} />}
+                  colorScheme="gray"
+                  size="sm"
+                  onClick={handleShare}
+                >
+                  Share
+                </Button>
+              </Tooltip>
+            </HStack>
+
+            {/* Edit button for listing creator */}
+            {isCreator && (
               <Button
-                leftIcon={<Icon as={FaShare} />}
-                colorScheme="gray"
+                leftIcon={<Icon as={FaEdit} />}
+                colorScheme="teal"
                 size="sm"
-                onClick={handleShare}
+                variant="outline"
+                width="100%"
+                mt={2}
+                onClick={onOpenEditModal}
               >
-                Share
+                Edit Listing
               </Button>
-            </Tooltip>
-          </HStack>
+            )}
+
+            {/* Edit Listing Modal */}
+            {isCreator && activeListing.id && (
+              <EditListingModal
+                isOpen={isEditModalOpen}
+                onClose={onCloseEditModal}
+                listingId={activeListing.id}
+              />
+            )}
+          </>
         )}
       </VStack>
     </Box>

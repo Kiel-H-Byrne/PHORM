@@ -42,10 +42,36 @@ const updateUserById = async (userId: string, newData: Partial<IUser>) => {
 };
 
 const getUsers = async () => {
-  if (!usersRef) return;
+  if (!usersRef) return [];
   const querySnapshot = await getDocs(usersRef);
-  const users = querySnapshot.docs.map((doc) => doc.data());
+  const users = querySnapshot.docs.map((doc) => doc.data() as IUser);
   return users;
+};
+
+/**
+ * Find users by class year
+ * @param classYear The class year to search for
+ * @returns Array of users with the specified class year
+ */
+const findUsersByClassYear = async (classYear: number) => {
+  if (!usersRef) return [];
+
+  try {
+    // Query users where profile.classYear equals the provided classYear
+    const q = query(usersRef, where("profile.classYear", "==", classYear));
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      return [];
+    }
+
+    // Map the documents to user objects
+    const users = querySnapshot.docs.map((doc) => doc.data() as IUser);
+    return users;
+  } catch (error) {
+    console.error(`Error finding users by class year ${classYear}:`, error);
+    return [];
+  }
 };
 
 // Create a new user in the users collection
@@ -99,6 +125,7 @@ export {
   findOrCreateUser,
   findUserByEmail,
   findUserById,
+  findUsersByClassYear,
   getUsers,
   updateUserById,
 };
