@@ -34,7 +34,6 @@ const MapSearch = ({ onSelectListing, mapInstance }: MapSearchProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
   // Debounced search function
   const handleSearch = useCallback(
     async (term: string) => {
@@ -47,7 +46,7 @@ const MapSearch = ({ onSelectListing, mapInstance }: MapSearchProps) => {
       try {
         const searchResults = await searchListings(term, 5);
         setResults(searchResults);
-        if (searchResults.length > 0) {
+        if (searchResults.length > -1) {
           onOpen();
         }
       } catch (error) {
@@ -63,6 +62,7 @@ const MapSearch = ({ onSelectListing, mapInstance }: MapSearchProps) => {
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
+
       setSearchTerm(value);
 
       // Clear previous timeout
@@ -122,7 +122,7 @@ const MapSearch = ({ onSelectListing, mapInstance }: MapSearchProps) => {
       zIndex={10}
     >
       <Popover
-        isOpen={isOpen && results.length > 0}
+        isOpen={isOpen}
         onClose={onClose}
         placement="bottom"
         autoFocus={false}
@@ -142,17 +142,18 @@ const MapSearch = ({ onSelectListing, mapInstance }: MapSearchProps) => {
               boxShadow="md"
               value={searchTerm}
               onChange={handleInputChange}
-              onFocus={() => results.length > 0 && onOpen()}
+              onFocus={() => onOpen()}
               _focus={{ boxShadow: "outline" }}
             />
             {isLoading ? (
               <InputRightElement>
-                <Spinner size="sm" color="blue.500" />
+                <Spinner size="sm" colorScheme="mwphgldc.purple" />
               </InputRightElement>
             ) : searchTerm ? (
               <InputRightElement>
                 <Button
                   size="sm"
+                  borderRadius={"full"}
                   variant="ghost"
                   onClick={handleClearSearch}
                   aria-label="Clear search"
@@ -170,6 +171,11 @@ const MapSearch = ({ onSelectListing, mapInstance }: MapSearchProps) => {
         >
           <PopoverBody p={0}>
             <List spacing={0}>
+              {results.length === 0 && (
+                <ListItem p={3} textAlign="center">
+                  No results found.
+                </ListItem>
+              )}
               {results.map((listing) => (
                 <ListItem
                   key={listing.id}
@@ -178,12 +184,20 @@ const MapSearch = ({ onSelectListing, mapInstance }: MapSearchProps) => {
                   cursor="pointer"
                   onClick={() => handleSelectListing(listing)}
                   borderBottom="1px solid"
-                  borderColor="gray.100"
+                  borderColor="mwphgldc.purple.900"
                 >
                   <Flex align="center">
-                    <Icon as={FaMapMarkerAlt} color="blue.500" mr={2} />
+                    <Icon
+                      as={FaMapMarkerAlt}
+                      color="mwphgldc.purple.900"
+                      mr={2}
+                    />
                     <Box>
-                      <Text fontWeight="bold" noOfLines={1}>
+                      <Text
+                        fontWeight="bold"
+                        noOfLines={1}
+                        color="mwphgldc.purple.900"
+                      >
                         {listing.name}
                       </Text>
                       <Text fontSize="sm" color="gray.600" noOfLines={1}>

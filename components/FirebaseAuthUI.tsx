@@ -38,17 +38,15 @@ const FirebaseAuthUI = ({
               // User is signed in
               // Set auth cookie
               setAuthCookie(user);
-
+              console.log(user);
               // Create or find user in the users collection
               // This ensures phone auth users have a record in the users table
               const userData = {
                 id: user.uid,
-                name: user.displayName || user.phoneNumber || "New User",
+                name: user.displayName || user.phoneNumber || "New Member",
                 email: user.email || "",
                 image: user.photoURL || "",
-                emailVerified: user.emailVerified
-                  ? new Date().toISOString()
-                  : undefined,
+                emailVerified: user.emailVerified || false,
                 profile: {
                   firstName: user.displayName?.split(" ")[0] || "",
                   lastName:

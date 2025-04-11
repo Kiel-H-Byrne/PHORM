@@ -4,13 +4,11 @@ import {
   endAt,
   getDoc,
   getDocs,
-  limit,
   orderBy,
   query,
   setDoc,
   startAt,
   updateDoc,
-  where,
 } from "firebase/firestore";
 import { distanceBetween, geohashQueryBounds } from "geofire-common";
 import { IListing } from "../types";
@@ -27,11 +25,11 @@ const listingsRef = appFsdb ? collection(appFsdb, "listings") : undefined;
  */
 const listingCreate = async function (data: IListing) {
   if (!listingsRef) return null;
-  
+
   try {
     // Generate a new document reference
     const docRef = doc(listingsRef);
-    
+
     // Add ID and creation timestamp if not provided
     const enhancedData = {
       ...data,
@@ -39,14 +37,14 @@ const listingCreate = async function (data: IListing) {
       submitted: data.submitted || new Date(),
       updated: new Date(),
     };
-    
+
     // Save the document
     await setDoc(docRef, enhancedData, { merge: true });
-    
+
     console.log(`Created listing with ID: ${docRef.id}`);
     return docRef;
   } catch (error) {
-    console.error('Error creating listing:', error);
+    console.error("Error creating listing:", error);
     throw error;
   }
 };
@@ -62,7 +60,7 @@ const listingsFetchAll = async function () {
   try {
     const querySnapshot = await getDocs(listingsRef);
     const listings: IListing[] = [];
-    
+
     querySnapshot?.forEach((doc) => {
       const data = doc.data() as IListing;
       listings.push({
@@ -70,10 +68,10 @@ const listingsFetchAll = async function () {
         id: doc.id, // Ensure ID is always included
       });
     });
-    
+
     return listings;
   } catch (error) {
-    console.error('Error fetching all listings:', error);
+    console.error("Error fetching all listings:", error);
     return [];
   }
 };
@@ -89,14 +87,14 @@ const listingsFetch = async function (listingId: string) {
   try {
     const docRef = doc(listingsRef, listingId);
     const docSnap = await getDoc(docRef);
-    
+
     if (docSnap.exists()) {
       return {
-        ...docSnap.data() as IListing,
+        ...(docSnap.data() as IListing),
         id: docSnap.id,
       };
     }
-    
+
     return null;
   } catch (error) {
     console.error(`Error fetching listing ${listingId}:`, error);
@@ -110,24 +108,27 @@ const listingsFetch = async function (listingId: string) {
  * @param data The data to update
  * @returns True if successful, false otherwise
  */
-const listingUpdate = async function (listingId: string, data: Partial<IListing>) {
+const listingUpdate = async function (
+  listingId: string,
+  data: Partial<IListing>
+) {
   if (!listingsRef) return false;
-  
+
   try {
     const docRef = doc(listingsRef, listingId);
     const docSnap = await getDoc(docRef);
-    
+
     if (!docSnap.exists()) {
       console.error(`Listing ${listingId} not found`);
       return false;
     }
-    
+
     // Add updated timestamp
     const updateData = {
       ...data,
       updated: new Date(),
     };
-    
+
     await updateDoc(docRef, updateData);
     console.log(`Updated listing ${listingId}`);
     return true;
@@ -148,7 +149,7 @@ const getListingsWithinRadius = async (
   center: [number, number]
 ) => {
   if (!listingsRef) return [];
-  
+
   try {
     // Calculate geohash bounds for the given radius
     const bounds = geohashQueryBounds(center, radiusInM);
@@ -170,7 +171,7 @@ const getListingsWithinRadius = async (
     const listings = snapShots
       .flatMap((snapShot) => snapShot.docs)
       .map((doc) => ({
-        ...doc.data() as IListing,
+        ...(doc.data() as IListing),
         id: doc.id,
       }));
 
@@ -181,10 +182,12 @@ const getListingsWithinRadius = async (
       return distanceInM <= radiusInM;
     });
 
-    console.log(`Found ${filteredListings.length} listings within ${radiusInM}m radius`);
+    console.log(
+      `Found ${filteredListings.length} listings within ${radiusInM}m radius`
+    );
     return filteredListings;
   } catch (error) {
-    console.error('Error getting listings within radius:', error);
+    console.error("Error getting listings within radius:", error);
     return [];
   }
 };
@@ -196,22 +199,22 @@ const getListingsWithinRadius = async (
  */
 const listingsDelete = async function (listingId: string) {
   if (!listingsRef) return false;
-  
+
   try {
     const docRef = doc(listingsRef, listingId);
     const docSnap = await getDoc(docRef);
-    
+
     if (!docSnap.exists()) {
       console.error(`Listing ${listingId} not found`);
       return false;
     }
-    
+
     // Instead of deleting, mark as deleted
     await updateDoc(docRef, {
       deleted: true,
       deletedAt: new Date(),
     });
-    
+
     console.log(`Marked listing ${listingId} as deleted`);
     return true;
   } catch (error) {
@@ -226,25 +229,29 @@ const listingsDelete = async function (listingId: string) {
  * @param maxResults Maximum number of results to return
  * @returns Array of matching listings
  */
-const searchListings = async function (searchTerm: string, maxResults: number = 20) {
+const searchListings = async function (
+  searchTerm: string,
+  maxResults: number = 20
+) {
   if (!listingsRef || !searchTerm) return [];
-  
+
   try {
     // Get all listings (in a real app, you'd use a search index)
     const allListings = await listingsFetchAll();
-    
+
     // Filter by search term
     const normalizedTerm = searchTerm.toLowerCase().trim();
-    const results = allListings.filter(listing => 
-      listing.name?.toLowerCase().includes(normalizedTerm) ||
-      listing.description?.toLowerCase().includes(normalizedTerm) ||
-      listing.address?.toLowerCase().includes(normalizedTerm)
+    const results = allListings.filter(
+      (listing) =>
+        listing.name?.toLowerCase().includes(normalizedTerm) ||
+        listing.description?.toLowerCase().includes(normalizedTerm) ||
+        listing.address?.toLowerCase().includes(normalizedTerm)
     );
-    
+
     // Limit results
     return results.slice(0, maxResults);
   } catch (error) {
-    console.error('Error searching listings:', error);
+    console.error("Error searching listings:", error);
     return [];
   }
 };
@@ -252,9 +259,9 @@ const searchListings = async function (searchTerm: string, maxResults: number = 
 export {
   getListingsWithinRadius,
   listingCreate,
+  listingUpdate,
   listingsDelete,
   listingsFetch,
   listingsFetchAll,
-  listingUpdate,
   searchListings,
 };

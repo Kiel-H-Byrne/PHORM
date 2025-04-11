@@ -13,6 +13,7 @@ const OrgSchema = z.object({
   number: z.string(),
   state: z.string(),
 });
+const experience_levels = ["apprentice", "intermediate", "master"] as const;
 export const ProfileSchema = z.object({
   firstName: z.string(),
   lastName: z.string(),
@@ -22,8 +23,10 @@ export const ProfileSchema = z.object({
   occupation: z.string(),
   location: z.string(),
   bio: z.string(),
-  skills: z.array(z.string()),
-  // email: z.string().email(),
+  specialties: z.array(z.string()),
+  experienceLevel: z.enum(experience_levels),
+  availability: z.string(),
+  socialLinks: z.array(z.string()),
   contact: z.object({
     email: z.string().email(),
     phone: z.string(),
@@ -44,6 +47,7 @@ export const UserSchema = z.object({
   emailVerified: z.string(),
   profile: ProfileSchema.partial().required({
     orgs: true,
+    lastName: true,
   }),
 });
 

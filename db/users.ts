@@ -13,13 +13,12 @@ import { appFsdb } from "./firebase";
 
 const usersRef = appFsdb ? collection(appFsdb, "users") : undefined;
 
-const findUserById = async (userId: string) => {
+const findUserById = async (userId: string | undefined) => {
   if (!usersRef) return;
   const userRef = doc(usersRef, userId);
   const userDoc = await getDoc(userRef);
-  console.log("userDoc", userDoc.data());
   if (userDoc.exists()) {
-    return userDoc.data();
+    return userDoc.data() as IUser;
   }
   return null;
 };
@@ -65,9 +64,9 @@ const createUser = async (userId: string, userData: Partial<IUser>) => {
   // Merge the provided user data with default values
   const newUser = {
     id: userId,
-    name: userData.name || '',
-    email: userData.email || '',
-    image: userData.image || '',
+    name: userData.name || "",
+    email: userData.email || "",
+    image: userData.image || "",
     emailVerified: userData.emailVerified || null,
     profile: { ...defaultProfile, ...userData.profile },
   };
@@ -88,7 +87,7 @@ const findOrCreateUser = async (userId: string, userData: Partial<IUser>) => {
 
   // If user doesn't exist, create a new one
   if (!existingUser) {
-    console.log('User not found, creating new user:', userId);
+    console.log("User not found, creating new user:", userId);
     return await createUser(userId, userData);
   }
 
@@ -97,9 +96,9 @@ const findOrCreateUser = async (userId: string, userData: Partial<IUser>) => {
 
 export {
   createUser,
-  findOrCreateUser, findUserByEmail,
+  findOrCreateUser,
+  findUserByEmail,
   findUserById,
   getUsers,
-  updateUserById
+  updateUserById,
 };
-

@@ -1,4 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
+import { findUserById } from "@/db/users";
+import { IUser } from "@/types";
 import {
   Box,
   Button,
@@ -20,32 +22,68 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { MdAdd } from "react-icons/md";
+import useSWR from "swr";
+import useSWRMutation from "swr/mutation";
 
 export default function EditProfileForm({
   onUpdate,
 }: {
   onUpdate: () => void;
 }) {
-  const { user: member } = useAuth();
-  console.log(member);
+  const { user } = useAuth();
+  const { data: member }: { data?: IUser | null } = useSWR(
+    `/api/users/${user?.uid}`,
+    async () => await findUserById(user?.uid)
+  );
+  const { trigger, error: updateError } = useSWRMutation(
+    `/api/users/${user?.uid}`,
+    async (url, { arg }) => {
+      const res = await fetch(url, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(arg),
+      });
+      if (!res.ok) {
+        toast({
+          title: updateError,
+          status: "error",
+          duration: 3000,
+        });
+      } else {
+        toast({
+          title: "Profile updated",
+          status: "success",
+          duration: 3000,
+        });
+      }
+      return res.json();
+    }
+  );
   const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [newSpecialty, setNewSpecialty] = useState("");
-  const [formData, setFormData] = useState({
-    // firstName: member?.profile.firstName|| "",
-    // lastName: member?.profile.lastName|| "",
-    // email: member?.profile.email|| "",
-    // phone: member?.profile.phone || "",
-    // bio: member?.profile.bio || "",
-    // location: member?.profile.location || "",
-    // specialties: member.profile.specialties || [],
-    // experienceLevel: member.profile.experienceLevel || "",
-    // availability: member.profile.availability || "",
-    // socialLinks: member.profile.socialLinks || "",
+  const [formData, setFormData] = useState<Partial<IUser["profile"]>>({
+    firstName: member?.profile.firstName || "",
+    lastName: member?.profile.lastName || "",
+    contact: {
+      email: member?.profile.contact?.email || "",
+      phone: member?.profile.contact?.phone || "",
+    },
+    bio: member?.profile.bio || "",
+    location: member?.profile.location || "",
+    specialties: member?.profile.specialties || [],
+    experienceLevel: member?.profile.experienceLevel || "intermediate",
+    availability: member?.profile.availability || "",
+    socialLinks: member?.profile.socialLinks || [],
+    orgs: member?.profile.orgs || [],
   });
 
   const handleAddSpecialty = () => {
-    if (newSpecialty && !formData.specialties.includes(newSpecialty)) {
+    if (
+      newSpecialty &&
+      formData.specialties &&
+      !formData.specialties.includes(newSpecialty)
+    ) {
       setFormData({
         ...formData,
         specialties: [...formData.specialties, newSpecialty],
@@ -55,10 +93,12 @@ export default function EditProfileForm({
   };
 
   const handleRemoveSpecialty = (specialty: string) => {
-    setFormData({
-      ...formData,
-      specialties: formData.specialties.filter((s) => s !== specialty),
-    });
+    if (formData.specialties) {
+      setFormData({
+        ...formData,
+        specialties: formData.specialties.filter((s) => s !== specialty),
+      });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -66,19 +106,10 @@ export default function EditProfileForm({
     setIsLoading(true);
 
     try {
-      const res = await fetch(`/api/members/${user?.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+      console.log("I want to send", JSON.stringify(formData));
 
-      if (!res.ok) throw new Error("Failed to update profile");
+      trigger(formData);
 
-      toast({
-        title: "Profile updated",
-        status: "success",
-        duration: 3000,
-      });
       onUpdate();
     } catch (error) {
       toast({
@@ -123,9 +154,12 @@ export default function EditProfileForm({
             <FormLabel>Email</FormLabel>
             <Input
               type="email"
-              value={formData.email}
+              value={formData.contact?.email}
               onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
+                setFormData({
+                  ...formData,
+                  contact: { ...formData.contact, email: e.target.value },
+                })
               }
             />
           </FormControl>
@@ -134,9 +168,12 @@ export default function EditProfileForm({
             <FormLabel>Phone</FormLabel>
             <Input
               type="tel"
-              value={formData.phone}
+              value={formData.contact?.phone}
               onChange={(e) =>
-                setFormData({ ...formData, phone: e.target.value })
+                setFormData({
+                  ...formData,
+                  contact: { ...formData.contact, phone: e.target.value },
+                })
               }
             />
           </FormControl>
@@ -162,7 +199,11 @@ export default function EditProfileForm({
             <Select
               value={formData.experienceLevel}
               onChange={(e) =>
-                setFormData({ ...formData, experienceLevel: e.target.value })
+                setFormData({
+                  ...formData,
+                  experienceLevel: e.target
+                    .value as IUser["profile"]["experienceLevel"],
+                })
               }
             >
               <option value="">Select experience level</option>
@@ -205,7 +246,7 @@ export default function EditProfileForm({
               </InputRightElement>
             </InputGroup>
             <HStack spacing={2} mt={2} wrap="wrap">
-              {formData.specialties.map((specialty: string) => (
+              {formData.specialties?.map((specialty: string) => (
                 <Tag
                   key={specialty}
                   size="md"
