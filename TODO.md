@@ -1,38 +1,132 @@
-# TODOs
+# PHORM Project TODO List
 
-- [ ] map/browse
-- [-] auth
-- [ ] add biz form (if auth'd)
-- [ ] edit biz form (if auth'd && entered/owned business)
-- [ ] edit profile form (if auth'd)
-- [ ] On Profile page; list other members of your 'class' (year) if registered.
+## Project Status Overview
 
+### Completed Features ✅
 
-<!--
-[Header]
-Welcome to PHORM: Prince Hall's Online Registry of Merchants
-Discover and Support Businesses Owned by Prince Hall Freemasons
-[Subheader]
+- [x] User authentication with Firebase (email, phone)
+- [x] User profile management and editing
+- [x] Business listing creation and editing
+- [x] Map interface with markers and clusters
+- [x] Search functionality with filtering
+- [x] Dashboard with user profile display
+- [x] Class year members display
 
-Connecting Communities, Empowering Entrepreneurs, Strengthening our Brotherhood
-[Introduction]
+### In Progress Features 🔄
 
-Welcome to PHORM, the premier online directory dedicated to promoting and supporting businesses owned by individuals affiliated with Prince Hall Freemasonry. Immerse yourself in a platform that celebrates our shared bond while showcasing the talents and offerings of our esteemed brethren.
-[Paragraph 1]
+- [~] Map/browse experience optimization
+- [~] Mobile responsiveness improvements
+- [~] Performance optimizations
 
-Uncover Hidden Gems: PHORM presents a thoughtfully curated selection of businesses owned by Prince Hall Freemasons. Explore a diverse range of offerings, from skilled artisans to exceptional culinary experiences, professional services, and more. Our user-friendly platform connects you with businesses that are deeply rooted in our community and embody our shared values.
-[Paragraph 2]
+### Pending Features ⏳
 
-Verified and Trusted: Every business listed in PHORM undergoes a meticulous verification process, ensuring that you can trust the quality and integrity of our brethren's enterprises. By engaging with these trusted businesses, you directly contribute to the growth and success of our Prince Hall Masonic community.
-[Paragraph 3]
+- [ ] Favorites functionality
+- [ ] Business verification system
+- [ ] User notifications
+- [ ] Advanced search and filtering
 
-Empowering Our Brotherhood: When you choose to support businesses listed in PHORM, you actively contribute to the economic empowerment of our Prince Hall Freemasonry network. Together, we nurture entrepreneurship, create opportunities, and honor the legacy passed down to us by supporting our brethren's endeavors.
-[Call-to-Action]
+## Immediate Next Steps (Priority Order)
 
-Start Your Journey with PHORM: Download our app today and embark on a meaningful exploration of businesses owned by individuals affiliated with Prince Hall Freemasonry. Embrace the power of our brotherhood, support our brethren, and shape a thriving future for our community.
-[Footer]
+### 1. Bug Fixes and TypeScript Compliance
 
-About PHORM: Discover more about our mission, commitment, and the unique advantages of being part of our online registry.
-Get Listed: Are you a business owner affiliated with Prince Hall Freemasonry? Join PHORM's online registry to showcase your enterprise, connect with our community, and expand your reach.
+- [ ] Resolve remaining TypeScript errors
+  - [ ] Fix creator ID type issues in ListingCard and EditListingForm
+  - [ ] Update interfaces to include missing properties (classYear, etc.)
+  - [ ] Eliminate use of 'any' types throughout the codebase
+- [ ] Fix permission issues with .next/trace file
+- [ ] Address React Hook Form submission handling in form components
 
---->
+### 2. Core Functionality Completion
+
+- [ ] Complete favorites functionality
+  - [ ] Implement save/unsave business to favorites
+  - [ ] Create API endpoint for managing favorites
+  - [ ] Update dashboard to display actual favorites
+- [ ] Enhance business verification system
+  - [ ] Implement admin approval workflow
+  - [ ] Add verification badges to listings
+  - [ ] Create verification request form
+
+### 3. User Experience Improvements
+
+- [ ] Enhance mobile responsiveness
+  - [ ] Optimize map interface for mobile devices
+  - [ ] Improve form layouts on smaller screens
+  - [ ] Test and fix navigation on mobile devices
+- [ ] Implement loading states and error handling
+  - [ ] Add consistent loading indicators
+  - [ ] Improve error messages and recovery options
+  - [ ] Implement retry mechanisms for failed operations
+
+### 4. Performance Optimizations
+
+- [ ] Implement code splitting and lazy loading
+- [ ] Optimize image loading and processing
+- [ ] Improve map marker rendering performance
+- [ ] Add caching for frequently accessed data
+
+## Medium-Term Goals
+
+### 1. Enhanced Search and Discovery
+
+- [ ] Implement advanced filtering options
+  - [ ] Filter by distance from user
+  - [ ] Filter by business categories
+  - [ ] Filter by ratings/reviews
+- [ ] Add geolocation-based recommendations
+- [ ] Implement "businesses near me" feature
+
+### 2. Social Features
+
+- [ ] Add ratings and reviews system
+- [ ] Implement business owner responses to reviews
+- [ ] Create social sharing functionality for listings
+- [ ] Add ability to recommend businesses to other members
+
+### 3. Analytics and Insights
+
+- [ ] Implement business analytics for owners
+  - [ ] Profile view counts
+  - [ ] Search appearance metrics
+  - [ ] Click-through rates
+- [ ] Add admin dashboard with platform metrics
+
+## Long-Term Vision
+
+### 1. Community Building
+
+- [ ] Create discussion forums or groups
+- [ ] Implement events calendar for business promotions
+- [ ] Add direct messaging between members and business owners
+
+### 2. Monetization Strategies
+
+- [ ] Develop premium listing options
+- [ ] Create sponsored placement opportunities
+- [ ] Implement verification fee structure
+
+### 3. Platform Expansion
+
+- [ ] Develop native mobile applications
+- [ ] Expand to additional fraternal organizations
+- [ ] Create API for third-party integrations
+
+## Technical Debt and Maintenance
+
+- [ ] Improve test coverage (aim for >80%)
+- [ ] Refactor components for better reusability
+- [ ] Update dependencies and address security vulnerabilities
+- [ ] Implement automated CI/CD pipeline
+- [ ] Create comprehensive documentation
+
+## Notes for Development
+
+- Prioritize user experience and mobile responsiveness
+- Focus on stability and performance before adding new features
+- Maintain TypeScript compliance throughout the codebase
+- Follow established design patterns and component structure
+- Test thoroughly across different devices and browsers
+
+---
+
+Last updated: June 2023
