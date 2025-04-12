@@ -5,15 +5,16 @@
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
-    "forceConsistentCasingInFileNames": true,
+    // "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "sourceMap": true,
     "jsx": "preserve",
-    "incremental": true,
+    // "incremental": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"]
@@ -23,7 +24,12 @@
       {
         "name": "next"
       }
-    ]
+    ],
+    // Performance optimizations
+    "disableSizeLimit": true,
+    "importsNotUsedAsValues": "remove",
+    "forceConsistentCasingInFileNames": true,
+    "incremental": true
   },
   "include": [
     "next-env.d.ts",
@@ -32,5 +38,5 @@
     "types.d.ts",
     ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", ".next", "out"]
 }

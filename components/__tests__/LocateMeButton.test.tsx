@@ -1,7 +1,7 @@
 import { Map, initialize, mockInstances } from "@googlemaps/jest-mocks";
 import "@testing-library/jest-dom/extend-expect";
 import { fireEvent, render } from "@testing-library/react";
-import { SessionProvider } from "next-auth/react";
+import React from "react";
 import FloatingButtons from "../LocateMeButton";
 
 beforeEach(() => {
@@ -17,13 +17,11 @@ const mockSetClientLocation = jest.fn(); // Mock the setClientLocation prop
 describe("LocateMeButton", () => {
   it("should render the component correctly", () => {
     const { container } = render(
-      <SessionProvider>
-        <FloatingButtons
-          mapInstance={mockInstances.get(Map)[0]}
-          setClientLocation={mockSetClientLocation}
-          clientLocation={null}
-        />
-      </SessionProvider>
+      <FloatingButtons
+        mapInstance={mockInstances.get(Map)[0]}
+        setClientLocation={mockSetClientLocation}
+        clientLocation={null}
+      />
     );
 
     expect(container).toMatchSnapshot();
@@ -31,13 +29,11 @@ describe("LocateMeButton", () => {
 
   it('should call handleClick when the "My Location" button is clicked', () => {
     const { getByLabelText } = render(
-      <SessionProvider>
-        <FloatingButtons
-          mapInstance={mockInstances.get(Map)[0]}
-          setClientLocation={mockSetClientLocation}
-          clientLocation={null}
-        />
-      </SessionProvider>
+      <FloatingButtons
+        mapInstance={mockInstances.get(Map)[0]}
+        setClientLocation={mockSetClientLocation}
+        clientLocation={null}
+      />
     );
 
     const myLocationButton = getByLabelText("My Location");
@@ -50,13 +46,11 @@ describe("LocateMeButton", () => {
 
   it('should call handleOpen when the "Add Listing" button is clicked', () => {
     const { getByLabelText } = render(
-      <SessionProvider>
-        <FloatingButtons
-          mapInstance={mockInstances.get(Map)[0]}
-          setClientLocation={mockSetClientLocation}
-          clientLocation={null}
-        />
-      </SessionProvider>
+      <FloatingButtons
+        mapInstance={mockInstances.get(Map)[0]}
+        setClientLocation={mockSetClientLocation}
+        clientLocation={null}
+      />
     );
 
     const addListingButton = getByLabelText("Add Listing");

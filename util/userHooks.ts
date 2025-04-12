@@ -1,5 +1,7 @@
 import useSWR from "swr";
 import fetcher from "./fetch";
+import { IUser } from "@/types";
+import { UserImportBuilder } from "firebase-admin/lib/auth/user-import-builder";
 
 export function useCurrentUser() {
   const { data, mutate } = useSWR("/api/user", fetcher);
@@ -7,8 +9,10 @@ export function useCurrentUser() {
   return [user, { mutate }];
 }
 
-export function useFetchUser(userId: string) {
-  const { data, error } = useSWR(`/api/users/${userId}`, fetcher, {
+export function useFetchUser(userId?: string | string[]): IUser | undefined {
+  let url = `/api/users/${userId}`
+  if (Array.isArray(userId)) { url = `/api/users/${userId[0]}` }
+  const { data, error } = useSWR(url, fetcher, {
     revalidateOnFocus: false,
   });
   if (error) {

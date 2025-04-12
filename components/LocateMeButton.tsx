@@ -1,3 +1,6 @@
+"use client";
+
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Button,
   Heading,
@@ -20,7 +23,7 @@ import {
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
-import { signIn, useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 import { memo, useCallback, useEffect, useState } from "react";
 import { IconType } from "react-icons";
 import { BiMessageAltAdd } from "react-icons/bi";
@@ -36,7 +39,8 @@ const FloatingButtons = (props: ILocateMe) => {
   const [geoWatchId, setGeoWatchId] = useState(0);
   const [clientMarker, setClientMarker] = useState({} as google.maps.Marker);
   const [toggleDisplay, setToggleDisplay] = useState(false);
-  const { data: session, status } = useSession();
+  const { user, loading } = useAuth();
+  const router = useRouter();
   const { mapInstance, setClientLocation, clientLocation } = props;
 
   useEffect(() => {
@@ -177,7 +181,7 @@ const FloatingButtons = (props: ILocateMe) => {
       <Modal isOpen={isOpen} onClose={onClose} closeOnOverlayClick={true}>
         <ModalOverlay />
         <ModalContent>
-          {status == "authenticated" ? (
+          {user ? (
             <>
               <ModalHeader>
                 <Text fontSize="2xl">Add Listing:</Text>
@@ -192,7 +196,9 @@ const FloatingButtons = (props: ILocateMe) => {
               <Heading textAlign="center" size="lg">
                 Sign In to Add Your Business
               </Heading>
-              <Button onClick={() => signIn()}>Sign In</Button>
+              <Button onClick={() => router.push("/auth/login")}>
+                Sign In
+              </Button>
             </VStack>
           )}
         </ModalContent>

@@ -5,6 +5,7 @@ import {
   getDoc,
   getDocs,
   query,
+  setDoc,
   updateDoc,
   where,
 } from "firebase/firestore";
@@ -12,14 +13,14 @@ import { appFsdb } from "./firebase";
 
 const usersRef = appFsdb ? collection(appFsdb, "users") : undefined;
 
-const findUserById = async (userId: string) => {
+const findUserById = async (userId: string | undefined) => {
   if (!usersRef) return;
   const userRef = doc(usersRef, userId);
   const userDoc = await getDoc(userRef);
   if (userDoc.exists()) {
-    return userDoc.data();
+    return userDoc.data() as IUser;
   }
-  return;
+  return null;
 };
 
 const findUserByEmail = async (email: string) => {
@@ -29,7 +30,7 @@ const findUserByEmail = async (email: string) => {
   if (!querySnapshot.empty) {
     return querySnapshot.docs[0].data();
   }
-  return;
+  return null;
 };
 
 const updateUserById = async (userId: string, newData: Partial<IUser>) => {
@@ -41,10 +42,90 @@ const updateUserById = async (userId: string, newData: Partial<IUser>) => {
 };
 
 const getUsers = async () => {
-  if (!usersRef) return;
+  if (!usersRef) return [];
   const querySnapshot = await getDocs(usersRef);
-  const users = querySnapshot.docs.map((doc) => doc.data());
+  const users = querySnapshot.docs.map((doc) => doc.data() as IUser);
   return users;
 };
 
-export { findUserByEmail, findUserById, getUsers, updateUserById };
+/**
+ * Find users by class year
+ * @param classYear The class year to search for
+ * @returns Array of users with the specified class year
+ */
+const findUsersByClassYear = async (classYear: number) => {
+  if (!usersRef) return [];
+
+  try {
+    // Query users where profile.classYear equals the provided classYear
+    const q = query(usersRef, where("profile.classYear", "==", classYear));
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      return [];
+    }
+
+    // Map the documents to user objects
+    const users = querySnapshot.docs.map((doc) => doc.data() as IUser);
+    return users;
+  } catch (error) {
+    console.error(`Error finding users by class year ${classYear}:`, error);
+    return [];
+  }
+};
+
+// Create a new user in the users collection
+const createUser = async (userId: string, userData: Partial<IUser>) => {
+  if (!usersRef) return;
+
+  // Create a basic user profile with default values
+  const defaultProfile = {
+    orgs: [],
+    ownedListings: [],
+    verifiedListings: [],
+    deverifiedListings: [],
+    favorites: [],
+  };
+
+  // Merge the provided user data with default values
+  const newUser = {
+    id: userId,
+    name: userData.name || "",
+    email: userData.email || "",
+    image: userData.image || "",
+    emailVerified: userData.emailVerified || null,
+    profile: { ...defaultProfile, ...userData.profile },
+  };
+
+  // Set the document with the user ID
+  const userRef = doc(usersRef, userId);
+  await setDoc(userRef, newUser);
+
+  return newUser;
+};
+
+// Check if a user exists and create if not
+const findOrCreateUser = async (userId: string, userData: Partial<IUser>) => {
+  if (!usersRef) return null;
+
+  // Try to find the user first
+  const existingUser = await findUserById(userId);
+
+  // If user doesn't exist, create a new one
+  if (!existingUser) {
+    console.log("User not found, creating new user:", userId);
+    return await createUser(userId, userData);
+  }
+
+  return existingUser;
+};
+
+export {
+  createUser,
+  findOrCreateUser,
+  findUserByEmail,
+  findUserById,
+  findUsersByClassYear,
+  getUsers,
+  updateUserById,
+};

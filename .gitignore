@@ -4,12 +4,16 @@
 /node_modules
 /.pnp
 .pnp.js
-
+/.vscode
+/.github
+/.husky 
+/.swc
 # testing
 /coverage
 
 # next.js
 /.next/
+/.next/**/*
 /out/
 
 # production

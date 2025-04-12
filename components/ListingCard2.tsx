@@ -1,129 +1,271 @@
-import { IListing, PHA_LODGES } from "@/types";
-import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
+import { useAuth } from "@/contexts/AuthContext";
+import { IListing } from "@/types";
 import {
+  Badge,
   Box,
-  Button,
   Card,
   CardBody,
-  CardFooter,
-  Collapse,
   Flex,
   HStack,
   IconButton,
   Image,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalHeader,
+  ModalOverlay,
   Text,
+  Tooltip,
+  chakra,
+  useColorModeValue,
+  useDisclosure,
+  useToast,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import { MdDirections, MdShare } from "react-icons/md";
-import useSWR from "swr";
+import {
+  MdBookmark,
+  MdBookmarkBorder,
+  MdDirections,
+  MdEmail,
+  MdInfo,
+  MdPhone,
+  MdShare,
+} from "react-icons/md";
 
-const getLodgeName = ({
-  state,
-  lodgeNo,
+const AnimatedCard = chakra(Card, {
+  baseStyle: {
+    transition: "all 0.2s ease-in-out",
+  },
+});
+
+export default function ListingCard2({
+  activeListing,
 }: {
-  state: string | undefined;
-  lodgeNo: number | undefined;
-}) => state && lodgeNo && PHA_LODGES[state][lodgeNo];
+  activeListing: IListing;
+}) {
+  const { user } = useAuth();
+  const [isFavorited, setIsFavorited] = useState(false);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast();
 
-const BusinessCard = ({ activeListing }: { activeListing: IListing }) => {
-  const [isOwnerInfoOpen, setIsOwnerInfoOpen] = useState(false);
-  const { claims, imageUri, creator } = activeListing;
-  const claimantID = claims?.[0].member.id;
-  const uploaderID = creator?.id;
-  const ownerID = claimantID || uploaderID;
-  const fetchURI = ownerID ? `/api/users/${ownerID}` : null;
-  const { data: owner, isLoading } = useSWR(fetchURI);
-  const ownerHasName = owner && "name" in owner;
-  const handleOwnerInfoToggle = () => {
-    setIsOwnerInfoOpen(!isOwnerInfoOpen);
+  const cardBg = useColorModeValue("white", "gray.800");
+  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const textColor = useColorModeValue("gray.600", "gray.300");
+
+  const handleFavorite = () => {
+    setIsFavorited(!isFavorited);
+    toast({
+      title: isFavorited ? "Removed from favorites" : "Added to favorites",
+      status: "success",
+      duration: 2000,
+    });
+  };
+
+  const handleContact = async (method: "phone" | "email") => {
+    if (method === "phone" && activeListing.phone) {
+      window.location.href = `tel:${activeListing.phone}`;
+    } else if (method === "email" && activeListing.email) {
+      window.location.href = `mailto:${activeListing.email}`;
+    }
+  };
+
+  const handleDirections = () => {
+    if (activeListing.lat && activeListing.lng) {
+      window.open(
+        `https://www.google.com/maps/dir/?api=1&destination=${activeListing.lat},${activeListing.lng}`,
+        "_blank"
+      );
+    } else if (activeListing.address) {
+      window.open(
+        `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+          activeListing.address
+        )}`,
+        "_blank"
+      );
+    }
+  };
+
+  const handleShare = async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: activeListing.name,
+          text: activeListing.description,
+          url: window.location.href,
+        });
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        toast({
+          title: "Link copied to clipboard",
+          status: "success",
+          duration: 2000,
+        });
+      }
+    } catch (err) {
+      console.error("Error sharing:", err);
+    }
   };
   return (
-    <Card
-      maxW="md"
-      mx="auto"
-      p={3}
-      borderWidth="1px"
-      borderRadius="lg"
-      overflow="hidden"
-      boxShadow="md"
-    >
-      {/* Image section */}
-      {imageUri && <Image src={imageUri} alt="Business Image" />}
+    <>
+      <AnimatedCard
+        bg={cardBg}
+        borderWidth="1px"
+        borderColor={borderColor}
+        borderRadius="lg"
+        overflow="hidden"
+        maxW={"xs"}
+        height={"sm"}
+        _hover={{ transform: "translateY(-4px)", boxShadow: "lg" }}
+      >
+        <Box position="relative">
+          <Image
+            src={activeListing.imageUri || "/img/placeholder-business.png"}
+            alt={activeListing.name}
+            height="200px"
+            width="100%"
+            objectFit="cover"
+            fallbackSrc="/img/placeholder-business.png"
+          />
+          {activeListing.isPremium && (
+            <Badge
+              position="absolute"
+              top={2}
+              right={2}
+              colorScheme="yellow"
+              variant="solid"
+            >
+              Premium
+            </Badge>
+          )}
+        </Box>
 
-      {/* Business Information */}
-      <Box>
-        <CardBody>
-          <Text fontWeight="bold" fontSize="lg">
-            {activeListing.name}
-          </Text>
-          <Text fontSize="sm" color="gray.600">
+        <CardBody p={4}>
+          <Flex justify="space-between" align="start" mb={2}>
+            <Box>
+              <Text fontSize="xl" fontWeight="bold" mb={1}>
+                {activeListing.name}
+              </Text>
+              <Text color={textColor} fontSize="sm" noOfLines={2}>
+                {activeListing.description}
+              </Text>
+            </Box>
+            {user && (
+              <IconButton
+                aria-label={
+                  isFavorited ? "Remove from favorites" : "Add to favorites"
+                }
+                icon={isFavorited ? <MdBookmark /> : <MdBookmarkBorder />}
+                onClick={handleFavorite}
+                variant="ghost"
+                colorScheme="blue"
+              />
+            )}
+          </Flex>
+
+          <Text fontSize="sm" color={textColor} mb={3}>
             {activeListing.address}
           </Text>
-          {/* Owner Information Dropdown */}
-          {ownerHasName && (
-            <>
-              <Flex justify="space-between" align="center" mt="2">
-                <Button
-                  size="sm"
-                  colorScheme="teal"
-                  onClick={handleOwnerInfoToggle}
-                >
-                  Owned by {owner?.name}
-                </Button>
+
+          <Flex wrap="wrap" gap={2} mb={4}>
+            {activeListing.categories?.map((category) => (
+              <Badge key={category} colorScheme="blue" variant="subtle">
+                {category}
+              </Badge>
+            ))}
+          </Flex>
+
+          <HStack spacing={2} justify="flex-end">
+            {activeListing.phone && (
+              <Tooltip label="Call">
                 <IconButton
-                  icon={
-                    isOwnerInfoOpen ? <ChevronUpIcon /> : <ChevronDownIcon />
-                  }
-                  aria-label="Toggle Owner Info"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleOwnerInfoToggle}
+                  aria-label="Call business"
+                  icon={<MdPhone />}
+                  onClick={() => handleContact("phone")}
+                  colorScheme="green"
+                  variant="ghost"
                 />
-              </Flex>
-              <Collapse in={isOwnerInfoOpen} animateOpacity>
-                <Box mt="2" bg="gray.100" rounded="md">
-                  <Text fontSize="sm" fontWeight="bold">
-                    Owner Information
-                  </Text>
-                  <Text fontSize="sm">{owner?.name}</Text>
-                  <Text fontSize="sm">
-                    {getLodgeName({
-                      state: owner?.profile.lodgeState,
-                      lodgeNo: owner?.profile.lodgeNumber,
-                    })}
-                  </Text>
-                </Box>
-              </Collapse>
-            </>
-          )}
-        </CardBody>
-        <CardFooter>
-          {/* Call to Action Buttons */}
-          <HStack align="center" mt="4">
-            <Button
-              leftIcon={<MdDirections />}
-              colorScheme="blue"
-              size="sm"
-              rounded="full"
-              // onClick={directions}
-            >
-              Directions
-            </Button>
-
-            <Button
-              leftIcon={<MdShare />}
-              colorScheme="teal"
-              size="sm"
-              rounded="full"
-              // onClick={share}
-            >
-              Share
-            </Button>
+              </Tooltip>
+            )}
+            {activeListing.email && (
+              <Tooltip label="Email">
+                <IconButton
+                  aria-label="Email business"
+                  icon={<MdEmail />}
+                  onClick={() => handleContact("email")}
+                  colorScheme="blue"
+                  variant="ghost"
+                />
+              </Tooltip>
+            )}
+            <Tooltip label="Details">
+              <IconButton
+                aria-label="View details"
+                icon={<MdInfo />}
+                onClick={onOpen}
+                colorScheme="purple"
+                variant="ghost"
+              />
+            </Tooltip>
+            <Tooltip label="Get Directions">
+              <IconButton
+                aria-label="Get directions"
+                icon={<MdDirections />}
+                onClick={handleDirections}
+                colorScheme="blue"
+                variant="ghost"
+              />
+            </Tooltip>
+            <Tooltip label="Share">
+              <IconButton
+                aria-label="Share listing"
+                icon={<MdShare />}
+                onClick={handleShare}
+                colorScheme="blue"
+                variant="ghost"
+              />
+            </Tooltip>
           </HStack>
-        </CardFooter>
-      </Box>
-    </Card>
-  );
-};
+        </CardBody>
+      </AnimatedCard>
 
-export default BusinessCard;
+      <Modal isOpen={isOpen} onClose={onClose} size="xl">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>{activeListing.name}</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={6}>
+            <Image
+              src={activeListing.imageUri || "/img/placeholder-business.png"}
+              alt={activeListing.name}
+              width="100%"
+              height="300px"
+              objectFit="cover"
+              borderRadius="md"
+              mb={4}
+            />
+            <Text mb={4}>{activeListing.description}</Text>
+            <Text fontWeight="bold" mb={2}>
+              Contact Information:
+            </Text>
+            {activeListing.phone && (
+              <Text mb={2}>📞 {activeListing.phone}</Text>
+            )}
+            {activeListing.email && (
+              <Text mb={2}>📧 {activeListing.email}</Text>
+            )}
+            <Text mb={4}>📍 {activeListing.address}</Text>
+            {activeListing.businessHours && (
+              <>
+                <Text fontWeight="bold" mb={2}>
+                  Business Hours:
+                </Text>
+                <Text whiteSpace="pre-line">{activeListing.businessHours}</Text>
+              </>
+            )}
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+    </>
+  );
+}
