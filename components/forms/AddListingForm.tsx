@@ -2,11 +2,12 @@
 
 import { useAuth } from "@/contexts/AuthContext";
 import { ListingsSchema } from "@/db/schemas";
-import { IListing } from "@/types";
 import {
   Box,
   Button,
   Checkbox,
+  CheckboxGroup,
+  Divider,
   FormControl,
   FormErrorMessage,
   FormHelperText,
@@ -24,12 +25,17 @@ import {
   TagLabel,
   Text,
   Textarea,
+  Tooltip,
   useToast,
+  VStack,
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { STATE_ABBREVIATIONS } from "../../util/constants";
+import { IListing } from "@/types";
+import PlacesAutocomplete from "./PlacesAutocomplete";
+import parseAddressComponents, { ParsedAddress } from "@/util/addressParser";
 
 interface AddListingFormProps {
   onDrawerClose: () => void;
@@ -54,7 +60,7 @@ const BUSINESS_CATEGORIES = [
   "Manufacturing",
   "Wholesale",
   "Non-Profit",
-  "Other",
+  "Other"
 ];
 
 // Relationship types
@@ -62,7 +68,7 @@ const RELATIONSHIP_TYPES = [
   { value: "owner", label: "I own this business" },
   { value: "manager", label: "I manage this business" },
   { value: "consultant", label: "I am a consultant/service provider" },
-  { value: "affiliate", label: "I can provide benefits for this business" },
+  { value: "affiliate", label: "I can provide benefits for this business" }
 ];
 
 const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
@@ -72,28 +78,31 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
   const [relationshipType, setRelationshipType] = useState<string>("owner");
   const [benefitsOffered, setBenefitsOffered] = useState<string>("");
   const [consultingServices, setConsultingServices] = useState<string>("");
-
+  
+  // State for address from Places Autocomplete
+  const [addressData, setAddressData] = useState<ParsedAddress | null>(null);
+  
   const {
     register,
     reset,
     setValue,
     handleSubmit,
-    formState: { errors, isSubmitting, isSubmitSuccessful },
+    formState: { errors, isSubmitting },
   } = useForm<IListing>({
     resolver: zodResolver(ListingsSchema),
     mode: "all",
     defaultValues: {
       categories: [],
       isPremium: false,
-      name: "",
-      description: "",
-      street: "",
-      city: "",
-      state: "DC",
-      phone: "",
-      url: "",
-      email: "",
-    },
+      name: '',
+      description: '',
+      street: '',
+      city: '',
+      state: 'DC',
+      phone: '',
+      url: '',
+      email: '',
+    }
   });
 
   const submitToast = useToast({
@@ -135,59 +144,26 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
   }, [newCategory, selectedCategories, setValue]);
 
   // Handle removing a category
-  const handleRemoveCategory = useCallback(
-    (category: string) => {
-      const updatedCategories = selectedCategories.filter(
-        (c) => c !== category
-      );
-      setSelectedCategories(updatedCategories);
-      setValue("categories", updatedCategories);
-    },
-    [selectedCategories, setValue]
-  );
+  const handleRemoveCategory = useCallback((category: string) => {
+    const updatedCategories = selectedCategories.filter(
+      (c) => c !== category
+    );
+    setSelectedCategories(updatedCategories);
+    setValue("categories", updatedCategories);
+  }, [selectedCategories, setValue]);
 
   // Handle selecting a predefined category
-  const handleSelectCategory = useCallback(
-    (category: string) => {
-      if (!selectedCategories.includes(category)) {
-        const updatedCategories = [...selectedCategories, category];
-        setSelectedCategories(updatedCategories);
-        setValue("categories", updatedCategories);
-      }
-    },
-    [selectedCategories, setValue]
-  );
+  const handleSelectCategory = useCallback((category: string) => {
+    if (!selectedCategories.includes(category)) {
+      const updatedCategories = [...selectedCategories, category];
+      setSelectedCategories(updatedCategories);
+      setValue("categories", updatedCategories);
+    }
+  }, [selectedCategories, setValue]);
 
   // Handle relationship type change
   const handleRelationshipChange = useCallback((value: string) => {
     setRelationshipType(value);
-  }, []);
-
-  // Get geocoding details from address
-  const getPlaceDetails = useCallback(async (address: string) => {
-    return new Promise<{
-      lat: number;
-      lng: number;
-      placeId: string;
-    }>((resolve, reject) => {
-      try {
-        const geocoder = new google.maps.Geocoder();
-        geocoder.geocode({ address }, (results, status) => {
-          if (status === "OK" && results && results[0]) {
-            const { lat, lng } = results[0].geometry.location;
-            resolve({
-              lat: lat(),
-              lng: lng(),
-              placeId: results[0].place_id,
-            });
-          } else {
-            reject(new Error(`Geocoding failed: ${status}`));
-          }
-        });
-      } catch (error) {
-        reject(error);
-      }
-    });
   }, []);
 
   const submitData = async (data: IListing) => {
@@ -198,22 +174,20 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
         throw new Error("You must be logged in to add a listing");
       }
 
-      // Extract address components
-      const { city, state, zip, street } = data;
-      const address = `${street} ${city} ${state} ${zip}`;
-
-      // Get geocoding details
-      const details = await getPlaceDetails(address);
+      // Check if we have address data from Places Autocomplete
+      if (!addressData) {
+        throw new Error("Please select a valid address from the suggestions");
+      }
 
       // Add description if not provided
       const description =
-        data.description || `${data.name} located in ${city}, ${state}`;
+        data.description || `${data.name} located in ${addressData.city}, ${addressData.state}`;
 
       // Add relationship metadata
       let metaData: Record<string, any> = {
-        relationshipType: relationshipType,
+        relationshipType: relationshipType
       };
-
+      
       // Add specific fields based on relationship type
       if (relationshipType === "affiliate") {
         metaData.benefitsOffered = benefitsOffered;
@@ -226,12 +200,19 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
         ...data,
         description,
         creator,
-        ...details,
+        lat: addressData.lat,
+        lng: addressData.lng,
+        place_id: addressData.placeId,
+        street: addressData.street,
+        city: addressData.city,
+        state: addressData.state,
+        zip: addressData.zip,
+        address: addressData.formattedAddress,
         submitted: new Date(),
         claimsCount: 0,
         claims: [],
         categories: selectedCategories,
-        metaData,
+        metaData
       };
 
       // Submit to API
@@ -245,11 +226,11 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
       }
 
       await response.json();
-
+      
       // Reset form and close drawer on success
       reset();
       onDrawerClose();
-
+      
       return true;
     } catch (error) {
       console.error("Error submitting listing:", error);
@@ -269,6 +250,19 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
     setRelationshipType("owner");
     setBenefitsOffered("");
     setConsultingServices("");
+    setAddressData(null);
+  };
+  
+  // Handle place selection from Google Places Autocomplete
+  const handlePlaceSelect = (place: google.maps.places.PlaceResult) => {
+    const parsedAddress = parseAddressComponents(place);
+    setAddressData(parsedAddress);
+    
+    // Update form fields with the parsed address data
+    setValue("street", parsedAddress.street);
+    setValue("city", parsedAddress.city);
+    setValue("state", parsedAddress.state);
+    setValue("zip", parsedAddress.zip);
   };
 
   // If user is not authenticated, show login message
@@ -286,7 +280,7 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
   return (
     <Box width="100%" maxWidth="100%">
       <form onSubmit={handleSubmit(submitData)}>
-        <Grid gap={6}>
+        <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6}>
           {/* Business Name */}
           <FormControl isInvalid={!!errors.name} mb={3}>
             <FormLabel htmlFor="name">Business Name</FormLabel>
@@ -304,10 +298,7 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
           {/* Relationship to Business */}
           <FormControl mb={3} gridColumn={{ md: "span 2" }}>
             <FormLabel>Your Relationship to this Business</FormLabel>
-            <RadioGroup
-              value={relationshipType}
-              onChange={handleRelationshipChange}
-            >
+            <RadioGroup value={relationshipType} onChange={handleRelationshipChange}>
               <Stack direction="column" spacing={2}>
                 {RELATIONSHIP_TYPES.map((type) => (
                   <Radio key={type.value} value={type.value}>
@@ -321,9 +312,7 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
           {/* Conditional fields based on relationship type */}
           {relationshipType === "affiliate" && (
             <FormControl mb={3} gridColumn={{ md: "span 2" }}>
-              <FormLabel htmlFor="benefitsOffered">
-                Benefits You Can Offer
-              </FormLabel>
+              <FormLabel htmlFor="benefitsOffered">Benefits You Can Offer</FormLabel>
               <Textarea
                 id="benefitsOffered"
                 placeholder="Describe the friends & family benefits you can offer (discounts, special services, etc.)"
@@ -331,10 +320,7 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
                 onChange={(e) => setBenefitsOffered(e.target.value)}
                 rows={3}
               />
-              <FormHelperText>
-                This helps other members understand what benefits they can
-                receive
-              </FormHelperText>
+              <FormHelperText>This helps other members understand what benefits they can receive</FormHelperText>
             </FormControl>
           )}
 
@@ -348,9 +334,7 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
                 onChange={(e) => setConsultingServices(e.target.value)}
                 rows={3}
               />
-              <FormHelperText>
-                Provide details about your expertise and services
-              </FormHelperText>
+              <FormHelperText>Provide details about your expertise and services</FormHelperText>
             </FormControl>
           )}
 
@@ -384,64 +368,30 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
             Address Information
           </Heading>
 
-          {/* Street */}
-          <FormControl
-            isInvalid={!!errors.street}
-            mb={3}
-            gridColumn={{ md: "span 2" }}
-          >
-            <FormLabel htmlFor="street">Street Address</FormLabel>
-            <Input
-              id="street"
-              placeholder="123 Main St"
-              {...register("street")}
-            />
-            <FormErrorMessage>
-              {errors.street?.message as string}
-            </FormErrorMessage>
-          </FormControl>
-
-          {/* City */}
-          <FormControl isInvalid={!!errors.city} mb={3}>
-            <FormLabel htmlFor="city">City</FormLabel>
-            <Input id="city" placeholder="City name" {...register("city")} />
-            <FormErrorMessage>
-              {errors.city?.message as string}
-            </FormErrorMessage>
-          </FormControl>
-
-          {/* State */}
-          <FormControl isInvalid={!!errors.state} mb={3}>
-            <FormLabel htmlFor="state">State</FormLabel>
-            <Select
-              id="state"
-              placeholder="Select state"
-              {...register("state")}
-            >
-              {STATE_ABBREVIATIONS.map((state) => (
-                <option value={state} key={state}>
-                  {state}
-                </option>
-              ))}
-            </Select>
-            <FormErrorMessage>
-              {errors.state?.message as string}
-            </FormErrorMessage>
-          </FormControl>
-
-          {/* Zip */}
-          <FormControl isInvalid={!!errors.zip} mb={3}>
-            <FormLabel htmlFor="zip">Zip Code</FormLabel>
-            <Input
-              id="zip"
-              type="number"
-              placeholder="12345"
-              {...register("zip", {
-                valueAsNumber: true,
-              })}
-            />
-            <FormErrorMessage>{errors.zip?.message as string}</FormErrorMessage>
-          </FormControl>
+          {/* Google Places Autocomplete */}
+          <PlacesAutocomplete 
+            onPlaceSelect={handlePlaceSelect}
+            isInvalid={!addressData && !!errors.street}
+            errorMessage="Please select a valid address"
+            defaultValue={addressData?.formattedAddress || ""}
+          />
+          
+          {/* Hidden address fields - populated by Places Autocomplete */}
+          <input type="hidden" {...register("street")} />
+          <input type="hidden" {...register("city")} />
+          <input type="hidden" {...register("state")} />
+          <input type="hidden" {...register("zip", { valueAsNumber: true })} />
+          
+          {/* Display selected address details */}
+          {addressData && (
+            <FormControl mb={3} gridColumn={{ md: "span 2" }}>
+              <Box p={3} bg="blue.50" borderRadius="md">
+                <Text fontWeight="medium" mb={1}>Selected Address:</Text>
+                <Text>{addressData.street}</Text>
+                <Text>{addressData.city}, {addressData.state} {addressData.zip}</Text>
+              </Box>
+            </FormControl>
+          )}
 
           {/* Phone */}
           <FormControl isInvalid={!!errors.phone} mb={3}>
@@ -500,7 +450,7 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
           {/* Categories */}
           <FormControl mb={3} gridColumn={{ md: "span 2" }}>
             <FormLabel>Business Categories</FormLabel>
-
+            
             {/* Selected Categories */}
             <Box mb={3}>
               <HStack spacing={2} flexWrap="wrap">
@@ -514,14 +464,12 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
                     mb={2}
                   >
                     <TagLabel>{category}</TagLabel>
-                    <TagCloseButton
-                      onClick={() => handleRemoveCategory(category)}
-                    />
+                    <TagCloseButton onClick={() => handleRemoveCategory(category)} />
                   </Tag>
                 ))}
               </HStack>
             </Box>
-
+            
             {/* Add Custom Category */}
             <HStack mb={3}>
               <Input
@@ -534,7 +482,7 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
                 Add
               </Button>
             </HStack>
-
+            
             {/* Predefined Categories */}
             <Box>
               <Text fontSize="sm" fontWeight="medium" mb={2}>
@@ -565,10 +513,7 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
             <Checkbox {...register("isPremium")}>
               <Text fontWeight="medium">Premium Listing</Text>
             </Checkbox>
-            <FormHelperText>
-              Premium listings appear at the top of search results and include
-              enhanced features
-            </FormHelperText>
+            <FormHelperText>Premium listings appear at the top of search results and include enhanced features</FormHelperText>
           </FormControl>
 
           {/* Form Actions */}

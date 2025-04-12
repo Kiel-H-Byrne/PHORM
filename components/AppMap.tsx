@@ -93,9 +93,14 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
     ? `api/listings?lat=${client_location.lat}&lng=${client_location.lng}`
     : "api/listings";
 
+  const libraries: ("places" | "drawing" | "geometry" | "visualization")[] = [
+    "places",
+  ];
+
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY!,
+    libraries,
   });
 
   const {

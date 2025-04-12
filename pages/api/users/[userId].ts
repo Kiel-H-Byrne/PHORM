@@ -1,7 +1,6 @@
 // 608da9f19a70cb0805c59923
 
 import { findOrCreateUser, findUserById, updateUserById } from "@/db/users";
-import console from "console";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export default async function userHandler(
@@ -30,6 +29,7 @@ export default async function userHandler(
               image: "",
               profile: {
                 orgs: [],
+                lastName: "",
               },
             });
           }
@@ -60,6 +60,7 @@ export default async function userHandler(
               image: "",
               profile: {
                 orgs: [],
+                lastName: "",
               },
             });
           }

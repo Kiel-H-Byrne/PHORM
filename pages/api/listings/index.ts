@@ -1,6 +1,5 @@
 import { appFsdb } from "@/db/firebase";
 import { IListing } from "@/types";
-import { getUserFromCookie } from "@/util/authCookies";
 import { faker } from "@faker-js/faker";
 import {
   addDoc,
@@ -62,8 +61,6 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const user = getUserFromCookie();
-
   const listingsRef = collection(appFsdb!, "listings");
 
   switch (req.method) {
@@ -126,10 +123,6 @@ export default async function handler(
 
     case "POST":
       try {
-        if (!user) {
-          return res.status(401).json({ error: "Authentication required" });
-        }
-
         // Parse the request body
         const data =
           typeof req.body === "string" ? JSON.parse(req.body) : req.body;

@@ -1,3 +1,4 @@
+import { getAppCheck } from "firebase-admin/app-check";
 import { NextResponse, type NextRequest } from "next/server";
 
 // Define which routes require authentication
@@ -55,7 +56,26 @@ export async function middleware(request: NextRequest) {
     // Allow access but might limit results based on auth status
     // This would be handled in the API route itself
   }
+  const appCheckToken = request.headers.get("X-Firebase-AppCheck");
 
+  if (!appCheckToken) {
+    return NextResponse.json(
+      { success: false, message: "Authentication required" },
+      { status: 401 }
+    );
+  }
+
+  try {
+    await getAppCheck().verifyToken(appCheckToken);
+
+    // If verifyToken() succeeds, continue with the next middleware
+    // function in the stack.
+  } catch (err) {
+    return NextResponse.json(
+      { success: false, message: "Authentication required" },
+      { status: 401 }
+    );
+  }
   // Continue with the request
   return NextResponse.next();
 }
