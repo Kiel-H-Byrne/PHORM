@@ -1,5 +1,5 @@
 import AboutModal from "./AboutModal";
-import AddListingDrawer from "./AddListingDrawer";
+import AddListingModal from "./AddListingModal";
 import AppMap from "./AppMap";
 import CondensedCard from "./CondensedCard";
 import CustomHead from "./CustomHead";
@@ -21,8 +21,8 @@ import UserDashboard from "./UserDashboard";
 import { AddListingForm } from "./forms";
 export {
   AboutModal,
-  AddListingDrawer,
   AddListingForm,
+  AddListingModal,
   AppMap,
   CondensedCard,
   CustomHead,

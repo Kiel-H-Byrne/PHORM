@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/contexts/AuthContext";
 import { ListingsSchema } from "@/db/schemas";
+import { IListing } from "@/types";
 import {
   Box,
   Button,
@@ -26,10 +27,9 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { geohashForLocation } from "geofire-common";
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { IListing, StatesEnum } from "../../types";
+import { STATE_ABBREVIATIONS } from "../../util/constants";
 
 interface AddListingFormProps {
   onDrawerClose: () => void;
@@ -65,17 +65,6 @@ const RELATIONSHIP_TYPES = [
   { value: "affiliate", label: "I can provide benefits for this business" },
 ];
 
-// Business hours template
-const DAYS_OF_WEEK = [
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-  "Sunday",
-];
-
 const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
   // State for selected categories
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -88,48 +77,41 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
     register,
     reset,
     setValue,
-    getValues,
     handleSubmit,
     formState: { errors, isSubmitting, isSubmitSuccessful },
-    control,
-    watch,
-  } = useForm({
+  } = useForm<IListing>({
     resolver: zodResolver(ListingsSchema),
     mode: "all",
     defaultValues: {
       categories: [],
       isPremium: false,
+      name: "",
+      description: "",
+      street: "",
+      city: "",
+      state: "DC",
+      phone: "",
+      url: "",
+      email: "",
     },
   });
 
   const submitToast = useToast({
-    colorScheme: "yellow",
-    status: "info",
-    title: "Submitting",
-    description: `Submitting information...`,
-    duration: 3000,
-    isClosable: true,
-  });
-
-  const successToast = useToast({
-    colorScheme: "green",
-    status: "success",
     title: "Form Submitted",
-    description: `Successfully submitted form.`,
+    description: "Your business listing has been submitted successfully!",
+    status: "success",
     duration: 5000,
     isClosable: true,
   });
 
   const alertToast = useToast({
-    colorScheme: "red",
-    status: "error",
     title: "Form Error",
-    description: `Form Error`,
+    description: "There was an error submitting your form. Please try again.",
+    status: "error",
     duration: 5000,
     isClosable: true,
   });
 
-  const formRef = useRef();
   const { user } = useAuth();
   const creator = useMemo(
     () =>
@@ -137,47 +119,10 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
         id: user.uid,
         name: user.displayName,
         email: user.email,
-        image: user.photoURL,
+        photoURL: user.photoURL,
       },
     [user]
   );
-
-  const getPlaceDetails = useCallback(async (address: string) => {
-    if (!window.google || !window.google.maps) {
-      throw new Error("Google Maps API not loaded");
-    }
-
-    try {
-      const geocoder = new google.maps.Geocoder();
-      const geocodeResponse = await new Promise<google.maps.GeocoderResponse>(
-        (resolve, reject) => {
-          geocoder.geocode({ address }, (results, status) => {
-            if (status === "OK" && results && results.length > 0) {
-              resolve({ results } as google.maps.GeocoderResponse);
-            } else {
-              reject(
-                new Error(
-                  `Geocode was not successful: ${status}. Please check the address.`
-                )
-              );
-            }
-          });
-        }
-      );
-
-      const {
-        geometry: { location },
-        place_id,
-      } = geocodeResponse.results[0];
-      const lat = location.lat();
-      const lng = location.lng();
-      const geoHash = geohashForLocation([lat, lng]);
-      return { lat, lng, geoHash, place_id };
-    } catch (error) {
-      console.error("Error getting place details:", error);
-      throw error;
-    }
-  }, []);
 
   // Handle adding a category
   const handleAddCategory = useCallback(() => {
@@ -218,128 +163,130 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
     setRelationshipType(value);
   }, []);
 
-  const submitData = useCallback(
-    async (data: IListing) => {
+  // Get geocoding details from address
+  const getPlaceDetails = useCallback(async (address: string) => {
+    return new Promise<{
+      lat: number;
+      lng: number;
+      placeId: string;
+    }>((resolve, reject) => {
       try {
-        submitToast();
-
-        if (!user) {
-          throw new Error("You must be logged in to add a listing");
-        }
-
-        // Extract address components
-        const { city, state, zip, street } = data;
-        const address = `${street} ${city} ${state} ${zip}`;
-
-        // Get geocoding details
-        const details = await getPlaceDetails(address);
-
-        // Add description if not provided
-        const description =
-          data.description || `${data.name} located in ${city}, ${state}`;
-
-        // Add relationship metadata
-        let metaData: Record<string, any> = {
-          relationshipType: relationshipType,
-        };
-
-        // Add specific fields based on relationship type
-        if (relationshipType === "affiliate") {
-          metaData.benefitsOffered = benefitsOffered;
-        } else if (relationshipType === "consultant") {
-          metaData.consultingServices = consultingServices;
-        }
-
-        // Combine all data
-        const submitData = {
-          ...data,
-          description,
-          creator,
-          ...details,
-          submitted: new Date(),
-          claimsCount: 0,
-          claims: [],
-          categories: selectedCategories,
-          metaData,
-        };
-
-        // Submit to API
-        const response = await fetch("/api/listings", {
-          method: "POST",
-          body: JSON.stringify(submitData),
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ address }, (results, status) => {
+          if (status === "OK" && results && results[0]) {
+            const { lat, lng } = results[0].geometry.location;
+            resolve({
+              lat: lat(),
+              lng: lng(),
+              placeId: results[0].place_id,
+            });
+          } else {
+            reject(new Error(`Geocoding failed: ${status}`));
+          }
         });
-
-        if (!response.ok) {
-          throw new Error(`Error creating listing: ${response.statusText}`);
-        }
-
-        return await response.json();
       } catch (error) {
-        console.error("Error submitting listing:", error);
-        alertToast({
-          title: "Form Error",
-          description:
-            error instanceof Error ? error.message : "Failed to create listing",
-        });
-        throw error;
+        reject(error);
       }
-    },
-    [
-      getPlaceDetails,
-      creator,
-      submitToast,
-      alertToast,
-      user,
-      relationshipType,
-      benefitsOffered,
-      consultingServices,
-      selectedCategories,
-    ]
-  );
+    });
+  }, []);
 
-  useEffect(() => {
-    isSubmitting && Object.keys(errors).length !== 0 && submitToast();
-    if (isSubmitSuccessful) {
+  const submitData = async (data: IListing) => {
+    try {
+      submitToast();
+
+      if (!user) {
+        throw new Error("You must be logged in to add a listing");
+      }
+
+      // Extract address components
+      const { city, state, zip, street } = data;
+      const address = `${street} ${city} ${state} ${zip}`;
+
+      // Get geocoding details
+      const details = await getPlaceDetails(address);
+
+      // Add description if not provided
+      const description =
+        data.description || `${data.name} located in ${city}, ${state}`;
+
+      // Add relationship metadata
+      let metaData: Record<string, any> = {
+        relationshipType: relationshipType,
+      };
+
+      // Add specific fields based on relationship type
+      if (relationshipType === "affiliate") {
+        metaData.benefitsOffered = benefitsOffered;
+      } else if (relationshipType === "consultant") {
+        metaData.consultingServices = consultingServices;
+      }
+
+      // Combine all data
+      const submitData = {
+        ...data,
+        description,
+        creator,
+        ...details,
+        submitted: new Date(),
+        claimsCount: 0,
+        claims: [],
+        categories: selectedCategories,
+        metaData,
+      };
+
+      // Submit to API
+      const response = await fetch("/api/listings", {
+        method: "POST",
+        body: JSON.stringify(submitData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error creating listing: ${response.statusText}`);
+      }
+
+      await response.json();
+
+      // Reset form and close drawer on success
       reset();
       onDrawerClose();
-      successToast();
-    }
-  }, [
-    isSubmitSuccessful,
-    isSubmitting,
-    submitToast,
-    reset,
-    onDrawerClose,
-    successToast,
-    errors,
-  ]);
 
+      return true;
+    } catch (error) {
+      console.error("Error submitting listing:", error);
+      alertToast({
+        title: "Form Error",
+        description:
+          error instanceof Error ? error.message : "Failed to create listing",
+      });
+      throw error;
+    }
+  };
+
+  // Reset form
+  const handleReset = () => {
+    reset();
+    setSelectedCategories([]);
+    setRelationshipType("owner");
+    setBenefitsOffered("");
+    setConsultingServices("");
+  };
+
+  // If user is not authenticated, show login message
   if (!user) {
     return (
       <Box textAlign="center" p={6}>
-        <Heading as="h3" size="md" mb={4}>
+        <Heading as="h3" size="lg" mb={4}>
           Authentication Required
         </Heading>
-        <Text>You must be logged in to add a business listing.</Text>
+        <Text mb={4}>You must be logged in to add a business listing.</Text>
       </Box>
     );
   }
 
   return (
-    <Box
-      borderWidth="1px"
-      rounded="lg"
-      shadow="1px 1px 3px rgba(0,0,0,0.3)"
-      maxWidth={800}
-      p={6}
-      m="10px auto"
-    >
-      <Heading as="h2" size="md" mb={4} textAlign="center">
-        Add New Business Listing
-      </Heading>
-
-      <form onSubmit={handleSubmit(submitData)} encType={"application/json"}>
-        <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
+    <Box width="100%" maxWidth="100%">
+      <form onSubmit={handleSubmit(submitData)}>
+        <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6}>
           {/* Business Name */}
           <FormControl isInvalid={!!errors.name} mb={3}>
             <FormLabel htmlFor="name">Business Name</FormLabel>
@@ -429,11 +376,12 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
           <Heading
             as="h3"
             size="sm"
-            mb={2}
-            mt={2}
             gridColumn={{ md: "span 2" }}
+            borderBottomWidth="1px"
+            pb={2}
+            mb={4}
           >
-            Business Address
+            Address Information
           </Heading>
 
           {/* Street */}
@@ -470,7 +418,7 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
               placeholder="Select state"
               {...register("state")}
             >
-              {StatesEnum.options.map((state) => (
+              {STATE_ABBREVIATIONS.map((state) => (
                 <option value={state} key={state}>
                   {state}
                 </option>
@@ -622,22 +570,27 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
               enhanced features
             </FormHelperText>
           </FormControl>
-        </Grid>
 
-        <Box display="flex" justifyContent="space-between" mt={6}>
-          <Button type="reset" colorScheme="gray" variant="outline" width="48%">
-            Reset
-          </Button>
-          <Button
-            type="submit"
-            colorScheme="blue"
-            isLoading={isSubmitting}
-            isDisabled={Object.keys(errors).length > 0}
-            width="48%"
-          >
-            Submit
-          </Button>
-        </Box>
+          {/* Form Actions */}
+          <Box gridColumn={{ md: "span 2" }} textAlign="center">
+            <Button
+              type="reset"
+              onClick={handleReset}
+              mr={3}
+              isDisabled={isSubmitting}
+            >
+              Reset
+            </Button>
+            <Button
+              type="submit"
+              colorScheme="blue"
+              isLoading={isSubmitting}
+              loadingText="Submitting"
+            >
+              Submit
+            </Button>
+          </Box>
+        </Grid>
       </form>
     </Box>
   );

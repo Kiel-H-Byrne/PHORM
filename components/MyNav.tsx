@@ -14,7 +14,8 @@ import {
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { memo, useRef } from "react";
-import { AboutModal, AddListingDrawer, MyAvatar } from "./";
+import { AboutModal, MyAvatar } from "./";
+import AddListingModal from "./AddListingModal";
 import { AvatarDropdown } from "./AvatarDropdown";
 import { NavLinks } from "./NavLinks";
 
@@ -34,9 +35,9 @@ const MyNav = () => {
     onClose: onDropdownClose,
   } = useDisclosure();
   const {
-    isOpen: drawerIsOpen,
-    onOpen: onDrawerOpen,
-    onClose: onDrawerClose,
+    isOpen: modalIsOpen,
+    onOpen: onModalOpen,
+    onClose: onModalClose,
   } = useDisclosure();
   const firstField = useRef().current;
 
@@ -86,7 +87,7 @@ const MyNav = () => {
               color="#fff"
               onClick={() =>
                 //logged in? add form else go to login page
-                isLoggedIn ? onDrawerOpen() : router.push("/auth/login")
+                isLoggedIn ? onModalOpen() : router.push("/auth/login")
               }
               size={"sm"}
               mr={4}
@@ -103,11 +104,7 @@ const MyNav = () => {
           <AvatarDropdown isLoggedIn={isLoggedIn} links={NAV_LINKS} />
         ) : null}
       </Box>
-      <AddListingDrawer
-        drawerIsOpen={drawerIsOpen}
-        firstField={firstField}
-        onDrawerClose={onDrawerClose}
-      />
+      <AddListingModal isOpen={modalIsOpen} onClose={onModalClose} />
       {!isLoggedIn && !isLoading && <AboutModal />}
     </>
   );
