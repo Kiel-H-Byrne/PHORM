@@ -286,7 +286,7 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
   return (
     <Box width="100%" maxWidth="100%">
       <form onSubmit={handleSubmit(submitData)}>
-        <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6}>
+        <Grid gap={6}>
           {/* Business Name */}
           <FormControl isInvalid={!!errors.name} mb={3}>
             <FormLabel htmlFor="name">Business Name</FormLabel>
