@@ -1,4 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
+import { ProfileSchema } from "@/db/schemas";
 import { findUserById } from "@/db/users";
 import { IUser } from "@/types";
 import {
@@ -32,28 +33,8 @@ import useSWRMutation from "swr/mutation";
 import { z } from "zod";
 
 // Profile schema for validation
-const profileSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  contact: z.object({
-    email: z
-      .string()
-      .email("Invalid email address")
-      .optional()
-      .or(z.literal("")),
-    phone: z.string().optional().or(z.literal("")),
-  }),
-  bio: z.string().optional().or(z.literal("")),
-  location: z.string().optional().or(z.literal("")),
-  specialties: z.array(z.string()).optional().default([]),
-  experienceLevel: z.enum(["entry", "intermediate", "expert"]).optional(),
-  availability: z.string().optional().or(z.literal("")),
-  socialLinks: z.array(z.string()).optional().default([]),
-  orgs: z.array(z.string()).optional().default([]),
-  classYear: z.number().optional(),
-});
 
-type ProfileFormData = z.infer<typeof profileSchema>;
+type ProfileFormData = z.infer<typeof ProfileSchema>;
 
 export default function EditProfileForm({
   onUpdate,
@@ -71,13 +52,10 @@ export default function EditProfileForm({
     data: userData,
     error: fetchError,
     isLoading,
-  } = useSWR<IUser | null>(
-    user?.uid ? `/api/users/${user.uid}` : null,
-    async () => {
-      if (!user?.uid) return null;
-      return await findUserById(user.uid);
-    }
-  );
+  } = useSWR<IUser | null>(`/api/users/${user?.uid}`, async () => {
+    if (!user?.uid) return;
+    return await findUserById(user.uid);
+  });
 
   // Setup form with validation
   const {
@@ -88,7 +66,7 @@ export default function EditProfileForm({
     getValues,
     formState: { errors },
   } = useForm<ProfileFormData>({
-    resolver: zodResolver(profileSchema),
+    resolver: zodResolver(ProfileSchema),
     defaultValues: {
       firstName: "",
       lastName: "",
@@ -107,12 +85,12 @@ export default function EditProfileForm({
   });
 
   // Setup mutation for updating profile
-  const { trigger, error: updateError } = useSWRMutation<
+  const { trigger, isMutating } = useSWRMutation<
     any,
     Error,
     string,
     ProfileFormData
-  >(user?.uid ? `/api/users/${user.uid}` : null, async (url, { arg }) => {
+  >(`/api/users/${user?.uid}`, async (url, { arg }) => {
     const res = await fetch(url, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -384,6 +362,7 @@ export default function EditProfileForm({
 
         <Button
           type="submit"
+          disabled={isMutating}
           colorScheme="blue"
           isLoading={isSubmitting}
           loadingText="Updating..."

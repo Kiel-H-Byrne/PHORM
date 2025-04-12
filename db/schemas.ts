@@ -6,6 +6,7 @@ const SocialSchema = z.object({
   instagram: z.string(),
   twitter: z.string(),
 });
+
 const reserved_orgs = ["lodge", "chapter", "appendant"] as const;
 const OrgSchema = z.object({
   type: z.enum(reserved_orgs),
@@ -15,29 +16,33 @@ const OrgSchema = z.object({
 });
 const experience_levels = ["apprentice", "intermediate", "master"] as const;
 export const ProfileSchema = z.object({
-  firstName: z.string(),
-  lastName: z.string(),
-  nickName: z.string(),
-  orgs: z.array(OrgSchema),
-  profilePhoto: z.string(),
-  occupation: z.string(),
-  location: z.string(),
-  bio: z.string(),
-  specialties: z.array(z.string()),
-  experienceLevel: z.enum(experience_levels),
-  availability: z.string(),
-  socialLinks: z.array(z.string()),
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
   contact: z.object({
-    email: z.string().email(),
-    phone: z.string(),
+    email: z
+      .string()
+      .email("Invalid email address")
+      .optional()
+      .or(z.literal("")),
+    phone: z.string().optional().or(z.literal("")),
   }),
-  ownedListings: z.array(z.string()),
-  verifiedListings: z.array(z.string()),
-  deverifiedListings: z.array(z.string()),
-  favorites: z.array(z.string()),
-  social: SocialSchema,
-  roles: z.array(z.string()),
+  bio: z.string().optional().or(z.literal("")),
+  location: z.string().optional().or(z.literal("")),
+  specialties: z.array(z.string()).optional().default([]),
+  experienceLevel: z.enum(experience_levels).optional(),
+  availability: z.string().optional().or(z.literal("")),
+  socialLinks: z.array(z.string()).optional().default([]),
+  orgs: z.array(OrgSchema).optional().default([]),
   classYear: z.number().optional(),
+  nickName: z.string().optional(),
+  profilePhoto: z.string().optional(),
+  occupation: z.string().optional(),
+  ownedListings: z.array(z.string()).optional(),
+  verifiedListings: z.array(z.string()).optional(),
+  deverifiedListings: z.array(z.string()).optional(),
+  favorites: z.array(z.string()).optional(),
+  social: SocialSchema.optional(),
+  roles: z.array(z.string()).optional(),
 });
 
 export const UserSchema = z.object({
