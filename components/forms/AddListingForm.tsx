@@ -5,36 +5,101 @@ import { ListingsSchema } from "@/db/schemas";
 import {
   Box,
   Button,
+  Checkbox,
   FormControl,
   FormErrorMessage,
+  FormHelperText,
   FormLabel,
   Grid,
   Heading,
+  HStack,
   Input,
+  Radio,
+  RadioGroup,
   Select,
+  Stack,
+  Tag,
+  TagCloseButton,
+  TagLabel,
   Text,
   Textarea,
   useToast,
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { geohashForLocation } from "geofire-common";
-import { memo, useCallback, useEffect, useMemo, useRef } from "react";
-import { Form, useForm } from "react-hook-form";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 import { IListing, StatesEnum } from "../../types";
 
 interface AddListingFormProps {
   onDrawerClose: () => void;
 }
 
+// Business categories
+const BUSINESS_CATEGORIES = [
+  "Restaurant",
+  "Retail",
+  "Professional Services",
+  "Consulting",
+  "Legal",
+  "Financial",
+  "Healthcare",
+  "Education",
+  "Technology",
+  "Construction",
+  "Real Estate",
+  "Transportation",
+  "Entertainment",
+  "Hospitality",
+  "Manufacturing",
+  "Wholesale",
+  "Non-Profit",
+  "Other",
+];
+
+// Relationship types
+const RELATIONSHIP_TYPES = [
+  { value: "owner", label: "I own this business" },
+  { value: "manager", label: "I manage this business" },
+  { value: "consultant", label: "I am a consultant/service provider" },
+  { value: "affiliate", label: "I can provide benefits for this business" },
+];
+
+// Business hours template
+const DAYS_OF_WEEK = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
+
 const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
+  // State for selected categories
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [newCategory, setNewCategory] = useState<string>("");
+  const [relationshipType, setRelationshipType] = useState<string>("owner");
+  const [benefitsOffered, setBenefitsOffered] = useState<string>("");
+  const [consultingServices, setConsultingServices] = useState<string>("");
+
   const {
     register,
     reset,
+    setValue,
+    getValues,
+    handleSubmit,
     formState: { errors, isSubmitting, isSubmitSuccessful },
     control,
+    watch,
   } = useForm({
     resolver: zodResolver(ListingsSchema),
     mode: "all",
+    defaultValues: {
+      categories: [],
+      isPremium: false,
+    },
   });
 
   const submitToast = useToast({
@@ -114,8 +179,47 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
     }
   }, []);
 
+  // Handle adding a category
+  const handleAddCategory = useCallback(() => {
+    if (newCategory && !selectedCategories.includes(newCategory)) {
+      const updatedCategories = [...selectedCategories, newCategory];
+      setSelectedCategories(updatedCategories);
+      setValue("categories", updatedCategories);
+      setNewCategory("");
+    }
+  }, [newCategory, selectedCategories, setValue]);
+
+  // Handle removing a category
+  const handleRemoveCategory = useCallback(
+    (category: string) => {
+      const updatedCategories = selectedCategories.filter(
+        (c) => c !== category
+      );
+      setSelectedCategories(updatedCategories);
+      setValue("categories", updatedCategories);
+    },
+    [selectedCategories, setValue]
+  );
+
+  // Handle selecting a predefined category
+  const handleSelectCategory = useCallback(
+    (category: string) => {
+      if (!selectedCategories.includes(category)) {
+        const updatedCategories = [...selectedCategories, category];
+        setSelectedCategories(updatedCategories);
+        setValue("categories", updatedCategories);
+      }
+    },
+    [selectedCategories, setValue]
+  );
+
+  // Handle relationship type change
+  const handleRelationshipChange = useCallback((value: string) => {
+    setRelationshipType(value);
+  }, []);
+
   const submitData = useCallback(
-    async ({ data }: { data: IListing }) => {
+    async (data: IListing) => {
       try {
         submitToast();
 
@@ -134,6 +238,18 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
         const description =
           data.description || `${data.name} located in ${city}, ${state}`;
 
+        // Add relationship metadata
+        let metaData: Record<string, any> = {
+          relationshipType: relationshipType,
+        };
+
+        // Add specific fields based on relationship type
+        if (relationshipType === "affiliate") {
+          metaData.benefitsOffered = benefitsOffered;
+        } else if (relationshipType === "consultant") {
+          metaData.consultingServices = consultingServices;
+        }
+
         // Combine all data
         const submitData = {
           ...data,
@@ -143,6 +259,8 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
           submitted: new Date(),
           claimsCount: 0,
           claims: [],
+          categories: selectedCategories,
+          metaData,
         };
 
         // Submit to API
@@ -166,7 +284,17 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
         throw error;
       }
     },
-    [getPlaceDetails, creator, submitToast, alertToast, user]
+    [
+      getPlaceDetails,
+      creator,
+      submitToast,
+      alertToast,
+      user,
+      relationshipType,
+      benefitsOffered,
+      consultingServices,
+      selectedCategories,
+    ]
   );
 
   useEffect(() => {
@@ -210,13 +338,7 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
         Add New Business Listing
       </Heading>
 
-      <Form
-        onSubmit={submitData}
-        encType={"application/json"}
-        onSuccess={() => console.log("Form submitted successfully")}
-        onError={() => alertToast()}
-        control={control}
-      >
+      <form onSubmit={handleSubmit(submitData)} encType={"application/json"}>
         <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
           {/* Business Name */}
           <FormControl isInvalid={!!errors.name} mb={3}>
@@ -232,13 +354,66 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
             </FormErrorMessage>
           </FormControl>
 
+          {/* Relationship to Business */}
+          <FormControl mb={3} gridColumn={{ md: "span 2" }}>
+            <FormLabel>Your Relationship to this Business</FormLabel>
+            <RadioGroup
+              value={relationshipType}
+              onChange={handleRelationshipChange}
+            >
+              <Stack direction="column" spacing={2}>
+                {RELATIONSHIP_TYPES.map((type) => (
+                  <Radio key={type.value} value={type.value}>
+                    {type.label}
+                  </Radio>
+                ))}
+              </Stack>
+            </RadioGroup>
+          </FormControl>
+
+          {/* Conditional fields based on relationship type */}
+          {relationshipType === "affiliate" && (
+            <FormControl mb={3} gridColumn={{ md: "span 2" }}>
+              <FormLabel htmlFor="benefitsOffered">
+                Benefits You Can Offer
+              </FormLabel>
+              <Textarea
+                id="benefitsOffered"
+                placeholder="Describe the friends & family benefits you can offer (discounts, special services, etc.)"
+                value={benefitsOffered}
+                onChange={(e) => setBenefitsOffered(e.target.value)}
+                rows={3}
+              />
+              <FormHelperText>
+                This helps other members understand what benefits they can
+                receive
+              </FormHelperText>
+            </FormControl>
+          )}
+
+          {relationshipType === "consultant" && (
+            <FormControl mb={3} gridColumn={{ md: "span 2" }}>
+              <FormLabel htmlFor="consultingServices">Your Services</FormLabel>
+              <Textarea
+                id="consultingServices"
+                placeholder="Describe the consulting or professional services you offer"
+                value={consultingServices}
+                onChange={(e) => setConsultingServices(e.target.value)}
+                rows={3}
+              />
+              <FormHelperText>
+                Provide details about your expertise and services
+              </FormHelperText>
+            </FormControl>
+          )}
+
           {/* Description */}
           <FormControl
             isInvalid={!!errors.description}
             mb={3}
             gridColumn={{ md: "span 2" }}
           >
-            <FormLabel htmlFor="description">Description</FormLabel>
+            <FormLabel htmlFor="description">Business Description</FormLabel>
             <Textarea
               id="description"
               placeholder="Enter a brief description of the business"
@@ -345,6 +520,108 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
             />
             <FormErrorMessage>{errors.url?.message as string}</FormErrorMessage>
           </FormControl>
+
+          {/* Email */}
+          <FormControl isInvalid={!!errors.email} mb={3}>
+            <FormLabel htmlFor="email">Business Email</FormLabel>
+            <Input
+              id="email"
+              type="email"
+              placeholder="business@example.com"
+              {...register("email")}
+            />
+            <FormErrorMessage>
+              {errors.email?.message as string}
+            </FormErrorMessage>
+          </FormControl>
+
+          {/* Business Hours */}
+          <FormControl mb={3} gridColumn={{ md: "span 2" }}>
+            <FormLabel htmlFor="businessHours">Business Hours</FormLabel>
+            <Textarea
+              id="businessHours"
+              placeholder="Monday-Friday: 9am-5pm, Saturday: 10am-3pm, Sunday: Closed"
+              {...register("businessHours")}
+              rows={2}
+            />
+            <FormHelperText>
+              Enter the regular hours of operation
+            </FormHelperText>
+          </FormControl>
+
+          {/* Categories */}
+          <FormControl mb={3} gridColumn={{ md: "span 2" }}>
+            <FormLabel>Business Categories</FormLabel>
+
+            {/* Selected Categories */}
+            <Box mb={3}>
+              <HStack spacing={2} flexWrap="wrap">
+                {selectedCategories.map((category) => (
+                  <Tag
+                    size="md"
+                    key={category}
+                    borderRadius="full"
+                    variant="solid"
+                    colorScheme="blue"
+                    mb={2}
+                  >
+                    <TagLabel>{category}</TagLabel>
+                    <TagCloseButton
+                      onClick={() => handleRemoveCategory(category)}
+                    />
+                  </Tag>
+                ))}
+              </HStack>
+            </Box>
+
+            {/* Add Custom Category */}
+            <HStack mb={3}>
+              <Input
+                placeholder="Add custom category"
+                value={newCategory}
+                onChange={(e) => setNewCategory(e.target.value)}
+                size="md"
+              />
+              <Button onClick={handleAddCategory} colorScheme="blue">
+                Add
+              </Button>
+            </HStack>
+
+            {/* Predefined Categories */}
+            <Box>
+              <Text fontSize="sm" fontWeight="medium" mb={2}>
+                Common Categories:
+              </Text>
+              <HStack spacing={2} flexWrap="wrap">
+                {BUSINESS_CATEGORIES.slice(0, 10).map((category) => (
+                  <Tag
+                    size="md"
+                    key={category}
+                    borderRadius="full"
+                    variant="outline"
+                    colorScheme="gray"
+                    cursor="pointer"
+                    onClick={() => handleSelectCategory(category)}
+                    mb={2}
+                    _hover={{ bg: "blue.50" }}
+                  >
+                    <TagLabel>{category}</TagLabel>
+                  </Tag>
+                ))}
+              </HStack>
+            </Box>
+          </FormControl>
+
+          {/* Premium Listing */}
+          <FormControl mb={3} gridColumn={{ md: "span 2" }}>
+            <Checkbox {...register("isPremium")}>
+              <Text fontWeight="medium">Premium Listing</Text>
+            </Checkbox>
+            <FormHelperText>
+              Premium listings appear at the top of search results and include
+              enhanced features
+            </FormHelperText>
+          </FormControl>
         </Grid>
 
         <Box display="flex" justifyContent="space-between" mt={6}>
@@ -361,7 +638,7 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
             Submit
           </Button>
         </Box>
-      </Form>
+      </form>
     </Box>
   );
 };

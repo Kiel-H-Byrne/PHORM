@@ -7,7 +7,7 @@ import {
   DrawerOverlay,
 } from "@chakra-ui/react";
 import { memo } from "react";
-import { AddListingForm } from "./";
+import { AddListingForm } from "./forms";
 
 function AddListingDrawer({
   drawerIsOpen,

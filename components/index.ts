@@ -1,6 +1,5 @@
 import AboutModal from "./AboutModal";
 import AddListingDrawer from "./AddListingDrawer";
-import AddListingForm from "./AddListingForm";
 import AppMap from "./AppMap";
 import CondensedCard from "./CondensedCard";
 import CustomHead from "./CustomHead";
@@ -19,6 +18,7 @@ import MyNav from "./MyNav";
 import ProtectedRoute from "./ProtectedRoute";
 import SingleInfoContent from "./SingleInfoContent";
 import UserDashboard from "./UserDashboard";
+import { AddListingForm } from "./forms";
 export {
   AboutModal,
   AddListingDrawer,
@@ -40,6 +40,5 @@ export {
   MyNav,
   ProtectedRoute,
   SingleInfoContent,
-  UserDashboard
+  UserDashboard,
 };
-

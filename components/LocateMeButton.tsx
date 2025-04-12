@@ -30,7 +30,7 @@ import { BiMessageAltAdd } from "react-icons/bi";
 import { MdMyLocation } from "react-icons/md";
 import { GLocation, ILocateMe } from "../types";
 import { milesToMeters, targetClient } from "../util/helpers";
-import AddListingForm from "./AddListingForm";
+import { AddListingForm } from "./forms";
 
 const FloatingButtons = (props: ILocateMe) => {
   // const [clientLocation, setClientLocation] = useState(null); //hoisted

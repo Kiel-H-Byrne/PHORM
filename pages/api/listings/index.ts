@@ -10,21 +10,29 @@ import {
   orderBy,
   query,
   startAfter,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import { NextApiRequest, NextApiResponse } from "next";
 
 const categories = [
-  "Electronics",
-  "Furniture",
-  "Books",
-  "Clothing",
-  "Sports",
-  "Home & Garden",
-  "Automotive",
-  "Toys",
-  "Music",
-  "Art",
+  "Restaurant",
+  "Retail",
+  "Professional Services",
+  "Consulting",
+  "Legal",
+  "Financial",
+  "Healthcare",
+  "Education",
+  "Technology",
+  "Construction",
+  "Real Estate",
+  "Transportation",
+  "Entertainment",
+  "Hospitality",
+  "Manufacturing",
+  "Wholesale",
+  "Non-Profit",
 ];
 
 const generateMockListings = (count: number = 100) => {
@@ -118,14 +126,65 @@ export default async function handler(
 
     case "POST":
       try {
+        if (!user) {
+          return res.status(401).json({ error: "Authentication required" });
+        }
+
+        // Parse the request body
+        const data =
+          typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+
+        // Extract metadata for different relationship types
+        const { metaData, ...restData } = data;
+
+        // Prepare the listing data
         const listingData = {
-          ...req.body,
+          ...restData,
           userId: user.uid,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
+          // Add relationship metadata
+          relationshipType: metaData?.relationshipType || "owner",
+          ...(metaData?.benefitsOffered && {
+            benefitsOffered: metaData.benefitsOffered,
+          }),
+          ...(metaData?.consultingServices && {
+            consultingServices: metaData.consultingServices,
+          }),
         };
 
         const docRef = await addDoc(listingsRef, listingData);
+
+        // If this is the user's business, update their profile
+        if (
+          metaData?.relationshipType === "owner" ||
+          metaData?.relationshipType === "consultant"
+        ) {
+          try {
+            // Get user reference
+            const userRef = collection(appFsdb!, "users");
+            const q = query(userRef, where("id", "==", user.uid));
+            const userSnapshot = await getDocs(q);
+
+            if (!userSnapshot.empty) {
+              const userDoc = userSnapshot.docs[0];
+              const userData = userDoc.data();
+
+              // Update owned listings array
+              const ownedListings = userData.profile?.ownedListings || [];
+              ownedListings.push(docRef.id);
+
+              // Update user document
+              await updateDoc(userDoc.ref, {
+                "profile.ownedListings": ownedListings,
+              });
+            }
+          } catch (error) {
+            console.error("Error updating user profile:", error);
+            // Continue even if this fails - the listing was created successfully
+          }
+        }
+
         res.status(201).json({ id: docRef.id, ...listingData });
       } catch (error) {
         console.error("Create Listing Error:", error);
