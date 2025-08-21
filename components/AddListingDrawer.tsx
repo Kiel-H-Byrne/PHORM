@@ -1,30 +1,29 @@
 import {
-  Button,
   Drawer,
   DrawerBody,
   DrawerCloseButton,
   DrawerContent,
-  DrawerFooter,
   DrawerHeader,
-  DrawerOverlay
+  DrawerOverlay,
 } from "@chakra-ui/react";
 import { memo } from "react";
 import { AddListingForm } from "./";
 
 function AddListingDrawer({
-  drawerIsOpen, firstField, onDrawerClose,
+  drawerIsOpen,
+  firstField,
+  onDrawerClose,
 }: {
   drawerIsOpen: boolean;
   firstField: undefined;
   onDrawerClose: () => void;
 }) {
-
   // const handleSubmit () => {
   //   if (formRef.current) {
-	// 		formRef.current.dispatchEvent(
-	// 			new Event('submit', { cancelable: true, bubbles: true })
-	// 		)
-	// 	}
+  // 		formRef.current.dispatchEvent(
+  // 			new Event('submit', { cancelable: true, bubbles: true })
+  // 		)
+  // 	}
   // }
   return (
     <Drawer
@@ -41,18 +40,18 @@ function AddListingDrawer({
         </DrawerHeader>
 
         <DrawerBody>
-          <AddListingForm onDrawerClose={onDrawerClose}/>
+          <AddListingForm onDrawerClose={onDrawerClose} />
         </DrawerBody>
 
-        <DrawerFooter borderTopWidth="1px">
+        {/* <DrawerFooter borderTopWidth="1px">
           <Button variant="outline" mr={3} onClick={onDrawerClose}>
             Cancel
           </Button>
-          {/* <Button colorScheme="blue" onClick={handleSubmit}>Submit</Button> */}
-        </DrawerFooter>
+          <Button colorScheme="mwphgldc.blue" onClick={handleSubmit}>Submit</Button>
+        </DrawerFooter> */}
       </DrawerContent>
     </Drawer>
   );
 }
 
-export default memo(AddListingDrawer)
+export default memo(AddListingDrawer);

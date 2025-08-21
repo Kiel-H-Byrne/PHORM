@@ -1,5 +1,4 @@
 import {
-  As,
   Box,
   Heading,
   ListIcon,
@@ -9,7 +8,8 @@ import {
   VStack,
   useColorModeValue,
 } from "@chakra-ui/react";
-import { DiResponsive } from "react-icons/di";
+import { IconType } from "react-icons";
+import { DiResponsive, DiVisualstudio } from "react-icons/di";
 import { GiAmericanFootballHelmet, GiSittingDog } from "react-icons/gi";
 import {
   SiChakraui,
@@ -31,9 +31,8 @@ import {
   SiStyledcomponents,
   SiTypescript,
   SiVercel,
-  SiVisualstudio,
   SiVitest,
-  SiZod
+  SiZod,
 } from "react-icons/si";
 
 const heading = "PHORM Technology Stack";
@@ -76,8 +75,12 @@ const toolingTech = [
   ["ESLint", "Identifying and reporting on patterns in JavaScript", SiEslint],
   ["Jest", "Testing framework", SiJest],
   ["Vercel", "The command-line interface for Vercel", SiVercel],
-  ["Husky", "Identifying and reporting on patterns in JavaScript", GiSittingDog],
-  ["Visual Studio Code", "A code editor for web development", SiVisualstudio],
+  [
+    "Husky",
+    "Identifying and reporting on patterns in JavaScript",
+    GiSittingDog,
+  ],
+  ["Visual Studio Code", "A code editor for web development", DiVisualstudio],
   [
     "Prettier",
     "An opinionated code formatter enforcing consistencies",
@@ -123,10 +126,7 @@ const methodologiesTech = [
 ];
 
 export default function TechPage() {
-  const bg_fg_color = useColorModeValue(
-    "green.200",
-    "green.50"
-  );
+  const bg_fg_color = useColorModeValue("green.200", "green.50");
   const urlEncodedColor = encodeURIComponent(bg_fg_color);
   const patternOpacity = 0.2;
 
@@ -138,7 +138,7 @@ export default function TechPage() {
       }}
     >
       <Heading>{heading} </Heading>
-      <Box maxW="3xl" p={3}>
+      <Box maxW="" p={3}>
         <Text as={"p"} textAlign={"left"}>
           This page outlines the technology stack, infrastructure, tooling and
           techniques used in implementing this website.
@@ -164,16 +164,10 @@ export function Section({
   techs,
 }: {
   title: string;
-  techs: string[][];
+  techs: (string | IconType)[][];
 }) {
-  const bg_color = useColorModeValue(
-    "purple.50",
-    "purple.900"
-  );
-  const bg_fg_color = useColorModeValue(
-    "purple.200",
-    "purple.50"
-  );
+  const bg_color = useColorModeValue("purple.50", "purple.900");
+  const bg_fg_color = useColorModeValue("purple.200", "purple.50");
   const urlEncodedColor = encodeURIComponent(bg_fg_color);
   const patternOpacity = 0.2;
 
@@ -186,9 +180,11 @@ export function Section({
       backgroundPosition={"-1.5em 2.5em"}
       borderRadius={"md"}
       backgroundColor={bg_color}
-      style={{
-        // backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='199' viewBox='0 0 100 199'%3E%3Cg fill='${urlEncodedColor}' fill-opacity='${patternOpacity}'%3E%3Cpath d='M0 199V0h1v1.99L100 199h-1.12L1 4.22V199H0zM100 2h-.12l-1-2H100v2z'%3E%3C/path%3E%3C/g%3E%3C/svg%3E")`,
-      }}
+      style={
+        {
+          // backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='199' viewBox='0 0 100 199'%3E%3Cg fill='${urlEncodedColor}' fill-opacity='${patternOpacity}'%3E%3Cpath d='M0 199V0h1v1.99L100 199h-1.12L1 4.22V199H0zM100 2h-.12l-1-2H100v2z'%3E%3C/path%3E%3C/g%3E%3C/svg%3E")`,
+        }
+      }
     >
       <Heading paddingBlock={2}>{title}</Heading>
       <TechList techs={techs} />
@@ -201,8 +197,15 @@ export function TechList({ techs }: { techs: (As | string | any)[][] }) {
     <UnorderedList>
       {techs.map((tech, i) => (
         <ListItem key={i}>
-          <ListIcon as={tech[2]} />
-          <strong>{tech[0]}</strong> - {tech[1]}
+          <ListIcon
+            as={tech[2]}
+            justifyItems="center"
+            fontSize={"2em"}
+            lineHeight={"2em"}
+          />
+          <Text as={"span"}>
+            <strong>{tech[0]}</strong> - {tech[1]}
+          </Text>
         </ListItem>
       ))}
     </UnorderedList>

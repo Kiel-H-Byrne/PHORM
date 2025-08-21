@@ -1,0 +1,26 @@
+{
+  "short_name": "PHORM",
+  "name": "The PHORM",
+  "description": "The Prince Hall Online Registry of Merchants",
+  "start_url": "/?utm_source=homescreen",
+  "scope": "/",
+  "lang": "en-US",
+  "dir": "ltr",
+  "orientation": "portrait",
+
+  "background_color": "#2828C8",
+  "theme_color": "#2828C8",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "/img/icons/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/img/icons/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

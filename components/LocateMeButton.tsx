@@ -1,6 +1,9 @@
+"use client";
+
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Button,
-  Center,
+  Heading,
   Icon,
   IconButton,
   Modal,
@@ -9,29 +12,35 @@ import {
   ModalContent,
   ModalHeader,
   ModalOverlay,
+  Popover,
+  PopoverArrow,
+  PopoverBody,
+  PopoverCloseButton,
+  PopoverContent,
+  PopoverTrigger,
   Text,
+  VStack,
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
-import { signIn, useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 import { memo, useCallback, useEffect, useState } from "react";
+import { IconType } from "react-icons";
 import { BiMessageAltAdd } from "react-icons/bi";
 import { MdMyLocation } from "react-icons/md";
 import { GLocation, ILocateMe } from "../types";
-import {
-  milesToMeters,
-  targetClient
-} from "../util/helpers";
+import { milesToMeters, targetClient } from "../util/helpers";
 import AddListingForm from "./AddListingForm";
 
-const LocateMeButton = (props: ILocateMe) => {
+const FloatingButtons = (props: ILocateMe) => {
   // const [clientLocation, setClientLocation] = useState(null); //hoisted
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [closestMarker, setClosestMarker] = useState({} as google.maps.Marker);
   const [geoWatchId, setGeoWatchId] = useState(0);
   const [clientMarker, setClientMarker] = useState({} as google.maps.Marker);
   const [toggleDisplay, setToggleDisplay] = useState(false);
-  const { data: session, status } = useSession();
+  const { user, loading } = useAuth();
+  const router = useRouter();
   const { mapInstance, setClientLocation, clientLocation } = props;
 
   useEffect(() => {
@@ -51,7 +60,7 @@ const LocateMeButton = (props: ILocateMe) => {
     description: `Searching...`,
   });
 
-  const handleClick = useCallback(() => {
+  const handleGetLocation = useCallback(() => {
     // const googleWindow: typeof google = (window as any).google;
     //when clicked, find users location. keep finding every x minutes or as position changes. if position doesn't change after x minutes. turn off
     //zoom to position
@@ -147,52 +156,50 @@ const LocateMeButton = (props: ILocateMe) => {
   ]);
 
   const handleOpen = useCallback(() => {
-    handleClick();
+    handleGetLocation();
     onOpen();
-  }, [handleClick, onOpen]);
+  }, [handleGetLocation, onOpen]);
   return (
     <>
-      <IconButton
-        position="absolute"
-        bottom="7rem"
-        right="10px"
-        borderRadius="50%"
-        color={clientLocation ? "secondary" : "default"}
-        // className={`${classes.root} ${clientLocation && classes.hasLocation}` }
-        aria-label="My Location"
-        onClick={handleClick}
-        bgColor={clientLocation ? "green" : "red"}
-      >
-        <Icon as={MdMyLocation} />
-      </IconButton>
-      <IconButton
-        position="absolute"
-        bottom="10rem"
-        right="10px"
-        borderRadius="50%"
-        colorScheme="yellow"
-        aria-label="Add Listing"
-        onClick={handleOpen}
-      >
-        <Icon as={BiMessageAltAdd} />
-      </IconButton>
-      <Modal isOpen={isOpen} onClose={onClose} closeOnOverlayClick={false}>
+      <VStack position="absolute" top="50%" right="10px">
+        <FloatingPopoverButton
+          colorScheme={"mwphgldc.purple"}
+          icon={BiMessageAltAdd}
+          handleClick={onOpen}
+          popOverText={"Add A Business!"}
+        />
+        <FloatingPopoverButton
+          colorScheme={clientLocation ? "mwphgldc.purple" : "mwphgldc.gold"}
+          handleClick={handleGetLocation}
+          icon={MdMyLocation}
+          popOverText={
+            clientLocation ? "Pinpoint Location" : "Find My Location"
+          }
+        />
+      </VStack>
+
+      <Modal isOpen={isOpen} onClose={onClose} closeOnOverlayClick={true}>
         <ModalOverlay />
         <ModalContent>
-          {status == "authenticated" && session ? (
+          {user ? (
             <>
               <ModalHeader>
                 <Text fontSize="2xl">Add Listing:</Text>
               </ModalHeader>
               <ModalCloseButton />
               <ModalBody>
-                <AddListingForm onDrawerClose={onClose}  />
+                <AddListingForm onDrawerClose={onClose} />
               </ModalBody>
             </>
           ) : (
-            <Center padding="22">
-              <Button onClick={() => signIn()}>Register / Log In</Button>
-            </Center>
+            <VStack padding="22">
+              <Heading textAlign="center" size="lg">
+                Sign In to Add Your Business
+              </Heading>
+              <Button onClick={() => router.push("/auth/login")}>
+                Sign In
+              </Button>
+            </VStack>
           )}
         </ModalContent>
       </Modal>
@@ -203,4 +210,35 @@ const LocateMeButton = (props: ILocateMe) => {
   );
 };
 
-export default memo(LocateMeButton);
+export default memo(FloatingButtons);
+function FloatingPopoverButton({
+  colorScheme,
+  popOverText,
+  icon,
+  handleClick,
+}: {
+  colorScheme: string;
+  popOverText: string;
+  icon: IconType;
+  handleClick?: () => void;
+}) {
+  return (
+    <Popover trigger="hover" placement="left" closeOnBlur={true}>
+      <PopoverTrigger>
+        <IconButton
+          borderRadius="50%"
+          aria-label="My Location"
+          onClick={handleClick}
+          colorScheme={colorScheme}
+        >
+          <Icon as={icon} />
+        </IconButton>
+      </PopoverTrigger>
+      <PopoverContent width={"11em"}>
+        <PopoverArrow />
+        <PopoverCloseButton />
+        <PopoverBody>{popOverText}</PopoverBody>
+      </PopoverContent>
+    </Popover>
+  );
+}

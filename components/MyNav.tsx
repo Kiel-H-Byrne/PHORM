@@ -1,54 +1,32 @@
+import { useAuth } from "@/contexts/AuthContext";
 import { AddIcon, CloseIcon, HamburgerIcon } from "@chakra-ui/icons";
 import {
   Box,
   Button,
   Flex,
   HStack,
-  Heading,
   IconButton,
   Image,
   Link,
   Menu,
-  Stack,
   useColorModeValue,
   useDisclosure,
 } from "@chakra-ui/react";
-import { signIn, useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 import { memo, useRef } from "react";
 import { AboutModal, AddListingDrawer, MyAvatar } from "./";
+import { AvatarDropdown } from "./AvatarDropdown";
+import { NavLinks } from "./NavLinks";
 
 const NAV_LINKS = [
-  { path: "/", label: "Home" },
-  { path: "/about", label: "About" },
+  { path: "/", label: "Home", isPrivate: false },
+  { path: "/about", label: "About", isPrivate: false },
   // { path: "/owners", label: "Owners" },
-  { path: "/?viewType=list", label: "List View" },
+  { path: "/?viewType=list", label: "List View", isPrivate: false },
+  { path: "/member-directory", label: "Member Directory", isPrivate: true },
 ];
-const NavLink = ({ path, label }: { path: string; label: string }) => (
-  <Link
-    px={2}
-    py={1}
-    rounded={"md"}
-    _hover={{
-      textDecoration: "none",
-      bg: useColorModeValue("gray.200", "gray.700"),
-    }}
-    href={path}
-  >
-    {label}
-  </Link>
-);
+export type INAVLINKS = typeof NAV_LINKS;
 
-const AvatarDropdown = () => (
-  <Box pb={4} display={{ md: "none" }}>
-    <Stack as={"nav"} spacing={4}>
-      <Heading color={"royalblue"} justifyContent={"center"} display={"inline-block"}>
-        P.H.O.R.M</Heading>
-      {NAV_LINKS.map(({ path, label }) => (
-        <NavLink key={label} path={path} label={label} />
-      ))}
-    </Stack>
-  </Box>
-);
 const MyNav = () => {
   const {
     isOpen: dropdownIsOpen,
@@ -62,11 +40,15 @@ const MyNav = () => {
   } = useDisclosure();
   const firstField = useRef().current;
 
-  const {status} = useSession();
+  const { user, loading } = useAuth();
+  const router = useRouter();
+  const isPrivateLink = (link: { isPrivate: boolean }) => link.isPrivate;
+  const isLoggedIn = !!user;
+  const isLoading = loading;
   return (
     <>
       <Box
-        bg={useColorModeValue("gray.100", "gray.900")}
+        bg={useColorModeValue("mwphgldc.blue.50", "gray.900")}
         px={4}
         position={"relative"}
         zIndex={1}
@@ -80,50 +62,55 @@ const MyNav = () => {
             onClick={dropdownIsOpen ? onDropdownClose : onDropdownOpen}
           />
           <HStack spacing={8} alignItems={"center"}>
-          <Image height={"14"} width={"14"} src="/img/Logo1.png"  alt="logo"/>
+            <Link href="/">
+              <Image
+                height={14}
+                aspectRatio={0.787}
+                src="/img/Logo1.png"
+                alt="logo"
+              />
+            </Link>
             <HStack
               as={"nav"}
               spacing={4}
               display={{ base: "none", md: "flex" }}
             >
               {/* <Heading color={"royalblue"}>P.H.O.R.M</Heading> */}
-              {NAV_LINKS.map(({ path, label }) => (
-                <NavLink key={label} path={path} label={label} />
-              ))}
+              <NavLinks links={NAV_LINKS} isLoggedIn={isLoggedIn} />
             </HStack>
           </HStack>
           <Flex alignItems={"center"}>
             <Button
               variant={"solid"}
-              colorScheme={"teal"}
-              onClick={
-                () =>
-                  //logged in? add form else signIn
-                  status === "authenticated" ?
-                  onDrawerOpen()
-                : signIn()
+              colorScheme={"mwphgldc.blue"}
+              color="#fff"
+              onClick={() =>
+                //logged in? add form else go to login page
+                isLoggedIn ? onDrawerOpen() : router.push("/auth/login")
               }
               size={"sm"}
               mr={4}
               leftIcon={<AddIcon />}
             >
-              Register Business {/** Get Listed */}
+              Add Your Business {/** Get Listed */}
             </Button>
             <Menu>
               <MyAvatar />
             </Menu>
           </Flex>
         </Flex>
-        {dropdownIsOpen ? <AvatarDropdown /> : null}
+        {dropdownIsOpen ? (
+          <AvatarDropdown isLoggedIn={isLoggedIn} links={NAV_LINKS} />
+        ) : null}
       </Box>
       <AddListingDrawer
         drawerIsOpen={drawerIsOpen}
         firstField={firstField}
         onDrawerClose={onDrawerClose}
       />
-      <AboutModal />
+      {!isLoggedIn && !isLoading && <AboutModal />}
     </>
   );
-}
+};
 
-export default memo(MyNav)
+export default memo(MyNav);

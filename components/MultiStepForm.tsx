@@ -15,7 +15,7 @@ import {
   Select,
   SimpleGrid,
   Textarea,
-  useToast
+  useToast,
 } from "@chakra-ui/react";
 import React, { useState } from "react";
 const Form1 = () => {
@@ -288,7 +288,7 @@ function MultiStepForm() {
     status: "success",
     duration: 3000,
     isClosable: true,
-  })
+  });
   return (
     <div>
       <Progress
@@ -348,4 +348,4 @@ function MultiStepForm() {
   );
 }
 
-export default MultiStepForm
+export default MultiStepForm;

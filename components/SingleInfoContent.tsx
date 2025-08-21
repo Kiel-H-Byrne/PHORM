@@ -3,14 +3,26 @@ import { memo } from "react";
 import { IListing } from "../types";
 import Card from "./ListingCard2";
 
- const SingleInfoContent = ({
-  data, options,
+interface InfoWindowOptions {
+  position: google.maps.LatLng | google.maps.LatLngLiteral;
+  pixelOffset?: google.maps.Size | null;
+  disableAutoPan?: boolean;
+  maxWidth?: number;
+  zIndex?: number;
+}
+
+const SingleInfoContent = ({
+  data,
+  options,
 }: {
   data: IListing[];
-  options: any;
+  options: InfoWindowOptions;
 }) => {
-  const { lat, lng, name } = data[0];
-  const listing = data[0]
+  const listing = data[0];
+  if (!listing) return null;
+
+  const { lat, lng } = listing;
+
   if (lat && lng) {
     return (
       <InfoWindow position={{ lat, lng }} options={options}>
@@ -18,5 +30,7 @@ import Card from "./ListingCard2";
       </InfoWindow>
     );
   }
+
+  return null;
 };
-export default memo(SingleInfoContent)
+export default memo(SingleInfoContent);

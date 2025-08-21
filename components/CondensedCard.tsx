@@ -1,16 +1,15 @@
-import { Card, CardBody, CardFooter, Text } from '@chakra-ui/react';
-import { memo } from 'react';
-import { IListing } from '../types';
+import { Card, CardBody, CardFooter, Text } from "@chakra-ui/react";
+import { memo } from "react";
+import { IListing } from "../types";
 
 interface Props {
-  activeListing: IListing
+  activeListing: IListing;
 }
 
-
-const CondensedCard = ({activeListing}:Props) => {
-  const {name, /*image, url, description*/} = activeListing;
+const CondensedCard = ({ activeListing }: Props) => {
+  const { name /*image, url, description*/ } = activeListing;
   return (
-    <Card >
+    <Card>
       <CardFooter>
         {/* {image && (
           <div >
@@ -31,4 +30,4 @@ const CondensedCard = ({activeListing}:Props) => {
     </Card>
   );
 };
-export default memo(CondensedCard)
+export default memo(CondensedCard);
