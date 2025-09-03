@@ -1,6 +1,7 @@
 import { appFsdb } from "@/db/firebase";
 import { IListing } from "@/types";
 import { getUserFromCookie } from "@/util/authCookies";
+import { STATE_ABBREVIATIONS } from "@/util/constants";
 import { faker } from "@faker-js/faker";
 import {
   addDoc,
@@ -15,34 +16,72 @@ import {
 import { NextApiRequest, NextApiResponse } from "next";
 
 const categories = [
-  "Electronics",
-  "Furniture",
-  "Books",
-  "Clothing",
-  "Sports",
-  "Home & Garden",
+  "Restaurant",
+  "Retail",
+  "Professional Services",
+  "Healthcare",
   "Automotive",
-  "Toys",
-  "Music",
-  "Art",
+  "Beauty & Wellness",
+  "Education",
+  "Real Estate",
+  "Construction",
+  "Technology",
+  "Entertainment",
+  "Finance",
 ];
+const local_states = ["MD", "DC", "VA"];
 
 const generateMockListings = (count: number = 100) => {
   const listings: IListing[] = [];
+  const state = faker.helpers.arrayElement(
+    STATE_ABBREVIATIONS.filter((s) => ["MD", "DC", "VA"].includes(s))
+  );
+  const street = `${faker.location.buildingNumber()} ${faker.location.street()}`;
+  const city = faker.location.city();
+  const zip = faker.location.zipCode("#####");
+  const address = `${street} ${city} ${state} ${zip}`;
 
   for (let i = 0; i < count; i++) {
     const listing: IListing = {
-      // uid: faker.string.uuid(),
       name: faker.company.name(),
-      description: faker.company.catchPhrase(),
-      // category: f.helpers.arrayElement(categories),
-      lat: faker.location.latitude({ min: 37.75, max: 39.5 }), // MD/DC bounds
-      lng: faker.location.longitude({ min: -79.6, max: -74.0 }), // MD/DC bounds
+      description: faker.company.buzzPhrase(),
+      street,
+      city,
+      state,
+      zip: parseInt(zip),
+      address,
+      lat: faker.location.latitude({ min: 37.75, max: 39.5 }),
+      lng: faker.location.longitude({ min: -79.6, max: -74.0 }),
       imageUri: faker.image.url(),
       submitted: faker.date.past(),
-      // status: "active",
-      // views: faker.number.int({ min: 0, max: 1000 }),
-      creator: faker.string.uuid(),
+      creator: faker.string.ulid(),
+      phone: faker.phone.number({ style: "human" }),
+      email: faker.internet.email(),
+      url: faker.internet.url(),
+      place_id: `place_${faker.string.alphanumeric(27)}`,
+      isPremium: faker.datatype.boolean({ probability: 0.2 }),
+      categories: faker.helpers.arrayElements(categories, {
+        min: 1,
+        max: 3,
+      }),
+      businessHours: `Mon-Fri: ${faker.helpers.arrayElement([
+        "9:00 AM - 5:00 PM",
+        "8:00 AM - 6:00 PM",
+        "10:00 AM - 8:00 PM",
+      ])}`,
+      social: {
+        facebook: faker.datatype.boolean({ probability: 0.6 })
+          ? faker.internet.url()
+          : "",
+        instagram: faker.datatype.boolean({ probability: 0.7 })
+          ? faker.internet.url()
+          : "",
+        twitter: faker.datatype.boolean({ probability: 0.4 })
+          ? faker.internet.url()
+          : "",
+      },
+      claims: [],
+      claimsCount: 0,
     };
     listings.push(listing);
   }
@@ -61,6 +100,7 @@ export default async function handler(
   switch (req.method) {
     case "GET":
       if (!user) {
+        console.log("API demo mode, must log in for actual data.");
         return res.status(200).json(generateMockListings(50));
       }
 

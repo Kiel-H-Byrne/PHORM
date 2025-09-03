@@ -1,5 +1,4 @@
 import { STATE_ABBREVIATIONS } from "@/util/constants";
-import { GoogleMapProps } from "@react-google-maps/api";
 import { z } from "zod";
 import { ClaimSchema, ListingsSchema, UserSchema } from "../db/schemas";
 
@@ -18,8 +17,8 @@ export type Libraries = (
 
 export interface IAppMap {
   client_location: GLocation | null;
-  setMapInstance: any;
-  mapInstance: GoogleMapProps & any;
+  setMapInstance: () => void;
+  mapInstance: google.maps.Map;
 }
 export interface ILocateMe {
   mapInstance: google.maps.Map | google.maps.StreetViewPanorama;

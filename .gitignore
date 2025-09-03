@@ -41,3 +41,5 @@ next-env.d.ts
 
 # settings
 momb-1b026-1564fbaaba3c.json
+# Local Netlify folder
+.netlify
