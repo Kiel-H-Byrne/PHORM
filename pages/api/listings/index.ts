@@ -29,19 +29,31 @@ const categories = [
   "Entertainment",
   "Finance",
 ];
-const local_states = ["MD", "DC", "VA"];
 
 const generateMockListings = (count: number = 100) => {
   const listings: IListing[] = [];
-  const state = faker.helpers.arrayElement(
-    STATE_ABBREVIATIONS.filter((s) => ["MD", "DC", "VA"].includes(s))
-  );
-  const street = `${faker.location.buildingNumber()} ${faker.location.street()}`;
-  const city = faker.location.city();
-  const zip = faker.location.zipCode("#####");
-  const address = `${street} ${city} ${state} ${zip}`;
+
+  const businessCategories = [
+    "Restaurant",
+    "Retail",
+    "Professional Services",
+    "Healthcare",
+    "Automotive",
+    "Beauty & Wellness",
+    "Education",
+    "Real Estate",
+    "Construction",
+    "Technology",
+    "Entertainment",
+    "Finance",
+  ];
 
   for (let i = 0; i < count; i++) {
+    const state = faker.helpers.arrayElement(STATE_ABBREVIATIONS);
+    const street = `${faker.location.buildingNumber()} ${faker.location.street()}`;
+    const city = faker.location.city();
+    const zip = faker.location.zipCode("#####");
+    const address = `${street} ${city} ${state} ${zip}`;
     const listing: IListing = {
       name: faker.company.name(),
       description: faker.company.buzzPhrase(),
@@ -52,15 +64,15 @@ const generateMockListings = (count: number = 100) => {
       address,
       lat: faker.location.latitude({ min: 37.75, max: 39.5 }),
       lng: faker.location.longitude({ min: -79.6, max: -74.0 }),
-      imageUri: faker.image.url(),
+      imageUri: `https://picsum.photos/picsum/300/100`,
       submitted: faker.date.past(),
       creator: faker.string.ulid(),
-      phone: faker.phone.number({ style: "human" }),
+      phone: faker.phone.number("###-###-####"),
       email: faker.internet.email(),
       url: faker.internet.url(),
       place_id: `place_${faker.string.alphanumeric(27)}`,
       isPremium: faker.datatype.boolean({ probability: 0.2 }),
-      categories: faker.helpers.arrayElements(categories, {
+      categories: faker.helpers.arrayElements(businessCategories, {
         min: 1,
         max: 3,
       }),

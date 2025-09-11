@@ -122,7 +122,7 @@ export default function ListingCard2({
           <Image
             src={activeListing.imageUri || "/img/placeholder-business.png"}
             alt={activeListing.name}
-            height="200px"
+            height="150px"
             width="100%"
             objectFit="cover"
             fallbackSrc="/img/placeholder-business.png"
@@ -175,7 +175,7 @@ export default function ListingCard2({
             ))}
           </Flex>
 
-          <HStack spacing={2} justify="flex-end">
+          <HStack spacing={2} justify="center" position={"absolute"} bottom={3}>
             {activeListing.phone && (
               <Tooltip label="Call">
                 <IconButton
