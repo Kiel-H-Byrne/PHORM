@@ -580,6 +580,55 @@ export const LIBRARIES: Libraries = [
   "localContext",
 ];
 
+// Global search suggestions
+export const BUSINESS_CATEGORIES = [
+  "Restaurant",
+  "Retail",
+  "Professional Services",
+  "Consulting",
+  "Legal",
+  "Financial",
+  "Healthcare",
+  "Education",
+  "Technology",
+  "Construction",
+  "Real Estate",
+  "Transportation",
+  "Entertainment",
+  "Hospitality",
+  "Manufacturing",
+  "Non-Profit",
+  "Other",
+] as const;
+
+export const SERVICE_TAGS = [
+  "Delivery",
+  "Catering",
+  "Takeout",
+  "Vegan",
+  "Gluten-free",
+  "Wheelchair accessible",
+  "Black-owned",
+  "Women-owned",
+  "24/7",
+  "Emergency",
+  "Same-day",
+  "Online",
+] as const;
+
+export const POPULAR_SEARCHES = [
+  "Soul Food",
+  "Barber",
+  "Hair Salon",
+  "Plumber",
+  "Electrician",
+  "Lawyer",
+  "Doctor",
+  "Dentist",
+  "Real Estate Agent",
+  "Accountant",
+] as const;
+
 export const CLUSTER_STYLE = [
   {
     url: "img/m1.png",

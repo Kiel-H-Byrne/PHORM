@@ -1,6 +1,11 @@
 import { searchListings } from "@/db/listings";
 import { IListing } from "@/types";
 import {
+  BUSINESS_CATEGORIES,
+  POPULAR_SEARCHES,
+  SERVICE_TAGS,
+} from "@/util/constants";
+import {
   Box,
   Button,
   Flex,
@@ -21,17 +26,22 @@ import {
   PopoverContent,
   PopoverTrigger,
   Spinner,
+  Tag,
+  TagLabel,
   Text,
+  Wrap,
+  WrapItem,
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FaFilter, FaMapMarkerAlt, FaSearch, FaTimes } from "react-icons/fa";
 
 interface MapSearchProps {
-  onSelectListing: (listing: IListing) => void;
+  onSelectListing?: (listing: IListing) => void;
   mapInstance?: google.maps.Map | null;
   onFilterChange?: (filters: SearchFilters) => void;
+  layout?: "overlay" | "inline";
 }
 
 interface SearchFilters {
@@ -44,6 +54,7 @@ const MapSearch = ({
   onSelectListing,
   mapInstance,
   onFilterChange,
+  layout = "overlay",
 }: MapSearchProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState<IListing[]>([]);
@@ -54,6 +65,31 @@ const MapSearch = ({
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const toast = useToast();
+
+  type Suggestion = {
+    type: "category" | "tag" | "popular";
+    label: string;
+    value: string;
+  };
+  const suggestions: Suggestion[] = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    const match = (s: string) => s.toLowerCase().includes(term);
+    const fromCats = BUSINESS_CATEGORIES.filter((c) => (term ? match(c) : true))
+      .slice(0, 6)
+      .map((c) => ({ type: "category" as const, label: c, value: c }));
+    const fromTags = SERVICE_TAGS.filter((t) => (term ? match(t) : true))
+      .slice(0, 6)
+      .map((t) => ({ type: "tag" as const, label: t, value: t }));
+    const fromPopular = POPULAR_SEARCHES.filter((p) => (term ? match(p) : true))
+      .slice(0, 6)
+      .map((p) => ({ type: "popular" as const, label: p, value: p }));
+    // Deduplicate by label
+    const all = [...fromCats, ...fromTags, ...fromPopular];
+    const seen = new Set<string>();
+    return all
+      .filter((s) => (seen.has(s.label) ? false : (seen.add(s.label), true)))
+      .slice(0, 12);
+  }, [searchTerm]);
   // Debounced search function
   const handleSearch = useCallback(
     async (term: string) => {
@@ -146,17 +182,20 @@ const MapSearch = ({
 
       setSearchTerm(value);
 
+      // Open suggestions when typing
+      if (value && suggestions.length > 0 && !isOpen) onOpen();
+
       // Clear previous timeout
       if (searchTimeoutRef.current) {
         clearTimeout(searchTimeoutRef.current);
       }
 
-      // Set new timeout
+      // Set new timeout for searching listings
       searchTimeoutRef.current = setTimeout(() => {
         handleSearch(value);
       }, 500); // 500ms debounce
     },
-    [handleSearch]
+    [handleSearch, isOpen, onOpen, suggestions.length]
   );
 
   // Clear search
@@ -233,12 +272,15 @@ const MapSearch = ({
 
   return (
     <Box
-      position="absolute"
-      top="20px"
-      left="50%"
-      transform="translateX(-50%)"
-      width={{ base: "90%", md: "400px" }}
+      position={layout === "overlay" ? "absolute" : "relative"}
+      top={layout === "overlay" ? "20px" : undefined}
+      left={layout === "overlay" ? "50%" : undefined}
+      transform={layout === "overlay" ? "translateX(-50%)" : undefined}
+      width={layout === "overlay" ? { base: "90%", md: "400px" } : "100%"}
       zIndex={10}
+      mx={layout === "inline" ? "auto" : undefined}
+      my={layout === "inline" ? 4 : undefined}
+      px={layout === "inline" ? 4 : undefined}
     >
       <Flex mb={2}>
         <Popover
@@ -256,13 +298,15 @@ const MapSearch = ({
               </InputLeftElement>
               <Input
                 ref={searchInputRef}
-                placeholder="Search for businesses..."
+                placeholder="What do you need?"
                 bg="white"
                 borderRadius="full"
                 boxShadow="md"
                 value={searchTerm}
                 onChange={handleInputChange}
-                onFocus={() => results.length > 0 && onOpen()}
+                onFocus={() =>
+                  (results.length > 0 || suggestions.length > 0) && onOpen()
+                }
                 _focus={{ boxShadow: "outline" }}
               />
               {isLoading ? (
@@ -351,11 +395,50 @@ const MapSearch = ({
           </Menu>
           <PopoverContent
             width={{ base: "90%", md: "400px" }}
-            maxH="300px"
+            maxH="360px"
             overflowY="auto"
           >
-            <PopoverBody p={0}>
-              <List spacing={0}>
+            <PopoverBody p={3}>
+              {/* Suggestions as chips/pills */}
+              {suggestions.length > 0 && (
+                <Box mb={results.length > 0 ? 3 : 0}>
+                  <Text fontSize="sm" color="gray.600" mb={2}>
+                    Suggestions
+                  </Text>
+                  <Wrap spacing={2}>
+                    {suggestions.map((s) => (
+                      <WrapItem key={`${s.type}:${s.label}`}>
+                        <Tag
+                          size="md"
+                          borderRadius="full"
+                          variant="subtle"
+                          colorScheme={
+                            s.type === "category"
+                              ? "blue"
+                              : s.type === "tag"
+                              ? "purple"
+                              : "gray"
+                          }
+                          cursor="pointer"
+                          onClick={() => {
+                            if (s.type === "category") {
+                              handleFilterChange("category", s.label);
+                            }
+                            setSearchTerm(s.value);
+                            handleSearch(s.value);
+                            if (!isOpen) onOpen();
+                          }}
+                        >
+                          <TagLabel>{s.label}</TagLabel>
+                        </Tag>
+                      </WrapItem>
+                    ))}
+                  </Wrap>
+                </Box>
+              )}
+
+              {/* Results list */}
+              <List spacing={0} mt={suggestions.length > 0 ? 2 : 0}>
                 {error && (
                   <ListItem p={3} textAlign="center" color="red.500">
                     {error}

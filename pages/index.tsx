@@ -1,3 +1,4 @@
+import { MapSearch } from "@/components";
 import BusinessCard from "@/components/ListingCard2";
 import { IListing } from "@/types";
 import fetcher from "@/util/fetch";
@@ -10,16 +11,13 @@ import {
   Heading,
   HStack,
   Icon,
-  Input,
-  InputGroup,
-  InputLeftElement,
   Text,
   VStack,
 } from "@chakra-ui/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { MdList, MdMap, MdSearch } from "react-icons/md";
+import { MdList, MdMap } from "react-icons/md";
 import SWR from "swr";
 
 /**
@@ -64,7 +62,7 @@ export default function IndexPage() {
           mx="auto"
           w={{ base: "100%", md: "70%" }}
         >
-          <InputGroup size="lg">
+          {/* <InputGroup size="lg">
             <InputLeftElement pointerEvents="none">
               <Icon as={MdSearch} color="gray.400" boxSize={6} />
             </InputLeftElement>
@@ -76,7 +74,8 @@ export default function IndexPage() {
               fontSize="md"
               bg="white"
             />
-          </InputGroup>
+          </InputGroup> */}
+          <MapSearch />
           <HStack mt={4} justify="center" spacing={4}>
             <Button
               as={Link}
