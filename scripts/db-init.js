@@ -1,3 +1,5 @@
+require("dotenv").config({ path: ".env.local" });
+
 /*
   Database initialization/seed script for PHORM
   Usage: npm run db-init
@@ -16,16 +18,16 @@ const admin = require("firebase-admin");
 const { faker } = require("@faker-js/faker");
 
 function initAdmin() {
-  if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+  if (process.env.NEXT_PUBLIC_GOOGLE_APPLICATION_CREDENTIALS) {
     admin.initializeApp();
     return admin.firestore();
   }
-  const projectId = process.env.FIREBASE_PROJECT_ID;
-  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-  let privateKey = process.env.FIREBASE_PRIVATE_KEY;
+  const projectId = process.env.NEXT_PUBLIC_FSDB_PROJECT_ID;
+  const clientEmail = process.env.NEXT_PUBLIC_FIREBASE_CLIENT_EMAIL;
+  let privateKey = process.env.NEXT_PUBLIC_FSDB_PRIVATE_KEY;
   if (!projectId || !clientEmail || !privateKey) {
     throw new Error(
-      "Missing Firebase Admin credentials. Set GOOGLE_APPLICATION_CREDENTIALS or FIREBASE_* env vars."
+      "Missing Firebase Admin credentials. Set FIREBASE_* env vars."
     );
   }
   // Normalize private key with escaped newlines
