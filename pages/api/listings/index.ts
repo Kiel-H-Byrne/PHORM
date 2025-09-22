@@ -3,6 +3,7 @@ import { IListing } from "@/types";
 import {
   addDoc,
   collection,
+  getCountFromServer,
   getDocs,
   limit,
   orderBy,
@@ -30,26 +31,49 @@ export default async function handler(
           page = "1",
           pageSize = "10",
           category,
+          includeCount,
+          all,
         } = req.query as {
           searchQuery?: string;
           page?: string;
           pageSize?: string;
           category?: string;
+          includeCount?: string;
+          all?: string;
         };
 
-        let q = query(listingsRef, orderBy("createdAt", "desc"));
-
+        // Base query (with optional category filter)
+        let base = query(listingsRef, orderBy("createdAt", "desc"));
         if (category) {
-          // categories is an array field
-          q = query(q, where("categories", "array-contains", category));
+          base = query(base, where("categories", "array-contains", category));
         }
 
-        // Basic pagination
-        q = query(q, limit(parseInt(pageSize || "10", 10)));
+        // If requesting all, stream through pages server-side (safe for dev datasets)
+        if (all === "true") {
+          const items: IListing[] = [];
+          let last: any = undefined;
+          const size = parseInt(pageSize || "50", 10);
+          const MAX = 1000; // safety cap
+          while (items.length < MAX) {
+            let pageQ = query(base, limit(size));
+            if (last) pageQ = query(pageQ, startAfter(last));
+            const snap = await getDocs(pageQ);
+            if (snap.empty) break;
+            snap.docs.forEach((d) =>
+              items.push({ id: d.id, ...(d.data() as any) } as IListing)
+            );
+            last = snap.docs[snap.docs.length - 1];
+            if (snap.size < size) break;
+          }
+          return res.status(200).json(items);
+        }
+
+        // Paged request
+        let q = query(base, limit(parseInt(pageSize || "10", 10)));
         if (parseInt(page || "1", 10) > 1) {
           const backfill = await getDocs(
             query(
-              q,
+              base,
               limit(
                 (parseInt(page || "1", 10) - 1) * parseInt(pageSize || "10", 10)
               )
@@ -76,6 +100,23 @@ export default async function handler(
               (Array.isArray(l.categories) &&
                 l.categories.join(" ").toLowerCase().includes(term))
           );
+        }
+
+        if (includeCount === "true") {
+          const countSnap = await getCountFromServer(base);
+          const total = countSnap.data().count || 0;
+          const size = parseInt(pageSize || "10", 10);
+          const pg = parseInt(page || "1", 10);
+          const totalPages = Math.max(1, Math.ceil(total / size));
+          return res
+            .status(200)
+            .json({
+              data: listings,
+              page: pg,
+              pageSize: size,
+              total,
+              totalPages,
+            });
         }
 
         return res.status(200).json(listings);
