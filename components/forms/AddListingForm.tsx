@@ -5,22 +5,22 @@ import { ListingsSchema } from "@/db/schemas";
 import {
   Box,
   Button,
+  Checkbox,
+  CheckboxGroup,
   FormControl,
   FormErrorMessage,
   FormLabel,
   Grid,
+  HStack,
   Heading,
   Input,
+  Progress,
   Select,
+  SimpleGrid,
   Text,
   Textarea,
-  useToast,
-  Progress,
-  HStack,
   VStack,
-  SimpleGrid,
-  Checkbox,
-  CheckboxGroup,
+  useToast,
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { geohashForLocation } from "geofire-common";
@@ -236,7 +236,7 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
       </Box>
     );
   }
-
+  console.log(step);
   return (
     <Box
       borderWidth="1px"
@@ -252,7 +252,13 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
       <Text textAlign="center" color="gray.600" mb={4}>
         Step {step} of 3
       </Text>
-      <Progress value={(step / 3) * 100} size="sm" colorScheme="blue" mb={6} aria-label={`Step ${step} of 3`} />
+      <Progress
+        value={(step / 3) * 100}
+        size="sm"
+        colorScheme="blue"
+        mb={6}
+        aria-label={`Step ${step} of 3`}
+      />
 
       <Form
         onSubmit={submitData}
@@ -264,16 +270,31 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
         {step === 1 && (
           <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
             {/* Business Name */}
-            <FormControl isInvalid={!!errors.name} mb={3} gridColumn={{ md: "span 2" }}>
+            <FormControl
+              isInvalid={!!errors.name}
+              mb={3}
+              gridColumn={{ md: "span 2" }}
+            >
               <FormLabel htmlFor="name">Business Name</FormLabel>
-              <Input id="name" placeholder="Enter business name" autoComplete="true" {...register("name")} />
-              <FormErrorMessage>{errors.name?.message as string}</FormErrorMessage>
+              <Input
+                id="name"
+                placeholder="Enter business name"
+                autoComplete="true"
+                {...register("name")}
+              />
+              <FormErrorMessage>
+                {errors.name?.message as string}
+              </FormErrorMessage>
             </FormControl>
 
             {/* Business Type */}
             <FormControl mb={3}>
               <FormLabel htmlFor="businessType">Business Type</FormLabel>
-              <Select id="businessType" placeholder="Select type" {...register("businessType")}>
+              <Select
+                id="businessType"
+                placeholder="Select type"
+                {...register("businessType")}
+              >
                 {BUSINESS_TYPES.map((t) => (
                   <option key={t} value={t}>
                     {t}
@@ -283,10 +304,22 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
             </FormControl>
 
             {/* Description */}
-            <FormControl isInvalid={!!errors.description} mb={3} gridColumn={{ md: "span 2" }}>
+            <FormControl
+              isInvalid={!!errors.description}
+              mb={3}
+              gridColumn={{ md: "span 2" }}
+            >
               <FormLabel htmlFor="description">Short Description</FormLabel>
-              <Textarea id="description" placeholder="Up to 150 characters" maxLength={150} rows={3} {...register("description")} />
-              <FormErrorMessage>{errors.description?.message as string}</FormErrorMessage>
+              <Textarea
+                id="description"
+                placeholder="Up to 150 characters"
+                maxLength={150}
+                rows={3}
+                {...register("description")}
+              />
+              <FormErrorMessage>
+                {errors.description?.message as string}
+              </FormErrorMessage>
             </FormControl>
           </Grid>
         )}
@@ -296,60 +329,95 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
             {/* Contact Name */}
             <FormControl mb={3}>
               <FormLabel htmlFor="contactName">Contact Person's Name</FormLabel>
-              <Input id="contactName" placeholder="Full name" {...register("contactName")} />
+              <Input
+                id="contactName"
+                placeholder="Full name"
+                {...register("contactName")}
+              />
             </FormControl>
 
             {/* Phone */}
             <FormControl isInvalid={!!errors.phone} mb={3}>
               <FormLabel htmlFor="phone">Phone Number</FormLabel>
-              <Input id="phone" type="tel" placeholder="(123) 456-7890" {...register("phone")} />
-              <FormErrorMessage>{errors.phone?.message as string}</FormErrorMessage>
+              <Input
+                id="phone"
+                type="tel"
+                placeholder="(123) 456-7890"
+                {...register("phone")}
+              />
+              <FormErrorMessage>
+                {errors.phone?.message as string}
+              </FormErrorMessage>
             </FormControl>
 
             {/* Email */}
-            <FormControl isInvalid={!!errors.email} mb={3} gridColumn={{ md: "span 2" }}>
+            {/* <FormControl isInvalid={!!errors.email} mb={3} gridColumn={{ md: "span 2" }}>
               <FormLabel htmlFor="email">Email Address</FormLabel>
               <Input id="email" type="email" placeholder="you@example.com" {...register("email")} />
               <FormErrorMessage>{errors.email?.message as string}</FormErrorMessage>
-            </FormControl>
+            </FormControl> */}
 
-            <Heading as="h3" size="sm" mb={2} mt={2} gridColumn={{ md: "span 2" }}>
+            <Heading
+              as="h3"
+              size="sm"
+              mb={2}
+              mt={2}
+              gridColumn={{ md: "span 2" }}
+            >
               Business Address
             </Heading>
 
             {/* Street */}
-            <FormControl isInvalid={!!errors.street} mb={3} gridColumn={{ md: "span 2" }}>
+            <FormControl
+              isInvalid={!!errors.street}
+              mb={3}
+              gridColumn={{ md: "span 2" }}
+            >
               <FormLabel htmlFor="street">Street Address</FormLabel>
-              <Input id="street" placeholder="123 Main St" {...register("street")} />
-              <FormErrorMessage>{errors.street?.message as string}</FormErrorMessage>
+              <Input
+                id="street"
+                placeholder="123 Main St"
+                {...register("street")}
+              />
+              <FormErrorMessage>
+                {errors.street?.message as string}
+              </FormErrorMessage>
             </FormControl>
 
             {/* City */}
             <FormControl isInvalid={!!errors.city} mb={3}>
               <FormLabel htmlFor="city">City</FormLabel>
               <Input id="city" placeholder="City name" {...register("city")} />
-              <FormErrorMessage>{errors.city?.message as string}</FormErrorMessage>
+              <FormErrorMessage>
+                {errors.city?.message as string}
+              </FormErrorMessage>
             </FormControl>
 
             {/* State */}
             <FormControl isInvalid={!!errors.state} mb={3}>
               <FormLabel htmlFor="state">State</FormLabel>
-              <Select id="state" placeholder="Select state" {...register("state")}>
+              <Select
+                id="state"
+                placeholder="Select state"
+                {...register("state")}
+              >
                 {StatesEnum.options.map((state) => (
                   <option value={state} key={state}>
                     {state}
                   </option>
                 ))}
               </Select>
-              <FormErrorMessage>{errors.state?.message as string}</FormErrorMessage>
+              <FormErrorMessage>
+                {errors.state?.message as string}
+              </FormErrorMessage>
             </FormControl>
 
             {/* Zip */}
-            <FormControl isInvalid={!!errors.zip} mb={3}>
+            {/* <FormControl isInvalid={!!errors.zip} mb={3}>
               <FormLabel htmlFor="zip">Zip Code</FormLabel>
               <Input id="zip" type="number" placeholder="12345" {...register("zip", { valueAsNumber: true })} />
               <FormErrorMessage>{errors.zip?.message as string}</FormErrorMessage>
-            </FormControl>
+            </FormControl> */}
           </Grid>
         )}
 
@@ -362,7 +430,10 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
                 control={control}
                 name="services"
                 render={({ field }) => (
-                  <CheckboxGroup value={field.value || []} onChange={field.onChange}>
+                  <CheckboxGroup
+                    value={field.value || []}
+                    onChange={field.onChange}
+                  >
                     <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={2}>
                       {SERVICES_OPTIONS.map((opt) => (
                         <Checkbox key={opt} value={opt} size="md">
@@ -378,23 +449,42 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
             {/* Website URL */}
             <FormControl isInvalid={!!errors.url}>
               <FormLabel htmlFor="url">Website URL</FormLabel>
-              <Input id="url" type="url" placeholder="https://example.com" {...register("url")} />
-              <FormErrorMessage>{errors.url?.message as string}</FormErrorMessage>
+              <Input
+                id="url"
+                type="url"
+                placeholder="https://example.com"
+                {...register("url")}
+              />
+              <FormErrorMessage>
+                {errors.url?.message as string}
+              </FormErrorMessage>
             </FormControl>
 
             {/* Social Links */}
             <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
               <FormControl>
                 <FormLabel htmlFor="facebook">Facebook</FormLabel>
-                <Input id="facebook" placeholder="facebook.com/yourpage" {...register("social.facebook" as const)} />
+                <Input
+                  id="facebook"
+                  placeholder="facebook.com/yourpage"
+                  {...register("social.facebook" as const)}
+                />
               </FormControl>
               <FormControl>
                 <FormLabel htmlFor="instagram">Instagram</FormLabel>
-                <Input id="instagram" placeholder="instagram.com/yourhandle" {...register("social.instagram" as const)} />
+                <Input
+                  id="instagram"
+                  placeholder="instagram.com/yourhandle"
+                  {...register("social.instagram" as const)}
+                />
               </FormControl>
               <FormControl>
                 <FormLabel htmlFor="twitter">Twitter/X</FormLabel>
-                <Input id="twitter" placeholder="twitter.com/yourhandle" {...register("social.twitter" as const)} />
+                <Input
+                  id="twitter"
+                  placeholder="twitter.com/yourhandle"
+                  {...register("social.twitter" as const)}
+                />
               </FormControl>
             </SimpleGrid>
           </VStack>
@@ -402,7 +492,11 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
 
         {/* Navigation Buttons */}
         <HStack mt={6} justify="space-between">
-          <Button onClick={() => setStep((s) => (s > 1 ? ((s - 1) as 1 | 2 | 3) : s))} variant="outline" isDisabled={step === 1}>
+          <Button
+            onClick={() => setStep((s) => (s > 1 ? ((s - 1) as 1 | 2 | 3) : s))}
+            variant="outline"
+            isDisabled={step === 1}
+          >
             Back
           </Button>
           {step < 3 ? (
@@ -410,11 +504,24 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
               colorScheme="blue"
               onClick={async () => {
                 // Validate current step fields before moving on
-                const step1Fields = ["name", "businessType", "description"] as const;
-                const step2Fields = ["contactName", "phone", "email", "street", "city", "state", "zip"] as const;
+                const step1Fields = [
+                  "name",
+                  "businessType",
+                  "description",
+                ] as const;
+                const step2Fields = [
+                  "contactName",
+                  "phone",
+                  // "email",
+                  "street",
+                  "city",
+                  "state",
+                  // "zip",
+                ] as const;
                 const toValidate = step === 1 ? step1Fields : step2Fields;
                 const ok = await trigger(toValidate as any);
-                if (ok) setStep((s) => ((s + 1) as 1 | 2 | 3));
+                if (ok) setStep((s) => (s + 1) as 1 | 2 | 3);
+                console.log(ok);
               }}
             >
               Next
