@@ -276,7 +276,7 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
           </FormControl>
 
           {/* Zip */}
-          <FormControl isInvalid={!!errors.zip} mb={3}>
+          {/* <FormControl isInvalid={!!errors.zip} mb={3}>
             <FormLabel htmlFor="zip">Zip Code</FormLabel>
             <Input
               id="zip"
@@ -287,7 +287,7 @@ const AddListingForm = ({ onDrawerClose }: { onDrawerClose: () => void }) => {
               })}
             />
             <FormErrorMessage>{errors.zip?.message as string}</FormErrorMessage>
-          </FormControl>
+          </FormControl> */}
         </Grid>
 
         <Box display="flex" justifyContent="space-between" mt={6}>

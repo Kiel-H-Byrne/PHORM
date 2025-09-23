@@ -1,6 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { findUserById } from "@/db/users";
 import { IListing, IUser } from "@/types";
+import { formatPhoneNum } from "@/utils/helpers";
 import {
   Avatar,
   Badge,
@@ -148,7 +149,7 @@ const UserDashboard = ({ userId }: UserDashboardProps) => {
                   ? `${userData.profile.firstName} ${userData.profile.lastName}`
                   : user?.displayName ||
                     user?.email ||
-                    user?.phoneNumber ||
+                    formatPhoneNum(user?.phoneNumber) ||
                     undefined
               }
               mr={6}
@@ -171,7 +172,7 @@ const UserDashboard = ({ userId }: UserDashboardProps) => {
                 )}
               </Heading>
               <Text color="gray.600">
-                {user?.email || user?.phoneNumber || "User"}
+                {user?.email || formatPhoneNum(user?.phoneNumber) || "User"}
               </Text>
               <Button
                 leftIcon={<Icon as={FaUser} />}
@@ -276,7 +277,7 @@ const UserDashboard = ({ userId }: UserDashboardProps) => {
                           fontSize="sm"
                           color="blue.500"
                         >
-                          {userData.profile.contact.phone}
+                          {formatPhoneNum(userData.profile.contact.phone)}
                         </Link>
                       </Flex>
                     )}

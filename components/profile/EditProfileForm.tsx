@@ -52,6 +52,7 @@ export default function EditProfileForm({
     data: userData,
     error: fetchError,
     isLoading,
+    mutate,
   } = useSWR<IUser | null>(`/api/users/${user?.uid}`, async () => {
     if (!user?.uid) return;
     return await findUserById(user.uid);
@@ -171,7 +172,7 @@ export default function EditProfileForm({
         duration: 3000,
         isClosable: true,
       });
-
+      mutate();
       onUpdate();
     } catch (error) {
       toast({
