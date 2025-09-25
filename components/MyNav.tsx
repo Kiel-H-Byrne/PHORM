@@ -14,7 +14,7 @@ import {
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { memo, useRef } from "react";
-import { AboutModal, AddListingDrawer, MyAvatar } from "./";
+import { AddListingDrawer, MyAvatar } from "./";
 import { AvatarDropdown } from "./AvatarDropdown";
 import { NavLinks } from "./NavLinks";
 
@@ -108,7 +108,6 @@ const MyNav = () => {
         firstField={firstField}
         onDrawerClose={onDrawerClose}
       />
-      {!isLoggedIn && !isLoading && <AboutModal />}
     </>
   );
 };

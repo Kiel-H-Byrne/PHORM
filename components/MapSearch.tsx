@@ -38,7 +38,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FaFilter, FaMapMarkerAlt, FaSearch, FaTimes } from "react-icons/fa";
 
 interface MapSearchProps {
-  onSelectListing?: (listing: IListing) => void;
+  onSelectListing: (listing: IListing) => void;
   mapInstance?: google.maps.Map | null;
   onFilterChange?: (filters: SearchFilters) => void;
   layout?: "overlay" | "inline";
