@@ -94,11 +94,33 @@ export const ListingsSchema = z
   })
   .partial()
   .transform((data, ctx) => {
-    //make address, and location? and....
-    const { street, city, state, zip } = data;
-    const address = `${street} ${city} ${state} ${zip}`;
-    data["submitted"] = new Date();
-    data["address"] = address;
-    // data["geoHash"] = geoHash;
+    const { street, city, state, zip } = data as any;
+    if (street && city && state && zip) {
+      const address = `${street} ${city} ${state} ${zip}`;
+      (data as any)["address"] = address;
+    }
+    (data as any)["submitted"] = new Date();
     return data;
   });
+
+const DiscountTypes = ["percent", "amount", "bogo", "free"] as const;
+export const CouponSchema = z
+  .object({
+    id: z.string(),
+    title: z.string().min(3),
+    description: z.string().optional().or(z.literal("")),
+    discountType: z.enum(DiscountTypes),
+    value: z.number().optional(),
+    code: z.string().optional().or(z.literal("")),
+    memberOnly: z.boolean().default(true),
+    terms: z.string().optional().or(z.literal("")),
+    validFrom: z.date().optional(),
+    validUntil: z.date().optional(),
+    tags: z.array(z.string()).optional().default([]),
+    listingId: z.string().optional(),
+    createdBy: z.string(),
+    active: z.boolean().default(true),
+    createdAt: z.string().optional(),
+    updatedAt: z.string().optional(),
+  })
+  .partial();

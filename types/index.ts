@@ -1,10 +1,16 @@
 import { STATE_ABBREVIATIONS } from "@/util/constants";
 import { z } from "zod";
-import { ClaimSchema, ListingsSchema, UserSchema } from "../db/schemas";
+import {
+  ClaimSchema,
+  CouponSchema,
+  ListingsSchema,
+  UserSchema,
+} from "../db/schemas";
 
 export type IClaims = z.infer<typeof ClaimSchema>[];
 export type IListing = z.infer<typeof ListingsSchema>;
 export type IUser = z.infer<typeof UserSchema>;
+export type ICoupon = z.infer<typeof CouponSchema>;
 
 export type Category = "a" | "b" | "c";
 export type Libraries = (

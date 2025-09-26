@@ -21,7 +21,7 @@ import { NavLinks } from "./NavLinks";
 const NAV_LINKS = [
   { path: "/", label: "Home", isPrivate: false },
   { path: "/about", label: "About", isPrivate: false },
-  // { path: "/owners", label: "Owners" },
+  { path: "/coupons", label: "Deals", isPrivate: false },
   { path: "/?viewType=list", label: "List View", isPrivate: false },
   { path: "/member-directory", label: "Member Directory", isPrivate: true },
 ];
