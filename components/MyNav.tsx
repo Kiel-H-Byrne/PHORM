@@ -14,18 +14,28 @@ import {
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { memo, useRef } from "react";
-import { AddListingDrawer, MyAvatar } from "./";
+import AddListingDrawer from "./AddListingDrawer";
+import MyAvatar from "./MyAvatar";
 import { AvatarDropdown } from "./AvatarDropdown";
 import { NavLinks } from "./NavLinks";
 
-const NAV_LINKS = [
+export interface NavLinkItem {
+  path: string;
+  label: string;
+  isPrivate: boolean;
+}
+
+export type INAVLINKS = NavLinkItem[];
+
+export const DEFAULT_NAV_LINKS: INAVLINKS = [
   { path: "/", label: "Home", isPrivate: false },
   { path: "/about", label: "About", isPrivate: false },
   { path: "/coupons", label: "Deals", isPrivate: false },
-  { path: "/?viewType=list", label: "List View", isPrivate: false },
+  { path: "/map", label: "Map View", isPrivate: false },
   { path: "/member-directory", label: "Member Directory", isPrivate: true },
 ];
-export type INAVLINKS = typeof NAV_LINKS;
+
+export const NAV_LINKS = DEFAULT_NAV_LINKS;
 
 const MyNav = () => {
   const {
@@ -45,6 +55,19 @@ const MyNav = () => {
   const isPrivateLink = (link: { isPrivate: boolean }) => link.isPrivate;
   const isLoggedIn = !!user;
   const isLoading = loading;
+
+  const isMapView =
+    router?.pathname === "/map" || router?.query?.viewType === "map";
+
+  const navLinks: INAVLINKS = [
+    { path: "/", label: "Home", isPrivate: false },
+    { path: "/about", label: "About", isPrivate: false },
+    { path: "/coupons", label: "Deals", isPrivate: false },
+    isMapView
+      ? { path: "/list", label: "List View", isPrivate: false }
+      : { path: "/map", label: "Map View", isPrivate: false },
+    { path: "/member-directory", label: "Member Directory", isPrivate: true },
+  ];
   return (
     <>
       <Box
@@ -76,7 +99,7 @@ const MyNav = () => {
               display={{ base: "none", md: "flex" }}
             >
               {/* <Heading color={"royalblue"}>P.H.O.R.M</Heading> */}
-              <NavLinks links={NAV_LINKS} isLoggedIn={isLoggedIn} />
+              <NavLinks links={navLinks} isLoggedIn={isLoggedIn} />
             </HStack>
           </HStack>
           <Flex alignItems={"center"}>
@@ -100,7 +123,7 @@ const MyNav = () => {
           </Flex>
         </Flex>
         {dropdownIsOpen ? (
-          <AvatarDropdown isLoggedIn={isLoggedIn} links={NAV_LINKS} />
+          <AvatarDropdown isLoggedIn={isLoggedIn} links={navLinks} />
         ) : null}
       </Box>
       <AddListingDrawer
