@@ -6,10 +6,13 @@ import {
   SERVICE_TAGS,
 } from "@/util/constants";
 import {
+  Badge,
   Box,
   Button,
   Flex,
+  HStack,
   Icon,
+  IconButton,
   Input,
   InputGroup,
   InputLeftElement,
@@ -21,17 +24,12 @@ import {
   MenuItemOption,
   MenuList,
   MenuOptionGroup,
-  Popover,
-  PopoverBody,
-  PopoverContent,
-  PopoverTrigger,
   Spinner,
   Tag,
   TagLabel,
   Text,
   Wrap,
   WrapItem,
-  useDisclosure,
   useToast,
 } from "@chakra-ui/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -42,6 +40,7 @@ interface MapSearchProps {
   mapInstance?: google.maps.Map | null;
   onFilterChange?: (filters: SearchFilters) => void;
   layout?: "overlay" | "inline";
+  placeholder?: string;
 }
 
 interface SearchFilters {
@@ -55,13 +54,17 @@ const MapSearch = ({
   mapInstance,
   onFilterChange,
   layout = "overlay",
+  placeholder = "Search for businesses...",
 }: MapSearchProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState<IListing[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<SearchFilters>({});
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isOpen, setIsOpen] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+
+  const searchContainerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const toast = useToast();
@@ -71,6 +74,7 @@ const MapSearch = ({
     label: string;
     value: string;
   };
+
   const suggestions: Suggestion[] = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
     const match = (s: string) => s.toLowerCase().includes(term);
@@ -83,13 +87,15 @@ const MapSearch = ({
     const fromPopular = POPULAR_SEARCHES.filter((p) => (term ? match(p) : true))
       .slice(0, 6)
       .map((p) => ({ type: "popular" as const, label: p, value: p }));
+
     // Deduplicate by label
     const all = [...fromCats, ...fromTags, ...fromPopular];
     const seen = new Set<string>();
     return all
       .filter((s) => (seen.has(s.label) ? false : (seen.add(s.label), true)))
-      .slice(0, 12);
+      .slice(0, 10);
   }, [searchTerm]);
+
   // Debounced search function
   const handleSearch = useCallback(
     async (term: string) => {
@@ -115,7 +121,7 @@ const MapSearch = ({
 
         if (filters.location) {
           filteredResults = filteredResults.filter((listing) => {
-            if (!filters.location) return;
+            if (!filters.location) return false;
             return (
               listing.state === filters.location ||
               (listing.city
@@ -132,7 +138,6 @@ const MapSearch = ({
             if (filters.sortBy === "name") {
               return (a.name || "").localeCompare(b.name || "");
             } else if (filters.sortBy === "distance" && mapInstance) {
-              // Calculate distance from current map center
               const center = mapInstance.getCenter();
               if (center && a.lat && a.lng && b.lat && b.lng) {
                 const distanceA =
@@ -153,11 +158,9 @@ const MapSearch = ({
         }
 
         setResults(filteredResults);
+        setIsOpen(true);
 
-        if (filteredResults.length > 0) {
-          onOpen();
-        } else if (searchResults.length > 0 && filteredResults.length === 0) {
-          // We had results but filters removed them all
+        if (searchResults.length > 0 && filteredResults.length === 0) {
           toast({
             title: "No matches found",
             description: "Try adjusting your filters",
@@ -165,65 +168,98 @@ const MapSearch = ({
             duration: 3000,
           });
         }
-      } catch (error) {
-        console.error("Error searching listings:", error);
+      } catch (err) {
+        console.error("Error searching listings:", err);
         setError("Failed to search listings. Please try again.");
       } finally {
         setIsLoading(false);
       }
     },
-    [onOpen, filters, mapInstance, toast]
+    [filters, mapInstance, toast]
   );
 
   // Handle input change with debounce
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
-
       setSearchTerm(value);
+      setHighlightedIndex(-1);
+      setIsOpen(true);
 
-      // Open suggestions when typing
-      if (value && suggestions.length > 0 && !isOpen) onOpen();
-
-      // Clear previous timeout
       if (searchTimeoutRef.current) {
         clearTimeout(searchTimeoutRef.current);
       }
 
-      // Set new timeout for searching listings
       searchTimeoutRef.current = setTimeout(() => {
         handleSearch(value);
-      }, 500); // 500ms debounce
+      }, 400);
     },
-    [handleSearch, isOpen, onOpen, suggestions.length]
+    [handleSearch]
   );
 
-  // Clear search
+  // Clear search input
   const handleClearSearch = useCallback(() => {
     setSearchTerm("");
     setResults([]);
-    onClose();
-    if (searchInputRef.current) {
-      searchInputRef.current.focus();
-    }
-  }, [onClose]);
+    setHighlightedIndex(-1);
+    setIsOpen(true);
+    searchInputRef.current?.focus();
+  }, []);
 
   // Handle listing selection
   const handleSelectListing = useCallback(
     (listing: IListing) => {
       onSelectListing(listing);
-      onClose();
+      setIsOpen(false);
+      setHighlightedIndex(-1);
 
-      // Center map on selected listing if map instance is available
       if (mapInstance && listing.lat && listing.lng) {
         mapInstance.panTo({ lat: listing.lat, lng: listing.lng });
-        mapInstance.setZoom(16); // Zoom in
+        mapInstance.setZoom(16);
       }
     },
-    [mapInstance, onClose, onSelectListing]
+    [mapInstance, onSelectListing]
   );
 
-  // Clean up timeout on unmount
+  // Handle suggestion chip selection
+  const handleSelectSuggestion = useCallback(
+    (suggestion: Suggestion) => {
+      if (suggestion.type === "category") {
+        const newFilters = { ...filters, category: suggestion.label };
+        setFilters(newFilters);
+        if (onFilterChange) {
+          onFilterChange(newFilters);
+        }
+      }
+      setSearchTerm(suggestion.value);
+      setHighlightedIndex(-1);
+      handleSearch(suggestion.value);
+      searchInputRef.current?.focus();
+    },
+    [filters, handleSearch, onFilterChange]
+  );
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      if (
+        searchContainerRef.current &&
+        !searchContainerRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+        setHighlightedIndex(-1);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, []);
+
+  // Clean up search timeout on unmount
   useEffect(() => {
     return () => {
       if (searchTimeoutRef.current) {
@@ -238,12 +274,10 @@ const MapSearch = ({
       const newFilters = { ...filters, [filterType]: value };
       setFilters(newFilters);
 
-      // Notify parent component if callback provided
       if (onFilterChange) {
         onFilterChange(newFilters);
       }
 
-      // Re-run search with new filters if we have a search term
       if (searchTerm && searchTerm.length >= 2) {
         handleSearch(searchTerm);
       }
@@ -258,7 +292,6 @@ const MapSearch = ({
       onFilterChange({});
     }
 
-    // Re-run search if we have a search term
     if (searchTerm && searchTerm.length >= 2) {
       handleSearch(searchTerm);
     }
@@ -268,224 +301,367 @@ const MapSearch = ({
       status: "info",
       duration: 2000,
     });
-  }, [filters, handleSearch, onFilterChange, searchTerm, toast]);
+  }, [handleSearch, onFilterChange, searchTerm, toast]);
+
+  // Keyboard navigation
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (!isOpen) {
+        if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+          e.preventDefault();
+          setIsOpen(true);
+        }
+        return;
+      }
+
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        if (results.length > 0) {
+          setHighlightedIndex((prev) =>
+            prev < results.length - 1 ? prev + 1 : 0
+          );
+        }
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        if (results.length > 0) {
+          setHighlightedIndex((prev) =>
+            prev > 0 ? prev - 1 : results.length - 1
+          );
+        }
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        if (highlightedIndex >= 0 && results[highlightedIndex]) {
+          handleSelectListing(results[highlightedIndex]);
+        } else if (searchTerm && searchTerm.length >= 2) {
+          if (searchTimeoutRef.current) {
+            clearTimeout(searchTimeoutRef.current);
+          }
+          handleSearch(searchTerm);
+        }
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        setIsOpen(false);
+        setHighlightedIndex(-1);
+      }
+    },
+    [
+      handleSearch,
+      handleSelectListing,
+      highlightedIndex,
+      isOpen,
+      results,
+      searchTerm,
+    ]
+  );
+
+  const activeFilterCount = Object.keys(filters).length;
 
   return (
     <Box
+      ref={searchContainerRef}
       position={layout === "overlay" ? "absolute" : "relative"}
-      top={layout === "overlay" ? "20px" : undefined}
+      top={layout === "overlay" ? "16px" : undefined}
       left={layout === "overlay" ? "50%" : undefined}
       transform={layout === "overlay" ? "translateX(-50%)" : undefined}
-      width={layout === "overlay" ? { base: "90%", md: "400px" } : "100%"}
-      zIndex={10}
+      width={layout === "overlay" ? { base: "92%", sm: "80%", md: "460px" } : "100%"}
+      zIndex={15}
       mx={layout === "inline" ? "auto" : undefined}
       my={layout === "inline" ? 4 : undefined}
       px={layout === "inline" ? 4 : undefined}
     >
-      <Flex mb={2}>
-        <Popover
-          isOpen={isOpen}
-          onClose={onClose}
-          placement="bottom"
-          autoFocus={false}
-          closeOnBlur={true}
-          closeOnEsc={true}
-        >
-          <PopoverTrigger>
-            <InputGroup size="md" flex={1} mr={2}>
-              <InputLeftElement pointerEvents="none">
-                <Icon as={FaSearch} color="gray.400" />
-              </InputLeftElement>
-              <Input
-                ref={searchInputRef}
-                placeholder="What do you need?"
-                bg="white"
-                borderRadius="full"
-                boxShadow="md"
-                value={searchTerm}
-                onChange={handleInputChange}
-                onFocus={() =>
-                  (results.length > 0 || suggestions.length > 0) && onOpen()
-                }
-                _focus={{ boxShadow: "outline" }}
+      <Flex gap={2} align="center">
+        {/* Search Input */}
+        <InputGroup size="md" flex={1}>
+          <InputLeftElement pointerEvents="none">
+            <Icon as={FaSearch} color="gray.400" />
+          </InputLeftElement>
+          <Input
+            ref={searchInputRef}
+            role="combobox"
+            aria-expanded={isOpen}
+            aria-haspopup="listbox"
+            aria-autocomplete="list"
+            aria-controls="map-search-listbox"
+            aria-activedescendant={
+              highlightedIndex >= 0
+                ? `map-search-item-${highlightedIndex}`
+                : undefined
+            }
+            aria-label="Search businesses"
+            placeholder={placeholder}
+            bg="white"
+            borderRadius="full"
+            boxShadow="md"
+            value={searchTerm}
+            onChange={handleInputChange}
+            onFocus={() => setIsOpen(true)}
+            onClick={() => setIsOpen(true)}
+            onKeyDown={handleKeyDown}
+            _focus={{ boxShadow: "0 0 0 2px #3a3ef1" }}
+          />
+          {isLoading ? (
+            <InputRightElement>
+              <Spinner size="sm" color="blue.500" />
+            </InputRightElement>
+          ) : searchTerm ? (
+            <InputRightElement>
+              <IconButton
+                size="xs"
+                isRound
+                variant="ghost"
+                onClick={handleClearSearch}
+                aria-label="Clear search"
+                icon={<Icon as={FaTimes} color="gray.400" />}
               />
-              {isLoading ? (
-                <InputRightElement>
-                  <Spinner size="sm" color="blue.500" />
-                </InputRightElement>
-              ) : searchTerm ? (
-                <InputRightElement>
-                  <Button
-                    size="sm"
-                    borderRadius={"full"}
-                    variant="ghost"
-                    onClick={handleClearSearch}
-                    aria-label="Clear search"
-                  >
-                    <Icon as={FaTimes} color="gray.400" />
-                  </Button>
-                </InputRightElement>
-              ) : null}
-            </InputGroup>
-          </PopoverTrigger>
+            </InputRightElement>
+          ) : null}
+        </InputGroup>
 
-          {/* Filter Menu */}
-          <Menu closeOnSelect={false}>
-            <MenuButton
-              as={Button}
-              rightIcon={<Icon as={FaFilter} />}
-              bg="white"
-              boxShadow="md"
-              borderRadius="full"
-              size="md"
-              aria-label="Filter results"
-              colorScheme={Object.keys(filters).length > 0 ? "blue" : "gray"}
-            >
-              {Object.keys(filters).length > 0
-                ? `Filters (${Object.keys(filters).length})`
-                : "Filter"}
-            </MenuButton>
-            <MenuList minWidth="240px" zIndex={20}>
-              <MenuOptionGroup
-                title="Category"
-                type="radio"
-                value={filters.category}
-                onChange={(value) => handleFilterChange("category", value)}
-              >
-                <MenuItemOption value="restaurant">Restaurant</MenuItemOption>
-                <MenuItemOption value="retail">Retail</MenuItemOption>
-                <MenuItemOption value="service">Service</MenuItemOption>
-                <MenuItemOption value="professional">
-                  Professional
-                </MenuItemOption>
-              </MenuOptionGroup>
-
-              <MenuOptionGroup
-                title="Location"
-                type="radio"
-                value={filters.location}
-                onChange={(value) => handleFilterChange("location", value)}
-              >
-                <MenuItemOption value="DC">Washington DC</MenuItemOption>
-                <MenuItemOption value="MD">Maryland</MenuItemOption>
-                <MenuItemOption value="VA">Virginia</MenuItemOption>
-              </MenuOptionGroup>
-
-              <MenuOptionGroup
-                title="Sort By"
-                type="radio"
-                value={filters.sortBy}
-                onChange={(value) => handleFilterChange("sortBy", value as any)}
-              >
-                <MenuItemOption value="name">Name</MenuItemOption>
-                <MenuItemOption value="distance">Distance</MenuItemOption>
-              </MenuOptionGroup>
-
-              <Flex justify="center" mt={4}>
-                <Button
-                  size="sm"
-                  onClick={clearFilters}
-                  colorScheme="red"
-                  variant="outline"
-                >
-                  Clear Filters
-                </Button>
-              </Flex>
-            </MenuList>
-          </Menu>
-          <PopoverContent
-            width={{ base: "90%", md: "400px" }}
-            maxH="360px"
-            overflowY="auto"
+        {/* Filter Menu */}
+        <Menu closeOnSelect={false} onOpen={() => setIsOpen(false)}>
+          <MenuButton
+            as={Button}
+            rightIcon={<Icon as={FaFilter} />}
+            bg="white"
+            boxShadow="md"
+            borderRadius="full"
+            size="md"
+            aria-label="Filter results"
+            colorScheme={activeFilterCount > 0 ? "blue" : "gray"}
+            flexShrink={0}
           >
-            <PopoverBody p={3}>
-              {/* Suggestions as chips/pills */}
-              {suggestions.length > 0 && (
-                <Box mb={results.length > 0 ? 3 : 0}>
-                  <Text fontSize="sm" color="gray.600" mb={2}>
-                    Suggestions
-                  </Text>
-                  <Wrap spacing={2}>
-                    {suggestions.map((s) => (
-                      <WrapItem key={`${s.type}:${s.label}`}>
-                        <Tag
-                          size="md"
+            {activeFilterCount > 0
+              ? `Filters (${activeFilterCount})`
+              : "Filter"}
+          </MenuButton>
+          <MenuList minWidth="240px" zIndex={25} boxShadow="xl">
+            <MenuOptionGroup
+              title="Category"
+              type="radio"
+              value={filters.category}
+              onChange={(value) => handleFilterChange("category", value)}
+            >
+              <MenuItemOption value="restaurant">Restaurant</MenuItemOption>
+              <MenuItemOption value="retail">Retail</MenuItemOption>
+              <MenuItemOption value="service">Service</MenuItemOption>
+              <MenuItemOption value="professional">
+                Professional
+              </MenuItemOption>
+            </MenuOptionGroup>
+
+            <MenuOptionGroup
+              title="Location"
+              type="radio"
+              value={filters.location}
+              onChange={(value) => handleFilterChange("location", value)}
+            >
+              <MenuItemOption value="DC">Washington DC</MenuItemOption>
+              <MenuItemOption value="MD">Maryland</MenuItemOption>
+              <MenuItemOption value="VA">Virginia</MenuItemOption>
+            </MenuOptionGroup>
+
+            <MenuOptionGroup
+              title="Sort By"
+              type="radio"
+              value={filters.sortBy}
+              onChange={(value) => handleFilterChange("sortBy", value as any)}
+            >
+              <MenuItemOption value="name">Name</MenuItemOption>
+              <MenuItemOption value="distance">Distance</MenuItemOption>
+            </MenuOptionGroup>
+
+            <Flex justify="center" mt={4} pb={2}>
+              <Button
+                size="sm"
+                onClick={clearFilters}
+                colorScheme="red"
+                variant="outline"
+              >
+                Clear Filters
+              </Button>
+            </Flex>
+          </MenuList>
+        </Menu>
+      </Flex>
+
+      {/* Combobox Dropdown */}
+      {isOpen && (
+        <Box
+          id="map-search-listbox"
+          role="listbox"
+          aria-label="Search suggestions and results"
+          position="absolute"
+          top="calc(100% + 6px)"
+          left={0}
+          right={0}
+          bg="white"
+          borderRadius="2xl"
+          boxShadow="0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)"
+          border="1px solid"
+          borderColor="gray.200"
+          maxH="380px"
+          overflowY="auto"
+          zIndex={20}
+          p={3}
+        >
+          {/* Suggestions Chips */}
+          {suggestions.length > 0 && (
+            <Box mb={results.length > 0 ? 3 : 1}>
+              <Text
+                fontSize="xs"
+                fontWeight="semibold"
+                color="gray.500"
+                textTransform="uppercase"
+                letterSpacing="wider"
+                mb={2}
+                px={1}
+              >
+                {searchTerm ? "Suggestions" : "Popular Searches"}
+              </Text>
+              <Wrap spacing={2}>
+                {suggestions.map((s) => (
+                  <WrapItem key={`${s.type}:${s.label}`}>
+                    <Tag
+                      size="md"
+                      borderRadius="full"
+                      variant="subtle"
+                      colorScheme={
+                        s.type === "category"
+                          ? "blue"
+                          : s.type === "tag"
+                          ? "purple"
+                          : "gray"
+                      }
+                      cursor="pointer"
+                      _hover={{
+                        opacity: 0.85,
+                        transform: "translateY(-1px)",
+                        boxShadow: "sm",
+                      }}
+                      transition="all 0.15s"
+                      onClick={() => handleSelectSuggestion(s)}
+                    >
+                      <TagLabel>{s.label}</TagLabel>
+                    </Tag>
+                  </WrapItem>
+                ))}
+              </Wrap>
+            </Box>
+          )}
+
+          {/* Loading Indicator */}
+          {isLoading && (
+            <Flex align="center" justify="center" p={4} color="gray.500" gap={2}>
+              <Spinner size="sm" color="blue.500" />
+              <Text fontSize="sm">Searching businesses...</Text>
+            </Flex>
+          )}
+
+          {/* Results List */}
+          {results.length > 0 && (
+            <Box mt={suggestions.length > 0 ? 2 : 0}>
+              <Text
+                fontSize="xs"
+                fontWeight="semibold"
+                color="gray.500"
+                textTransform="uppercase"
+                letterSpacing="wider"
+                mb={2}
+                px={1}
+              >
+                Businesses ({results.length})
+              </Text>
+              <List spacing={1}>
+                {results.map((listing, index) => {
+                  const isHighlighted = highlightedIndex === index;
+                  return (
+                    <ListItem
+                      key={listing.id || `${listing.lat}-${listing.lng}-${index}`}
+                      id={`map-search-item-${index}`}
+                      role="option"
+                      aria-selected={isHighlighted}
+                      p={2.5}
+                      borderRadius="lg"
+                      bg={isHighlighted ? "blue.50" : "transparent"}
+                      _hover={{ bg: "gray.100" }}
+                      cursor="pointer"
+                      onClick={() => handleSelectListing(listing)}
+                      transition="background 0.15s"
+                    >
+                      <Flex align="center">
+                        <Box
+                          p={2}
                           borderRadius="full"
-                          variant="subtle"
-                          colorScheme={
-                            s.type === "category"
-                              ? "blue"
-                              : s.type === "tag"
-                              ? "purple"
-                              : "gray"
-                          }
-                          cursor="pointer"
-                          onClick={() => {
-                            if (s.type === "category") {
-                              handleFilterChange("category", s.label);
-                            }
-                            setSearchTerm(s.value);
-                            handleSearch(s.value);
-                            if (!isOpen) onOpen();
-                          }}
+                          bg={isHighlighted ? "blue.100" : "gray.100"}
+                          color="blue.600"
+                          mr={3}
+                          flexShrink={0}
                         >
-                          <TagLabel>{s.label}</TagLabel>
-                        </Tag>
-                      </WrapItem>
-                    ))}
-                  </Wrap>
-                </Box>
-              )}
-
-              {/* Results list */}
-              <List spacing={0} mt={suggestions.length > 0 ? 2 : 0}>
-                {error && (
-                  <ListItem p={3} textAlign="center" color="red.500">
-                    {error}
-                  </ListItem>
-                )}
-
-                {!error && results.length === 0 && (
-                  <ListItem p={3} textAlign="center">
-                    No results found. Try a different search term or adjust your
-                    filters.
-                  </ListItem>
-                )}
-
-                {results.map((listing) => (
-                  <ListItem
-                    key={listing.id || `${listing.lat}-${listing.lng}`}
-                    p={3}
-                    _hover={{ bg: "gray.100" }}
-                    cursor="pointer"
-                    onClick={() => handleSelectListing(listing)}
-                    borderBottom="1px solid"
-                    borderColor="gray.200"
-                  >
-                    <Flex align="center">
-                      <Icon as={FaMapMarkerAlt} color="blue.500" mr={2} />
-                      <Box>
-                        <Text fontWeight="bold" noOfLines={1}>
-                          {listing.name}
-                        </Text>
-                        <Text fontSize="sm" color="gray.600" noOfLines={1}>
-                          {listing.address}
-                        </Text>
-                        {listing.categories &&
-                          listing.categories.length > 0 && (
-                            <Text fontSize="xs" color="gray.500" noOfLines={1}>
-                              {listing.categories.join(", ")}
+                          <Icon as={FaMapMarkerAlt} boxSize={3.5} />
+                        </Box>
+                        <Box flex={1} minW={0}>
+                          <Text
+                            fontWeight="bold"
+                            fontSize="sm"
+                            noOfLines={1}
+                            color="gray.800"
+                          >
+                            {listing.name}
+                          </Text>
+                          {listing.address && (
+                            <Text fontSize="xs" color="gray.600" noOfLines={1}>
+                              {listing.address}
                             </Text>
                           )}
-                      </Box>
-                    </Flex>
-                  </ListItem>
-                ))}
+                          {listing.categories &&
+                            listing.categories.length > 0 && (
+                              <HStack spacing={1} mt={1} wrap="wrap">
+                                {listing.categories.slice(0, 3).map((cat) => (
+                                  <Badge
+                                    key={cat}
+                                    fontSize="2xs"
+                                    colorScheme="blue"
+                                    variant="subtle"
+                                    borderRadius="full"
+                                    px={1.5}
+                                  >
+                                    {cat}
+                                  </Badge>
+                                ))}
+                              </HStack>
+                            )}
+                        </Box>
+                      </Flex>
+                    </ListItem>
+                  );
+                })}
               </List>
-            </PopoverBody>
-          </PopoverContent>
-        </Popover>
-      </Flex>
+            </Box>
+          )}
+
+          {/* Error Message */}
+          {error && (
+            <Box p={3} textAlign="center" color="red.500" fontSize="sm">
+              {error}
+            </Box>
+          )}
+
+          {/* Empty State */}
+          {!isLoading &&
+            !error &&
+            searchTerm.length >= 2 &&
+            results.length === 0 && (
+              <Box p={4} textAlign="center">
+                <Text fontSize="sm" color="gray.600">
+                  No results found for &ldquo;{searchTerm}&rdquo;.
+                </Text>
+                <Text fontSize="xs" color="gray.400" mt={1}>
+                  Try a different search term or adjust your filters.
+                </Text>
+              </Box>
+            )}
+        </Box>
+      )}
     </Box>
   );
 };

@@ -12,6 +12,7 @@ import {
   useColorModeValue,
   useDisclosure,
 } from "@chakra-ui/react";
+import NextLink from "next/link";
 import { useRouter } from "next/router";
 import { memo, useRef } from "react";
 import AddListingDrawer from "./AddListingDrawer";
@@ -85,7 +86,7 @@ const MyNav = () => {
             onClick={dropdownIsOpen ? onDropdownClose : onDropdownOpen}
           />
           <HStack spacing={8} alignItems={"center"}>
-            <Link href="/">
+            <Link as={NextLink} href="/">
               <Image
                 height={14}
                 aspectRatio={0.787}
