@@ -1,17 +1,22 @@
-import React from "react";
+import React, { useCallback } from "react";
 
 import { Marker } from "@react-google-maps/api";
 import { Clusterer } from "@react-google-maps/marker-clusterer";
 import { IListing } from "../types";
+
 interface IMyMarker {
   markerData: IListing;
   clusterer: Clusterer;
   activeData: IListing[];
-  setActiveData: any;
-  setWindowClosed: any;
-  setWindowOpen: any;
-  toggleDrawer: any;
+  setActiveData: (data: IListing[]) => void;
+  setWindowClosed: () => void;
+  setWindowOpen: () => void;
+  toggleDrawer: () => void;
 }
+
+const MARKER_ICON = {
+  url: "/img/orange_marker_sm.png",
+};
 
 const MyMarker = ({
   markerData,
@@ -21,49 +26,36 @@ const MyMarker = ({
   setWindowOpen,
   toggleDrawer,
 }: IMyMarker) => {
-  const { lat, lng, place_id } = markerData;
-  // location ? (loc = location.split(",")) : (loc = "50.60982,-1.34987");
-  // let locObj = { lat: parseFloat(loc[0]), lng: parseFloat(loc[1]) };
-  let image = {
-    url: "/img/orange_marker_sm.png",
-  };
-  // const mockData = {
-  //   name: "Sample Business",
-  //   address: "123 Main Street, City",
-  //   description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-  //   owner: {
-  //     username: "john_doe",
-  //     lodge: "ABC Lodge",
-  //     name: "John Doe",
-  //   },
-  //   imageUri: "https://picsum.photos/200/300",
-  // };
-  const handleMouseOverMarker = () => {
+  const lat = Number(markerData.lat);
+  const lng = Number(markerData.lng);
+
+  const handleMouseOverMarker = useCallback(() => {
     setActiveData([markerData]);
     setWindowOpen();
-  };
-  const handleMouseOut = () => {
+  }, [markerData, setActiveData, setWindowOpen]);
+
+  const handleMouseOut = useCallback(() => {
     setWindowClosed();
-  };
-  const handleClickMarker = () => {
-    // infowindow needs to be set for mobile (touch, no hover)
+  }, [setWindowClosed]);
+
+  const handleClickMarker = useCallback(() => {
     setActiveData([markerData]);
     toggleDrawer();
-  };
+  }, [markerData, setActiveData, toggleDrawer]);
+
+  if (isNaN(lat) || isNaN(lng) || (lat === 0 && lng === 0)) {
+    return null;
+  }
+
   return (
-    <div className="App-marker" key={place_id}>
-      <Marker
-        position={{ lat: lat!, lng: lng! }}
-        clusterer={clusterer}
-        icon={image}
-        onMouseOver={handleMouseOverMarker}
-        onMouseOut={handleMouseOut}
-        onClick={handleClickMarker}
-        //@ts-ignore
-        // __data={markerData}
-        // visible={categories.some((el) => selectedCategories.has(el))} //check for if category matches selected categories
-      />
-    </div>
+    <Marker
+      position={{ lat, lng }}
+      clusterer={clusterer}
+      icon={MARKER_ICON}
+      onMouseOver={handleMouseOverMarker}
+      onMouseOut={handleMouseOut}
+      onClick={handleClickMarker}
+    />
   );
 };
 

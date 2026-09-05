@@ -5,6 +5,7 @@ import {
   ReactNode,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -90,8 +91,8 @@ const WASHINGTON_DC = { lat: 38.9072, lng: -77.0369 };
 const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
   let { center, zoom, options } = default_props;
   const uri = client_location
-    ? `api/listings?lat=${client_location.lat}&lng=${client_location.lng}`
-    : "api/listings";
+    ? `/api/listings?all=true&lat=${client_location.lat}&lng=${client_location.lng}`
+    : "/api/listings?all=true";
 
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
@@ -121,11 +122,19 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
   } | null>(null);
   const markersRef = useRef<google.maps.Marker[]>([]);
 
-  const { data: fetchData } = SWR<IListing[]>(uri, fetcher, {
+  const { data: fetchData } = SWR<any>(uri, fetcher, {
     loadingTimeout: 1000,
     errorRetryCount: 2,
     revalidateOnFocus: false,
   });
+
+  const listingsData: IListing[] = useMemo(() => {
+    if (!fetchData) return [];
+    if (Array.isArray(fetchData)) return fetchData;
+    if (Array.isArray(fetchData.data)) return fetchData.data;
+    if (Array.isArray(fetchData.listings)) return fetchData.listings;
+    return [];
+  }, [fetchData]);
 
   const { toast } = createStandaloneToast();
 
@@ -211,11 +220,19 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
 
   const useRenderMarkers: (clusterer: Clusterer) => ReactNode[] = useCallback(
     (clusterer) => {
-      return fetchData!.map((markerData) => {
-        const { lat, lng } = markerData;
-        return lat && lng ? (
+      return listingsData
+        .filter((markerData) => {
+          const lat = Number(markerData.lat);
+          const lng = Number(markerData.lng);
+          return !isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0;
+        })
+        .map((markerData) => (
           <MyMarker
-            key={`${lat}, ${lng}-${markerData.name}`}
+            key={
+              markerData.id ||
+              markerData.place_id ||
+              `${markerData.lat},${markerData.lng}-${markerData.name}`
+            }
             markerData={markerData}
             clusterer={clusterer}
             activeData={activeData}
@@ -224,12 +241,9 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
             setWindowOpen={setWindowOpen}
             toggleDrawer={toggleDrawer}
           />
-        ) : (
-          <></>
-        );
-      });
+        ));
     },
-    [fetchData, activeData, setWindowClosed, toggleDrawer, setWindowOpen]
+    [listingsData, activeData, setWindowClosed, toggleDrawer, setWindowOpen]
   );
 
   // Handle cluster click
@@ -253,14 +267,20 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
         mapRef.setZoom(15);
 
         // Find and highlight closest marker
-        if (fetchData && fetchData.length > 0) {
+        if (listingsData.length > 0) {
           const closest = findClosestMarker(
             userPos,
-            (fetchData as any).map((o) => ({ lat: o.lat, lng: o.lng }))
+            listingsData.map((o) => ({
+              ...o,
+              lat: Number(o.lat),
+              lng: Number(o.lng),
+            }))
           );
-          setSelectedListing(closest);
-          setActiveData([closest as IListing & MarkerExtended]);
-          toggleDrawer();
+          if (closest) {
+            setSelectedListing(closest);
+            setActiveData([closest as IListing & MarkerExtended]);
+            toggleDrawer();
+          }
         }
       },
       (error) => {
@@ -275,9 +295,10 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
         onLoad={handleMapLoad}
         id="GMap"
         mapContainerStyle={{
+          width: "100%",
+          height: "100%",
           position: "absolute",
-          height: "calc(100% - 106px)",
-          top: "64px",
+          top: 0,
           left: 0,
           bottom: 0,
           right: 0,
@@ -298,7 +319,7 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
           />
         )} */}
         {/* {!fetchData && toast(searchToastData)} */}
-        {isLoaded && fetchData && fetchData.length > 0 ? (
+        {isLoaded && listingsData.length > 0 ? (
           <MarkerClusterer
             styles={CLUSTER_STYLE}
             averageCenter

@@ -1,6 +1,6 @@
 import AboutModal from "./AboutModal";
 import AddListingDrawer from "./AddListingDrawer";
-import AddListingForm from "./AddListingForm";
+import AddListingForm from "./forms/AddListingForm";
 import AppMap from "./AppMap";
 import CondensedCard from "./CondensedCard";
 import CustomHead from "./CustomHead";

@@ -1,6 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { findUserById } from "@/db/users";
 import { IListing, IUser } from "@/types";
+import { formatPhoneNum } from "@/utils/helpers";
 import {
   Avatar,
   Badge,
@@ -31,7 +32,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   FaBriefcase,
   FaBuilding,
@@ -49,6 +50,7 @@ import {
   FaUser,
   FaUserTie,
 } from "react-icons/fa";
+import AddListingDrawer from "./AddListingDrawer";
 import ListingCard from "./ListingCard";
 import { ClassYearMembers, EditProfileModal } from "./profile";
 
@@ -66,7 +68,12 @@ const UserDashboard = ({ userId }: UserDashboardProps) => {
   const [classYear, setClassYear] = useState<number | null>(null);
 
   const { isOpen, onToggle, onClose } = useDisclosure();
-
+  const {
+    isOpen: drawerIsOpen,
+    onOpen: onDrawerOpen,
+    onClose: onDrawerClose,
+  } = useDisclosure();
+  const firstField = useRef().current;
   const bgColor = useColorModeValue("white", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.700");
 
@@ -112,7 +119,7 @@ const UserDashboard = ({ userId }: UserDashboardProps) => {
 
   const handleAddListing = () => {
     // Open the add listing drawer or navigate to add listing page
-    router.push("/?addListing=true");
+    // router.push("/?addListing=true");
   };
 
   const handleEditProfile = () => {
@@ -148,7 +155,7 @@ const UserDashboard = ({ userId }: UserDashboardProps) => {
                   ? `${userData.profile.firstName} ${userData.profile.lastName}`
                   : user?.displayName ||
                     user?.email ||
-                    user?.phoneNumber ||
+                    formatPhoneNum(user?.phoneNumber) ||
                     undefined
               }
               mr={6}
@@ -171,7 +178,7 @@ const UserDashboard = ({ userId }: UserDashboardProps) => {
                 )}
               </Heading>
               <Text color="gray.600">
-                {user?.email || user?.phoneNumber || "User"}
+                {user?.email || formatPhoneNum(user?.phoneNumber) || "User"}
               </Text>
               <Button
                 leftIcon={<Icon as={FaUser} />}
@@ -276,7 +283,7 @@ const UserDashboard = ({ userId }: UserDashboardProps) => {
                           fontSize="sm"
                           color="blue.500"
                         >
-                          {userData.profile.contact.phone}
+                          {formatPhoneNum(userData.profile.contact.phone)}
                         </Link>
                       </Flex>
                     )}
@@ -479,13 +486,18 @@ const UserDashboard = ({ userId }: UserDashboardProps) => {
         >
           Add New Business
         </Button>
+        <AddListingDrawer
+          drawerIsOpen={drawerIsOpen}
+          firstField={firstField}
+          onDrawerClose={onDrawerClose}
+        />
 
         <Button
           leftIcon={<Icon as={FaMapMarkerAlt} />}
           colorScheme="teal"
           size="lg"
           height="100px"
-          onClick={() => router.push("/")}
+          onClick={() => router.push("/map")}
         >
           Explore Map
         </Button>

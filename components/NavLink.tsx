@@ -1,9 +1,11 @@
 import { Button, Link, useColorModeValue } from "@chakra-ui/react";
+import NextLink from "next/link";
 
 export const NavLink = ({ path, label }: { path: string; label: string }) => {
   const LinkHoverBgColor = useColorModeValue("gray.200", "gray.700");
   return (
     <Link
+      as={NextLink}
       px={2}
       py={1}
       rounded={"md"}

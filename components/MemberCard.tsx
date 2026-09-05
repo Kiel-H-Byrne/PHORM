@@ -12,6 +12,7 @@ import {
   Link,
   Text,
 } from "@chakra-ui/react";
+import NextLink from "next/link";
 
 function MemberCard({ user }: { user: IUser }) {
   const { firstName, lastName, profilePhoto, orgs, occupation, location, bio } =
@@ -54,7 +55,7 @@ function MemberCard({ user }: { user: IUser }) {
       </CardBody>
 
       <CardFooter>
-        <Link href={`/member/${user.id}`}>
+        <Link as={NextLink} href={`/member/${user.id}`}>
           <Button size={"sm"}>View Profile</Button>
         </Link>
       </CardFooter>
