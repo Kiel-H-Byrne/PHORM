@@ -45,7 +45,6 @@ export default function IndexPage() {
     "/api/listings",
     fetcher
   );
-  console.log(featured);
   const handleSearch = (e?: React.FormEvent) => {
     e?.preventDefault();
     const q = query.trim();
