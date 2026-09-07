@@ -33,7 +33,13 @@ const schema = z.object({
   listingId: z.string().optional(),
 });
 
-export default function AddCouponForm({ createdBy }: { createdBy: string }) {
+export default function AddCouponForm({
+  createdBy,
+  onSuccess,
+}: {
+  createdBy: string;
+  onSuccess?: () => void;
+}) {
   const toast = useToast();
   const router = useRouter();
 
@@ -72,6 +78,9 @@ export default function AddCouponForm({ createdBy }: { createdBy: string }) {
     }
     toast({ title: "Coupon created", status: "success" });
     reset();
+    if (onSuccess) {
+      onSuccess();
+    }
     router.push("/coupons");
   };
 

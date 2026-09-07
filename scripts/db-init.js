@@ -15,28 +15,46 @@ require("dotenv").config({ path: ".env.local" });
 const fs = require("fs");
 const path = require("path");
 const admin = require("firebase-admin");
+const { getFirestore } = require("firebase-admin/firestore");
 const { faker } = require("@faker-js/faker");
 
 function initAdmin() {
-  if (process.env.NEXT_PUBLIC_GOOGLE_APPLICATION_CREDENTIALS) {
-    admin.initializeApp();
-    return admin.firestore();
-  }
-  const projectId = process.env.NEXT_PUBLIC_FSDB_PROJECT_ID;
-  const clientEmail = process.env.NEXT_PUBLIC_FIREBASE_CLIENT_EMAIL;
-  let privateKey = process.env.NEXT_PUBLIC_FSDB_PRIVATE_KEY;
-  if (!projectId || !clientEmail || !privateKey) {
+  if (process.env.NODE_ENV === "production") {
     throw new Error(
-      "Missing Firebase Admin credentials. Set FIREBASE_* env vars."
+      "Seeding fake listings is not allowed in production! Only development mode using the '(default)' database can be seeded."
     );
   }
-  // Normalize private key with escaped newlines
-  privateKey = privateKey.replace(/\\n/g, "\n");
 
-  admin.initializeApp({
-    credential: admin.credential.cert({ projectId, clientEmail, privateKey }),
-  });
-  return admin.firestore();
+  let app;
+  if (process.env.NEXT_PUBLIC_GOOGLE_APPLICATION_CREDENTIALS) {
+    app = admin.apps.length > 0 ? admin.app() : admin.initializeApp();
+  } else {
+    const projectId = process.env.NEXT_PUBLIC_FSDB_PROJECT_ID;
+    const clientEmail = process.env.NEXT_PUBLIC_FIREBASE_CLIENT_EMAIL;
+    let privateKey = process.env.NEXT_PUBLIC_FSDB_PRIVATE_KEY;
+    if (!projectId || !clientEmail || !privateKey) {
+      throw new Error(
+        "Missing Firebase Admin credentials. Set FIREBASE_* env vars."
+      );
+    }
+    // Normalize private key with escaped newlines
+    privateKey = privateKey.replace(/\\n/g, "\n");
+
+    app =
+      admin.apps.length > 0
+        ? admin.app()
+        : admin.initializeApp({
+            credential: admin.credential.cert({
+              projectId,
+              clientEmail,
+              privateKey,
+            }),
+          });
+  }
+
+  // Explicitly target the '(default)' development database to ensure
+  // fake listings are never added to production ('phorm-db-prod').
+  return getFirestore(app, "(default)");
 }
 
 // Attempt to read BUSINESS_CATEGORIES from util/constants.ts to avoid duplication

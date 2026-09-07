@@ -7,7 +7,7 @@ import MemberCard from "./MemberCard";
 
 export default function MemberList({ members }: { members: IUser[] }) {
   const router = useRouter();
-  return !members ? (
+  return !members || members.length === 0 ? (
     <Card align="center" p={3}>
       <Heading pb={3}>No Members Yet...</Heading>
       <Button

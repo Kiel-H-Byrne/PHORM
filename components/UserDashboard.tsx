@@ -1,12 +1,15 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { findUserById } from "@/db/users";
-import { IListing, IUser } from "@/types";
+import { ICoupon, IListing, IUser } from "@/types";
 import { formatPhoneNum } from "@/utils/helpers";
 import {
   Avatar,
   Badge,
   Box,
   Button,
+  Card,
+  CardBody,
+  CardHeader,
   Divider,
   Flex,
   Grid,
@@ -46,12 +49,15 @@ import {
   FaMapMarkerAlt,
   FaPhone,
   FaPlus,
+  FaTag,
   FaTools,
   FaUser,
   FaUserTie,
 } from "react-icons/fa";
+import { MdLocalOffer } from "react-icons/md";
 import AddListingDrawer from "./AddListingDrawer";
 import ListingCard from "./ListingCard";
+import AddCouponModal from "./forms/AddCouponModal";
 import { ClassYearMembers, EditProfileModal } from "./profile";
 
 interface UserDashboardProps {
@@ -63,6 +69,7 @@ const UserDashboard = ({ userId }: UserDashboardProps) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [userListings, setUserListings] = useState<IListing[]>([]);
+  const [userCoupons, setUserCoupons] = useState<ICoupon[]>([]);
   const [favoriteListings, setFavoriteListings] = useState<IListing[]>([]);
   const [userData, setUserData] = useState<IUser | null>(null);
   const [classYear, setClassYear] = useState<number | null>(null);
@@ -73,11 +80,31 @@ const UserDashboard = ({ userId }: UserDashboardProps) => {
     onOpen: onDrawerOpen,
     onClose: onDrawerClose,
   } = useDisclosure();
+  const {
+    isOpen: couponModalIsOpen,
+    onOpen: onCouponModalOpen,
+    onClose: onCouponModalClose,
+  } = useDisclosure();
+
   const firstField = useRef().current;
   const bgColor = useColorModeValue("white", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.700");
 
-  // Fetch user's data, listings and favorites
+  const refetchCoupons = async () => {
+    if (!user?.uid) return;
+    try {
+      const res = await fetch(`/api/coupons?createdBy=${user.uid}`);
+      if (res.ok) {
+        const data = await res.json();
+        const items = Array.isArray(data) ? data : data.data || [];
+        setUserCoupons(items);
+      }
+    } catch (e) {
+      console.error("Error fetching user coupons:", e);
+    }
+  };
+
+  // Fetch user's data, listings, coupons, and favorites
   useEffect(() => {
     const fetchUserData = async () => {
       if (!user?.uid) return;
@@ -99,7 +126,22 @@ const UserDashboard = ({ userId }: UserDashboardProps) => {
         );
         if (listingsResponse.ok) {
           const listingsData = await listingsResponse.json();
-          setUserListings(listingsData.listings || []);
+          const items = Array.isArray(listingsData)
+            ? listingsData
+            : listingsData.listings || listingsData.data || [];
+          setUserListings(items);
+        }
+
+        // Fetch user's coupons
+        const couponsResponse = await fetch(
+          `/api/coupons?createdBy=${user.uid}`
+        );
+        if (couponsResponse.ok) {
+          const couponsData = await couponsResponse.json();
+          const couponItems = Array.isArray(couponsData)
+            ? couponsData
+            : couponsData.data || [];
+          setUserCoupons(couponItems);
         }
 
         // Fetch user's favorites
@@ -118,8 +160,7 @@ const UserDashboard = ({ userId }: UserDashboardProps) => {
   }, [userId, user]);
 
   const handleAddListing = () => {
-    // Open the add listing drawer or navigate to add listing page
-    // router.push("/?addListing=true");
+    onDrawerOpen();
   };
 
   const handleEditProfile = () => {
@@ -201,7 +242,7 @@ const UserDashboard = ({ userId }: UserDashboardProps) => {
             bg={useColorModeValue("blue.50", "blue.900")}
             p={4}
             borderRadius="md"
-            minW={{ md: "300px" }}
+            minW={{ md: "360px" }}
             textAlign="center"
           >
             <Stat px={2}>
@@ -211,6 +252,16 @@ const UserDashboard = ({ userId }: UserDashboardProps) => {
                   <Skeleton height="1.5rem" width="3rem" mx="auto" />
                 ) : (
                   userListings.length
+                )}
+              </StatNumber>
+            </Stat>
+            <Stat px={2}>
+              <StatLabel>Coupons</StatLabel>
+              <StatNumber>
+                {isLoading ? (
+                  <Skeleton height="1.5rem" width="3rem" mx="auto" />
+                ) : (
+                  userCoupons.length
                 )}
               </StatNumber>
             </Stat>
@@ -476,7 +527,7 @@ const UserDashboard = ({ userId }: UserDashboardProps) => {
       </Box>
 
       {/* Quick Actions */}
-      <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6} mb={8}>
+      <SimpleGrid columns={{ base: 1, sm: 2, md: 4 }} spacing={6} mb={8}>
         <Button
           leftIcon={<Icon as={FaPlus} />}
           colorScheme="blue"
@@ -486,11 +537,16 @@ const UserDashboard = ({ userId }: UserDashboardProps) => {
         >
           Add New Business
         </Button>
-        <AddListingDrawer
-          drawerIsOpen={drawerIsOpen}
-          firstField={firstField}
-          onDrawerClose={onDrawerClose}
-        />
+
+        <Button
+          leftIcon={<Icon as={FaTag} />}
+          colorScheme="cyan"
+          size="lg"
+          height="100px"
+          onClick={onCouponModalOpen}
+        >
+          Create Coupon
+        </Button>
 
         <Button
           leftIcon={<Icon as={FaMapMarkerAlt} />}
@@ -513,7 +569,22 @@ const UserDashboard = ({ userId }: UserDashboardProps) => {
         </Button>
       </SimpleGrid>
 
-      {/* Listings Tabs */}
+      <AddListingDrawer
+        drawerIsOpen={drawerIsOpen}
+        firstField={firstField}
+        onDrawerClose={onDrawerClose}
+      />
+
+      {user && (
+        <AddCouponModal
+          isOpen={couponModalIsOpen}
+          onClose={onCouponModalClose}
+          createdBy={user.uid}
+          onSuccess={refetchCoupons}
+        />
+      )}
+
+      {/* Listings & Coupons Tabs */}
       <Box
         bg={bgColor}
         p={6}
@@ -525,6 +596,7 @@ const UserDashboard = ({ userId }: UserDashboardProps) => {
         <Tabs colorScheme="blue" isLazy>
           <TabList>
             <Tab fontWeight="semibold">My Listings</Tab>
+            <Tab fontWeight="semibold">My Coupons ({userCoupons.length})</Tab>
             <Tab fontWeight="semibold">Favorites</Tab>
           </TabList>
 
@@ -572,6 +644,92 @@ const UserDashboard = ({ userId }: UserDashboardProps) => {
                     onClick={handleAddListing}
                   >
                     Add Your First Listing
+                  </Button>
+                </Box>
+              )}
+            </TabPanel>
+
+            {/* My Coupons Tab */}
+            <TabPanel>
+              {isLoading ? (
+                <Grid
+                  templateColumns={{
+                    base: "1fr",
+                    md: "repeat(2, 1fr)",
+                    lg: "repeat(3, 1fr)",
+                  }}
+                  gap={6}
+                >
+                  {[1, 2, 3].map((i) => (
+                    <Skeleton key={i} height="200px" borderRadius="lg" />
+                  ))}
+                </Grid>
+              ) : userCoupons.length > 0 ? (
+                <Grid
+                  templateColumns={{
+                    base: "1fr",
+                    md: "repeat(2, 1fr)",
+                    lg: "repeat(3, 1fr)",
+                  }}
+                  gap={6}
+                >
+                  {userCoupons.map((coupon) => (
+                    <Card
+                      key={coupon.id || coupon.title}
+                      borderRadius="lg"
+                      boxShadow="sm"
+                      borderWidth="1px"
+                      borderColor={borderColor}
+                    >
+                      <CardHeader pb={2}>
+                        <Flex justify="space-between" align="flex-start">
+                          <Heading size="sm">{coupon.title}</Heading>
+                          {coupon.code && (
+                            <Tag colorScheme="purple" size="sm">
+                              {coupon.code}
+                            </Tag>
+                          )}
+                        </Flex>
+                      </CardHeader>
+                      <CardBody pt={0}>
+                        {coupon.description && (
+                          <Text fontSize="sm" color="gray.600" mb={2}>
+                            {coupon.description}
+                          </Text>
+                        )}
+                        <Text fontSize="xs" color="gray.500">
+                          {coupon.discountType}
+                          {coupon.value ? ` • ${coupon.value}` : ""}
+                          {coupon.memberOnly ? " • Members only" : ""}
+                        </Text>
+                        {Array.isArray(coupon.tags) && coupon.tags.length > 0 && (
+                          <Flex wrap="wrap" gap={1} mt={2}>
+                            {coupon.tags.map((t) => (
+                              <Tag key={t} size="sm">
+                                {t}
+                              </Tag>
+                            ))}
+                          </Flex>
+                        )}
+                      </CardBody>
+                    </Card>
+                  ))}
+                </Grid>
+              ) : (
+                <Box textAlign="center" py={10}>
+                  <Icon as={MdLocalOffer} boxSize={12} color="gray.300" mb={4} />
+                  <Heading size="md" mb={2}>
+                    No Coupons or Deals Yet
+                  </Heading>
+                  <Text color="gray.500" mb={6}>
+                    You haven't created any member deals or coupons yet. Add a special offer to attract customers from the PHORM network!
+                  </Text>
+                  <Button
+                    colorScheme="blue"
+                    leftIcon={<Icon as={FaPlus} />}
+                    onClick={onCouponModalOpen}
+                  >
+                    Create Your First Coupon
                   </Button>
                 </Box>
               )}
