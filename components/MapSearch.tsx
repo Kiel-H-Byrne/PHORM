@@ -33,12 +33,13 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FaFilter, FaMapMarkerAlt, FaSearch, FaTimes } from "react-icons/fa";
+import { FaFilter, FaMapMarkerAlt, FaPlus, FaSearch, FaTimes } from "react-icons/fa";
 
 interface MapSearchProps {
   onSelectListing: (listing: IListing) => void;
   mapInstance?: google.maps.Map | null;
   onFilterChange?: (filters: SearchFilters) => void;
+  onAddListing?: (name?: string) => void;
   layout?: "overlay" | "inline";
   placeholder?: string;
 }
@@ -53,6 +54,7 @@ const MapSearch = ({
   onSelectListing,
   mapInstance,
   onFilterChange,
+  onAddListing,
   layout = "overlay",
   placeholder = "Search for businesses...",
 }: MapSearchProps) => {
@@ -655,9 +657,26 @@ const MapSearch = ({
                 <Text fontSize="sm" color="gray.600">
                   No results found for &ldquo;{searchTerm}&rdquo;.
                 </Text>
-                <Text fontSize="xs" color="gray.400" mt={1}>
+                <Text fontSize="xs" color="gray.400" mt={1} mb={3}>
                   Try a different search term or adjust your filters.
                 </Text>
+                <Button
+                  size="sm"
+                  colorScheme="blue"
+                  leftIcon={<Icon as={FaPlus} />}
+                  onClick={() => {
+                    setIsOpen(false);
+                    if (onAddListing) {
+                      onAddListing(searchTerm);
+                    } else if (typeof window !== "undefined") {
+                      window.location.href = `/list?searchQuery=${encodeURIComponent(
+                        searchTerm
+                      )}`;
+                    }
+                  }}
+                >
+                  Add This Business
+                </Button>
               </Box>
             )}
         </Box>

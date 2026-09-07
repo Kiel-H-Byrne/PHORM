@@ -28,10 +28,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           includeCount,
           all,
           listingId,
+          createdBy,
+          creator,
           activeOnly = "true",
         } = req.query as Record<string, string | undefined>;
 
-        let base = query(couponsRef, orderBy("createdAt", "desc"));
+        const creatorId = createdBy || creator;
+        let base = creatorId
+          ? query(couponsRef, where("createdBy", "==", creatorId))
+          : query(couponsRef, orderBy("createdAt", "desc"));
         if (activeOnly === "true") base = query(base, where("active", "==", true));
         if (listingId) base = query(base, where("listingId", "==", listingId));
 
@@ -77,6 +82,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         const snapshot = await getDocs(q);
         let coupons = snapshot.docs.map((d) => ({ id: d.id, ...(d.data() as any) })) as ICoupon[];
+        if (creatorId) {
+          coupons.sort((a, b) => ((b.createdAt || "") > (a.createdAt || "") ? 1 : -1));
+        }
 
         if (searchQuery) {
           const term = searchQuery.toLowerCase();

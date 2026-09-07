@@ -1,4 +1,6 @@
+import AddListingDrawer from "@/components/AddListingDrawer";
 import BusinessCard from "@/components/ListingCard2";
+import { useAuth } from "@/contexts/AuthContext";
 import { IListing } from "@/types";
 import fetcher from "@/util/fetch";
 import {
@@ -14,10 +16,13 @@ import {
   Stack,
   Text,
   VStack,
+  useColorModeValue,
+  useDisclosure,
 } from "@chakra-ui/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { FaBuilding, FaPlus } from "react-icons/fa";
 import { MdList, MdMap } from "react-icons/md";
 import SWR from "swr";
 
@@ -27,7 +32,14 @@ import SWR from "swr";
  */
 export default function IndexPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [query, setQuery] = useState("");
+  const {
+    isOpen: drawerIsOpen,
+    onOpen: onDrawerOpen,
+    onClose: onDrawerClose,
+  } = useDisclosure();
+  const firstField = useRef().current;
 
   const { data: featured } = SWR<IListing[]>("/api/listings", fetcher);
 
@@ -35,6 +47,14 @@ export default function IndexPage() {
     e?.preventDefault();
     const q = query.trim();
     router.push(q ? `/list?searchQuery=${encodeURIComponent(q)}` : "/list");
+  };
+
+  const handleAddBusiness = () => {
+    if (user) {
+      onDrawerOpen();
+    } else {
+      router.push("/auth/login");
+    }
   };
 
   return (
@@ -167,21 +187,54 @@ export default function IndexPage() {
         <Heading as="h2" size="lg">
           Featured Businesses
         </Heading>
-        <Grid
-          templateColumns={{
-            base: "1fr",
-            sm: "repeat(2, 1fr)",
-            md: "repeat(3, 1fr)",
-          }}
-          gap={6}
-        >
-          {featured?.slice(0, 6).map((listing) => (
-            <GridItem key={listing.id ?? listing.name}>
-              <BusinessCard activeListing={listing} />
-            </GridItem>
-          ))}
-        </Grid>
+        {featured && featured.length === 0 ? (
+          <Box
+            textAlign="center"
+            py={10}
+            px={6}
+            bg={useColorModeValue("gray.50", "gray.850")}
+            borderRadius="lg"
+            borderWidth="1px"
+            borderColor={useColorModeValue("gray.200", "gray.700")}
+          >
+            <Icon as={FaBuilding} boxSize={12} color="blue.400" mb={4} />
+            <Heading size="md" mb={2}>
+              No Businesses Listed Yet
+            </Heading>
+            <Text color="gray.600" maxW="450px" mx="auto" mb={6}>
+              Be the first to list your business on PHORM and reach the community!
+            </Text>
+            <Button
+              colorScheme="blue"
+              leftIcon={<Icon as={FaPlus} />}
+              onClick={handleAddBusiness}
+            >
+              Add Your Business
+            </Button>
+          </Box>
+        ) : (
+          <Grid
+            templateColumns={{
+              base: "1fr",
+              sm: "repeat(2, 1fr)",
+              md: "repeat(3, 1fr)",
+            }}
+            gap={6}
+          >
+            {featured?.slice(0, 6).map((listing) => (
+              <GridItem key={listing.id ?? listing.name}>
+                <BusinessCard activeListing={listing} />
+              </GridItem>
+            ))}
+          </Grid>
+        )}
       </VStack>
+
+      <AddListingDrawer
+        drawerIsOpen={drawerIsOpen}
+        firstField={firstField}
+        onDrawerClose={onDrawerClose}
+      />
     </Container>
   );
 }

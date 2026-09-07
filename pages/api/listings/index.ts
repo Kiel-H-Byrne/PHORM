@@ -31,6 +31,7 @@ export default async function handler(
           page = "1",
           pageSize = "10",
           category,
+          creator,
           includeCount,
           all,
         } = req.query as {
@@ -38,12 +39,15 @@ export default async function handler(
           page?: string;
           pageSize?: string;
           category?: string;
+          creator?: string;
           includeCount?: string;
           all?: string;
         };
 
-        // Base query (with optional category filter)
-        let base = query(listingsRef, orderBy("createdAt", "desc"));
+        // Base query (with optional category or creator filter)
+        let base = creator
+          ? query(listingsRef, where("creator.id", "==", creator))
+          : query(listingsRef, orderBy("createdAt", "desc"));
         if (category) {
           base = query(base, where("categories", "array-contains", category));
         }
@@ -99,6 +103,15 @@ export default async function handler(
               (l.address || "").toLowerCase().includes(term) ||
               (Array.isArray(l.categories) &&
                 l.categories.join(" ").toLowerCase().includes(term))
+          );
+        }
+
+        if (creator) {
+          listings = listings.filter(
+            (l) =>
+              (l as any).creator?.id === creator ||
+              (l as any).creator === creator ||
+              (l as any).createdBy === creator
           );
         }
 

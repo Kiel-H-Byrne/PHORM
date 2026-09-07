@@ -19,7 +19,9 @@ import MyNav from "./MyNav";
 import ProtectedRoute from "./ProtectedRoute";
 import SingleInfoContent from "./SingleInfoContent";
 import UserDashboard from "./UserDashboard";
+import AddCouponModal from "./forms/AddCouponModal";
 export {
+  AddCouponModal,
   AboutModal,
   AddListingDrawer,
   AddListingForm,
