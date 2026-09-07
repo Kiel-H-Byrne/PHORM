@@ -42,8 +42,8 @@ export const getUiConfig = () => {
         whitelistedCountries: ["US", "CA"], // Only allow US and Canada phone numbers
       },
       // Keep existing providers
-      firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-      firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+      // firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+      // firebase.auth.FacebookAuthProvider.PROVIDER_ID,
       firebase.auth.EmailAuthProvider.PROVIDER_ID,
     ],
     // Other UI options

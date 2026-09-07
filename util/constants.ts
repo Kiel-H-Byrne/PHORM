@@ -580,9 +580,58 @@ export const LIBRARIES: Libraries = [
   "localContext",
 ];
 
+// Global search suggestions
+export const BUSINESS_CATEGORIES = [
+  "Restaurant",
+  "Retail",
+  "Professional Services",
+  "Consulting",
+  "Legal",
+  "Financial",
+  "Healthcare",
+  "Education",
+  "Technology",
+  "Construction",
+  "Real Estate",
+  "Transportation",
+  "Entertainment",
+  "Hospitality",
+  "Manufacturing",
+  "Non-Profit",
+  "Other",
+] as const;
+
+export const SERVICE_TAGS = [
+  "Delivery",
+  "Catering",
+  "Takeout",
+  "Vegan",
+  "Gluten-free",
+  "Wheelchair accessible",
+  "Black-owned",
+  "Women-owned",
+  "24/7",
+  "Emergency",
+  "Same-day",
+  "Online",
+] as const;
+
+export const POPULAR_SEARCHES = [
+  "Soul Food",
+  "Barber",
+  "Hair Salon",
+  "Plumber",
+  "Electrician",
+  "Lawyer",
+  "Doctor",
+  "Dentist",
+  "Real Estate Agent",
+  "Accountant",
+] as const;
+
 export const CLUSTER_STYLE = [
   {
-    url: "img/m1.png",
+    url: "/img/m1.png",
     height: 53,
     width: 53,
     anchor: [26, 26],
@@ -590,7 +639,7 @@ export const CLUSTER_STYLE = [
     textSize: 11,
   },
   {
-    url: "img/m2.png",
+    url: "/img/m2.png",
     height: 56,
     width: 56,
     anchor: [28, 28],
@@ -598,7 +647,7 @@ export const CLUSTER_STYLE = [
     textSize: 11,
   },
   {
-    url: "img/m3.png",
+    url: "/img/m3.png",
     height: 66,
     width: 66,
     anchor: [33, 33],
@@ -606,7 +655,7 @@ export const CLUSTER_STYLE = [
     textSize: 11,
   },
   {
-    url: "img/m4.png",
+    url: "/img/m4.png",
     height: 78,
     width: 78,
     anchor: [39, 39],
@@ -614,7 +663,7 @@ export const CLUSTER_STYLE = [
     textSize: 11,
   },
   {
-    url: "img/m5.png",
+    url: "/img/m5.png",
     height: 90,
     width: 90,
     anchor: [45, 45],

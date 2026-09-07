@@ -1,10 +1,9 @@
 import { appFsdb } from "@/db/firebase";
 import { IListing } from "@/types";
-import { getUserFromCookie } from "@/util/authCookies";
-import { faker } from "@faker-js/faker";
 import {
   addDoc,
   collection,
+  getCountFromServer,
   getDocs,
   limit,
   orderBy,
@@ -14,127 +13,147 @@ import {
 } from "firebase/firestore";
 import { NextApiRequest, NextApiResponse } from "next";
 
-const categories = [
-  "Electronics",
-  "Furniture",
-  "Books",
-  "Clothing",
-  "Sports",
-  "Home & Garden",
-  "Automotive",
-  "Toys",
-  "Music",
-  "Art",
-];
-
-const generateMockListings = (count: number = 100) => {
-  const listings: IListing[] = [];
-
-  for (let i = 0; i < count; i++) {
-    const listing: IListing = {
-      // uid: faker.string.uuid(),
-      name: faker.company.name(),
-      description: faker.company.catchPhrase(),
-      // category: f.helpers.arrayElement(categories),
-      lat: faker.location.latitude({ min: 37.75, max: 39.5 }), // MD/DC bounds
-      lng: faker.location.longitude({ min: -79.6, max: -74.0 }), // MD/DC bounds
-      imageUri: faker.image.url(),
-      submitted: faker.date.past(),
-      // status: "active",
-      // views: faker.number.int({ min: 0, max: 1000 }),
-      creator: faker.string.uuid(),
-    };
-    listings.push(listing);
-  }
-
-  return listings;
-};
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const user = getUserFromCookie();
+  if (!appFsdb) {
+    return res.status(500).json({ error: "Firestore is not configured" });
+  }
 
-  const listingsRef = collection(appFsdb!, "listings");
+  const listingsRef = collection(appFsdb, "listings");
 
   switch (req.method) {
     case "GET":
-      if (!user) {
-        return res.status(200).json(generateMockListings(50));
-      }
-
       try {
         const {
           searchQuery,
           page = "1",
           pageSize = "10",
           category,
-        } = req.query;
+          creator,
+          includeCount,
+          all,
+        } = req.query as {
+          searchQuery?: string;
+          page?: string;
+          pageSize?: string;
+          category?: string;
+          creator?: string;
+          includeCount?: string;
+          all?: string;
+        };
 
-        let q = query(listingsRef, orderBy("createdAt", "desc"));
-
+        // Base query (with optional category or creator filter)
+        let base = creator
+          ? query(listingsRef, where("creator.id", "==", creator))
+          : query(listingsRef, orderBy("createdAt", "desc"));
         if (category) {
-          q = query(q, where("category", "==", category));
+          base = query(base, where("categories", "array-contains", category));
         }
 
-        if (searchQuery) {
-          q = query(
-            q,
-            where("title", ">=", searchQuery),
-            where("title", "<=", searchQuery + "\uf8ff")
-          );
+        // If requesting all, stream through pages server-side (safe for dev datasets)
+        if (all === "true") {
+          const items: IListing[] = [];
+          let last: any = undefined;
+          const size = parseInt(pageSize || "50", 10);
+          const MAX = 1000; // safety cap
+          while (items.length < MAX) {
+            let pageQ = query(base, limit(size));
+            if (last) pageQ = query(pageQ, startAfter(last));
+            const snap = await getDocs(pageQ);
+            if (snap.empty) break;
+            snap.docs.forEach((d) =>
+              items.push({ id: d.id, ...(d.data() as any) } as IListing)
+            );
+            last = snap.docs[snap.docs.length - 1];
+            if (snap.size < size) break;
+          }
+          return res.status(200).json(items);
         }
 
-        // Add pagination
-        q = query(q, limit(parseInt(pageSize as string)));
-        if (parseInt(page as string) > 1) {
-          const lastVisible = await getDocs(
+        // Paged request
+        let q = query(base, limit(parseInt(pageSize || "10", 10)));
+        if (parseInt(page || "1", 10) > 1) {
+          const backfill = await getDocs(
             query(
-              q,
+              base,
               limit(
-                (parseInt(page as string) - 1) * parseInt(pageSize as string)
+                (parseInt(page || "1", 10) - 1) * parseInt(pageSize || "10", 10)
               )
             )
           );
-          q = query(
-            q,
-            startAfter(lastVisible.docs[lastVisible.docs.length - 1])
+          if (!backfill.empty) {
+            q = query(q, startAfter(backfill.docs[backfill.docs.length - 1]));
+          }
+        }
+
+        const snapshot = await getDocs(q);
+        let listings = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...(doc.data() as any),
+        })) as IListing[];
+
+        // In-memory fuzzy search by name/address if searchQuery present
+        if (searchQuery) {
+          const term = searchQuery.toString().toLowerCase();
+          listings = listings.filter(
+            (l) =>
+              (l.name || "").toLowerCase().includes(term) ||
+              (l.address || "").toLowerCase().includes(term) ||
+              (Array.isArray(l.categories) &&
+                l.categories.join(" ").toLowerCase().includes(term))
           );
         }
 
-        const querySnapshot = await getDocs(q);
-        const listings = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        if (creator) {
+          listings = listings.filter(
+            (l) =>
+              (l as any).creator?.id === creator ||
+              (l as any).creator === creator ||
+              (l as any).createdBy === creator
+          );
+        }
 
-        res.status(200).json(listings);
+        if (includeCount === "true") {
+          const countSnap = await getCountFromServer(base);
+          const total = countSnap.data().count || 0;
+          const size = parseInt(pageSize || "10", 10);
+          const pg = parseInt(page || "1", 10);
+          const totalPages = Math.max(1, Math.ceil(total / size));
+          return res
+            .status(200)
+            .json({
+              data: listings,
+              page: pg,
+              pageSize: size,
+              total,
+              totalPages,
+            });
+        }
+
+        return res.status(200).json(listings);
       } catch (error) {
         console.error("List Listings Error:", error);
-        res.status(500).json({ error: "Failed to fetch listings" });
+        return res.status(500).json({ error: "Failed to fetch listings" });
       }
-      break;
 
     case "POST":
       try {
         const listingData = {
           ...req.body,
-          userId: user.uid,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
-
         const docRef = await addDoc(listingsRef, listingData);
-        res.status(201).json({ id: docRef.id, ...listingData });
+        return res.status(201).json({ id: docRef.id, ...listingData });
       } catch (error) {
         console.error("Create Listing Error:", error);
-        res.status(500).json({ error: "Failed to create listing" });
+        return res.status(500).json({ error: "Failed to create listing" });
       }
-      break;
 
     default:
       res.setHeader("Allow", ["GET", "POST"]);
-      res.status(405).end(`Method ${req.method} Not Allowed`);
+      return res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }

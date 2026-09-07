@@ -1,6 +1,6 @@
 import { FirebaseApp, getApps, initializeApp } from "firebase/app";
 import { Auth, getAuth } from "firebase/auth";
-import { Firestore, initializeFirestore } from "firebase/firestore";
+import { Firestore, getFirestore } from "firebase/firestore";
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FSDB_KEY,
   authDomain: process.env.NEXT_PUBLIC_FSDB_AUTH_URI,
@@ -10,6 +10,14 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FSDB_APP_ID,
   measurementId: process.env.NEXT_PUBLIC_FSDB_MEASUREMENT_ID,
 };
+
+// Database selection:
+// In production: "phorm-db-prod" (ensuring production only has real/user-added listings)
+// In development: "(default)" (where mock/seed listings reside)
+// Overridable via NEXT_PUBLIC_FSDB_DATABASE_ID
+const FIRESTORE_DATABASE_ID =
+  process.env.NEXT_PUBLIC_FSDB_DATABASE_ID ||
+  (process.env.NODE_ENV === "production" ? "phorm-db-prod" : "(default)");
 
 let appAuth: Auth | undefined,
   appFsdb: Firestore | undefined,
@@ -25,6 +33,6 @@ if (!firebaseConfig.apiKey) {
   // const appFsdb = getApps().length === 0 ? admin.initializeApp({credential: admin.credential.cert(firebaseCredentials)}) : getApps()[0]
   // const appAnalytics = getAnalytics(phormApp); //need 'window'
   appAuth = getAuth(phormApp);
-  appFsdb = initializeFirestore(phormApp, {});
+  appFsdb = getFirestore(phormApp, FIRESTORE_DATABASE_ID);
 }
-export { appAuth, appFsdb, phormApp };
+export { appAuth, appFsdb, phormApp, FIRESTORE_DATABASE_ID };

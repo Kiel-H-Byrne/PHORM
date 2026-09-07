@@ -7,7 +7,6 @@ import {
   CircularProgressLabel,
   HStack,
   Icon,
-  Link,
   Popover,
   PopoverArrow,
   PopoverBody,
@@ -16,13 +15,9 @@ import {
   PopoverHeader,
   PopoverTrigger,
 } from "@chakra-ui/react";
+import NextLink from "next/link";
 import { useRouter } from "next/router";
 import { memo } from "react";
-import {
-  FaFacebookSquare,
-  FaLinkedinIn,
-  FaTwitterSquare,
-} from "react-icons/fa";
 import { TbProgress } from "react-icons/tb";
 
 const MyAvatar = () => {
@@ -61,24 +56,13 @@ const MyAvatar = () => {
         <PopoverArrow />
         <PopoverCloseButton />
         <PopoverBody>
-          <HStack spacing={1} justifyContent={"space-evenly"}>
-            <Link href="#">
-              <Icon boxSize={30} as={FaFacebookSquare} />
-            </Link>
-            <Link href="#">
-              <Icon boxSize={30} as={FaLinkedinIn} />
-            </Link>
-            <Link href="#">
-              <Icon boxSize={30} as={FaTwitterSquare} />
-            </Link>
-          </HStack>
           <HStack justify="space-evenly">
             {isLoggedIn ? (
               <>
                 <Button onClick={handleSignOut}>Sign Out</Button>
-                <Link href="/dashboard">
-                  <Button>Dashboard</Button>
-                </Link>
+                <Button as={NextLink} href="/dashboard">
+                  Dashboard
+                </Button>
               </>
             ) : (
               <Button onClick={() => push("/auth/login")}>Sign In</Button>
