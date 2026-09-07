@@ -9,8 +9,8 @@ import {
   Container,
   Grid,
   GridItem,
-  Heading,
   HStack,
+  Heading,
   Icon,
   Image,
   Stack,
@@ -41,8 +41,11 @@ export default function IndexPage() {
   } = useDisclosure();
   const firstField = useRef().current;
 
-  const { data: featured } = SWR<IListing[]>("/api/listings", fetcher);
-
+  const { data: featured, isLoading } = SWR<IListing[]>(
+    "/api/listings",
+    fetcher
+  );
+  console.log(featured);
   const handleSearch = (e?: React.FormEvent) => {
     e?.preventDefault();
     const q = query.trim();
@@ -187,7 +190,7 @@ export default function IndexPage() {
         <Heading as="h2" size="lg">
           Featured Businesses
         </Heading>
-        {featured && featured.length === 0 ? (
+        {featured?.length === 0 ? (
           <Box
             textAlign="center"
             py={10}
@@ -202,7 +205,8 @@ export default function IndexPage() {
               No Businesses Listed Yet
             </Heading>
             <Text color="gray.600" maxW="450px" mx="auto" mb={6}>
-              Be the first to list your business on PHORM and reach the community!
+              Be the first to list your business on PHORM and reach the
+              community!
             </Text>
             <Button
               colorScheme="blue"
