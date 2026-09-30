@@ -1,14 +1,20 @@
 "use client";
 
 import { useAuth } from "@/contexts/AuthContext";
-import { ListingsSchema } from "@/db/schemas";
+import { ListingInputSchema } from "@/db/schemas";
+import { IListing, StatesEnum } from "@/types";
+import { trackEvent } from "@/util/analytics";
+import authFetch from "@/util/authFetch";
+import { BUSINESS_CATEGORIES } from "@/util/constants";
+import { geocodeAddress, useGoogleMaps } from "@/util/mapsLoader";
 import {
+  Alert,
+  AlertIcon,
   Box,
   Button,
-  Checkbox,
-  CheckboxGroup,
   FormControl,
   FormErrorMessage,
+  FormHelperText,
   FormLabel,
   Grid,
   HStack,
@@ -20,236 +26,172 @@ import {
   Text,
   Textarea,
   VStack,
-  useToast,
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { geohashForLocation } from "geofire-common";
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Controller, Form, useForm } from "react-hook-form";
-import { IListing, StatesEnum } from "../../types";
+import NextLink from "next/link";
+import { memo, useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useSWRConfig } from "swr";
+import * as z from "zod";
 
 interface AddListingFormProps {
   onDrawerClose: () => void;
 }
 
-// Additional user-friendly fields for the wizard only
-type WizardOnly = {
-  businessType?: "Service" | "Retail" | "Trade";
-  contactName?: string;
-  services?: string[];
+const ListingFormSchema = ListingInputSchema.omit({
+  lat: true,
+  lng: true,
+  place_id: true,
+  imageUri: true,
+  categories: true,
+})
+  .extend({
+    category: z.string().min(1, "Choose a category"),
+    keywords: z.string().max(200).optional(),
+  })
+  .refine((d) => !!(d.phone || d.email || d.url), {
+    message: "Add at least one way to contact the business",
+    path: ["phone"],
+  });
+
+type ListingFormValues = z.input<typeof ListingFormSchema>;
+type ListingFormOutput = z.output<typeof ListingFormSchema>;
+
+const STEP_FIELDS: Record<1 | 2, (keyof ListingFormValues)[]> = {
+  1: ["name", "category", "description"],
+  2: ["street", "city", "state", "zip", "phone", "email", "url"],
 };
 
 /**
  * AddListingForm
- * A 3-step, user-friendly wizard to add a business listing.
- * Steps:
- * 1) Business Information
- * 2) Contact & Location
- * 3) Services & Details
+ * 1) What is the business  2) Where / how to reach it  3) Optional extras
  */
 const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
+  const { user } = useAuth();
+  const { mutate } = useSWRConfig();
+  const { isLoaded: mapsLoaded } = useGoogleMaps();
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [created, setCreated] = useState<IListing | null>(null);
+
   const {
     register,
-    reset,
-    formState: { errors, isSubmitting, isSubmitSuccessful },
-    control,
+    handleSubmit,
     trigger,
-  } = useForm<Partial<IListing> & WizardOnly>({
-    resolver: zodResolver(ListingsSchema),
-    mode: "all",
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<ListingFormValues, unknown, ListingFormOutput>({
+    resolver: zodResolver(ListingFormSchema),
+    mode: "onTouched",
   });
-
-  const submitToast = useToast({
-    colorScheme: "yellow",
-    status: "info",
-    title: "Submitting",
-    description: `Submitting information...`,
-    duration: 3000,
-    isClosable: true,
-  });
-
-  const successToast = useToast({
-    colorScheme: "green",
-    status: "success",
-    title: "Form Submitted",
-    description: `Successfully submitted form.`,
-    duration: 5000,
-    isClosable: true,
-  });
-
-  const alertToast = useToast({
-    colorScheme: "red",
-    status: "error",
-    title: "Form Error",
-    description: `Form Error`,
-    duration: 5000,
-    isClosable: true,
-  });
-
-  const formRef = useRef();
-  const [step, setStep] = useState<1 | 2 | 3>(1);
-
-  const BUSINESS_TYPES: WizardOnly["businessType"][] = [
-    "Service",
-    "Retail",
-    "Trade",
-  ];
-  const SERVICES_OPTIONS = [
-    "Plumbing",
-    "Catering",
-    "Design",
-    "Consulting",
-    "IT Services",
-    "Construction",
-    "Retail",
-  ] as const;
-  const { user } = useAuth();
-  const creator = useMemo(
-    () =>
-      user && {
-        id: user.uid,
-        name: user.displayName,
-        email: user.email,
-        image: user.photoURL,
-      },
-    [user]
-  );
-
-  const getPlaceDetails = useCallback(async (address: string) => {
-    if (!window.google || !window.google.maps) {
-      throw new Error("Google Maps API not loaded");
-    }
-
-    try {
-      const geocoder = new google.maps.Geocoder();
-      const geocodeResponse = await new Promise<google.maps.GeocoderResponse>(
-        (resolve, reject) => {
-          geocoder.geocode({ address }, (results, status) => {
-            if (status === "OK" && results && results.length > 0) {
-              resolve({ results } as google.maps.GeocoderResponse);
-            } else {
-              reject(
-                new Error(
-                  `Geocode was not successful: ${status}. Please check the address.`
-                )
-              );
-            }
-          });
-        }
-      );
-
-      const {
-        geometry: { location },
-        place_id,
-      } = geocodeResponse.results[0];
-      const lat = location.lat();
-      const lng = location.lng();
-      const geoHash = geohashForLocation([lat, lng]);
-      return { lat, lng, geoHash, place_id };
-    } catch (error) {
-      console.error("Error getting place details:", error);
-      throw error;
-    }
-  }, []);
-
-  const submitData = useCallback(
-    async ({ data }: { data: Partial<IListing> & WizardOnly }) => {
-      try {
-        submitToast();
-
-        if (!user) {
-          throw new Error("You must be logged in to add a listing");
-        }
-
-        // Extract address components
-        const { city, state, zip, street } = data;
-        const address = `${street} ${city} ${state} ${zip}`;
-
-        // Get geocoding details
-        const details = await getPlaceDetails(address);
-
-        // Add description if not provided
-        const description =
-          data.description || `${data.name} located in ${city}, ${state}`;
-
-        // Combine all data
-        const submitData = {
-          ...data,
-          description,
-          creator,
-          ...details,
-          // Map wizard-only fields to existing schema fields
-          categories: (data.services as string[]) || [],
-          submitted: new Date(),
-          claimsCount: 0,
-          claims: [],
-        } as any;
-
-        // Submit to API
-        const response = await fetch("/api/listings", {
-          method: "POST",
-          body: JSON.stringify(submitData),
-        });
-
-        if (!response.ok) {
-          throw new Error(`Error creating listing: ${response.statusText}`);
-        }
-
-        return await response.json();
-      } catch (error) {
-        console.error("Error submitting listing:", error);
-        alertToast({
-          title: "Form Error",
-          description:
-            error instanceof Error ? error.message : "Failed to create listing",
-        });
-        throw error;
-      }
-    },
-    [getPlaceDetails, creator, submitToast, alertToast, user]
-  );
 
   useEffect(() => {
-    isSubmitting && Object.keys(errors).length !== 0 && submitToast();
-    if (isSubmitSuccessful) {
-      reset();
-      onDrawerClose();
-      successToast();
+    trackEvent("add_listing_start");
+  }, []);
+
+  const goNext = async () => {
+    if (step === 3) return;
+    const ok = await trigger(STEP_FIELDS[step]);
+    if (ok) {
+      trackEvent("add_listing_step", { step: step + 1 });
+      setStep((s) => (s + 1) as 1 | 2 | 3);
     }
-  }, [
-    isSubmitSuccessful,
-    isSubmitting,
-    submitToast,
-    reset,
-    onDrawerClose,
-    successToast,
-    errors,
-  ]);
+  };
+
+  const onSubmit = async (values: ListingFormOutput) => {
+    setSubmitError(null);
+    try {
+      const { category, keywords, ...rest } = values;
+      const address = [
+        rest.street,
+        rest.city,
+        `${rest.state} ${rest.zip || ""}`,
+      ]
+        .filter(Boolean)
+        .join(", ");
+      const geo = await geocodeAddress(address);
+      const extra = (keywords || "")
+        .split(",")
+        .map((k) => k.trim())
+        .filter(Boolean);
+      const categories = Array.from(new Set([category, ...extra])).slice(0, 5);
+
+      const res = await authFetch("/api/listings", {
+        method: "POST",
+        body: JSON.stringify({ ...rest, ...geo, categories }),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(
+          res.status === 401
+            ? "Your session expired. Please sign in again."
+            : body.error || "We couldn't save your listing. Please try again."
+        );
+      }
+      trackEvent("add_listing_complete", { category });
+      mutate(
+        (key) => typeof key === "string" && key.startsWith("/api/listings"),
+        undefined,
+        { revalidate: true }
+      );
+      setCreated(body as IListing);
+      reset();
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to create listing";
+      trackEvent("add_listing_error", { message });
+      setSubmitError(message);
+    }
+  };
 
   if (!user) {
     return (
       <Box textAlign="center" p={6}>
         <Heading as="h3" size="md" mb={4}>
-          Authentication Required
+          Sign in to add your business
         </Heading>
-        <Text>You must be logged in to add a business listing.</Text>
+        <Button as={NextLink} href="/auth/login" colorScheme="blue">
+          Sign in
+        </Button>
       </Box>
     );
   }
-  console.log(step);
+
+  if (created) {
+    return (
+      <VStack spacing={4} p={4} textAlign="center">
+        <Heading size="md">🎉 {created.name} is live!</Heading>
+        <Text color="gray.600">
+          Members can now find your business on the map and in search. Share
+          your listing with your lodge to help people find you.
+        </Text>
+        <Button
+          as={NextLink}
+          href={`/listing/${created.id}`}
+          colorScheme="blue"
+          width="full"
+          onClick={onDrawerClose}
+        >
+          View your listing
+        </Button>
+        <Button
+          variant="outline"
+          width="full"
+          onClick={() => {
+            setCreated(null);
+            setStep(1);
+            onDrawerClose();
+          }}
+        >
+          Done
+        </Button>
+      </VStack>
+    );
+  }
+
   return (
-    <Box
-      borderWidth="1px"
-      rounded="lg"
-      shadow="1px 1px 3px rgba(0,0,0,0.3)"
-      maxWidth={800}
-      p={6}
-      m="10px auto"
-    >
-      <Heading as="h2" size="lg" mb={2} textAlign="center">
-        Add Your Business
-      </Heading>
-      <Text textAlign="center" color="gray.600" mb={4}>
+    <Box maxWidth={800} py={2} m="0 auto">
+      <Text textAlign="center" color="gray.600" mb={2}>
         Step {step} of 3
       </Text>
       <Progress
@@ -260,279 +202,235 @@ const AddListingForm = ({ onDrawerClose }: AddListingFormProps) => {
         aria-label={`Step ${step} of 3`}
       />
 
-      <Form
-        onSubmit={submitData}
-        encType={"application/json"}
-        onSuccess={() => console.log("Form submitted successfully")}
-        onError={() => alertToast()}
-        control={control}
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        noValidate
+        onKeyDown={(e) => {
+          // Enter advances the wizard instead of submitting early.
+          const target = e.target as HTMLElement;
+          if (e.key === "Enter" && step < 3 && target.tagName !== "TEXTAREA") {
+            e.preventDefault();
+            goNext();
+          }
+        }}
       >
-        {step === 1 && (
-          <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
-            {/* Business Name */}
-            <FormControl
-              isInvalid={!!errors.name}
-              mb={3}
-              gridColumn={{ md: "span 2" }}
-            >
-              <FormLabel htmlFor="name">Business Name</FormLabel>
+        <Box display={step === 1 ? "block" : "none"}>
+          <VStack spacing={4} align="stretch">
+            <FormControl isInvalid={!!errors.name} isRequired>
+              <FormLabel htmlFor="name">Business name</FormLabel>
               <Input
                 id="name"
-                placeholder="Enter business name"
-                autoComplete="true"
+                placeholder="e.g. Hiram's Plumbing"
+                autoComplete="organization"
                 {...register("name")}
               />
-              <FormErrorMessage>
-                {errors.name?.message as string}
-              </FormErrorMessage>
+              <FormErrorMessage>{errors.name?.message}</FormErrorMessage>
             </FormControl>
 
-            {/* Business Type */}
-            <FormControl mb={3}>
-              <FormLabel htmlFor="businessType">Business Type</FormLabel>
+            <FormControl isInvalid={!!errors.category} isRequired>
+              <FormLabel htmlFor="category">Category</FormLabel>
               <Select
-                id="businessType"
-                placeholder="Select type"
-                {...register("businessType")}
+                id="category"
+                placeholder="Select a category"
+                {...register("category")}
               >
-                {BUSINESS_TYPES.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
+                {BUSINESS_CATEGORIES.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
                   </option>
                 ))}
               </Select>
+              <FormErrorMessage>{errors.category?.message}</FormErrorMessage>
             </FormControl>
 
-            {/* Description */}
-            <FormControl
-              isInvalid={!!errors.description}
-              mb={3}
-              gridColumn={{ md: "span 2" }}
-            >
-              <FormLabel htmlFor="description">Short Description</FormLabel>
+            <FormControl isInvalid={!!errors.description}>
+              <FormLabel htmlFor="description">What do you do?</FormLabel>
               <Textarea
                 id="description"
-                placeholder="Up to 150 characters"
-                maxLength={150}
+                placeholder="One or two sentences about your business"
+                maxLength={500}
                 rows={3}
                 {...register("description")}
               />
-              <FormErrorMessage>
-                {errors.description?.message as string}
-              </FormErrorMessage>
+              <FormErrorMessage>{errors.description?.message}</FormErrorMessage>
             </FormControl>
-          </Grid>
-        )}
+          </VStack>
+        </Box>
 
-        {step === 2 && (
+        <Box display={step === 2 ? "block" : "none"}>
           <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
-            {/* Contact Name */}
-            <FormControl mb={3}>
-              <FormLabel htmlFor="contactName">Contact Person's Name</FormLabel>
-              <Input
-                id="contactName"
-                placeholder="Full name"
-                {...register("contactName")}
-              />
-            </FormControl>
-
-            {/* Phone */}
-            <FormControl isInvalid={!!errors.phone} mb={3}>
-              <FormLabel htmlFor="phone">Phone Number</FormLabel>
-              <Input
-                id="phone"
-                type="tel"
-                placeholder="(123) 456-7890"
-                {...register("phone")}
-              />
-              <FormErrorMessage>
-                {errors.phone?.message as string}
-              </FormErrorMessage>
-            </FormControl>
-
-            {/* Email */}
-            {/* <FormControl isInvalid={!!errors.email} mb={3} gridColumn={{ md: "span 2" }}>
-              <FormLabel htmlFor="email">Email Address</FormLabel>
-              <Input id="email" type="email" placeholder="you@example.com" {...register("email")} />
-              <FormErrorMessage>{errors.email?.message as string}</FormErrorMessage>
-            </FormControl> */}
-
-            <Heading
-              as="h3"
-              size="sm"
-              mb={2}
-              mt={2}
-              gridColumn={{ md: "span 2" }}
-            >
-              Business Address
-            </Heading>
-
-            {/* Street */}
             <FormControl
               isInvalid={!!errors.street}
-              mb={3}
               gridColumn={{ md: "span 2" }}
             >
-              <FormLabel htmlFor="street">Street Address</FormLabel>
+              <FormLabel htmlFor="street">Street address</FormLabel>
               <Input
                 id="street"
                 placeholder="123 Main St"
+                autoComplete="street-address"
                 {...register("street")}
               />
-              <FormErrorMessage>
-                {errors.street?.message as string}
-              </FormErrorMessage>
+              <FormHelperText>
+                Optional. Leave it blank if you work from home or travel to
+                clients.
+              </FormHelperText>
+              <FormErrorMessage>{errors.street?.message}</FormErrorMessage>
             </FormControl>
 
-            {/* City */}
-            <FormControl isInvalid={!!errors.city} mb={3}>
+            <FormControl isInvalid={!!errors.city} isRequired>
               <FormLabel htmlFor="city">City</FormLabel>
-              <Input id="city" placeholder="City name" {...register("city")} />
-              <FormErrorMessage>
-                {errors.city?.message as string}
-              </FormErrorMessage>
-            </FormControl>
-
-            {/* State */}
-            <FormControl isInvalid={!!errors.state} mb={3}>
-              <FormLabel htmlFor="state">State</FormLabel>
-              <Select
-                id="state"
-                placeholder="Select state"
-                {...register("state")}
-              >
-                {StatesEnum.options.map((state) => (
-                  <option value={state} key={state}>
-                    {state}
-                  </option>
-                ))}
-              </Select>
-              <FormErrorMessage>
-                {errors.state?.message as string}
-              </FormErrorMessage>
-            </FormControl>
-
-            {/* Zip */}
-            {/* <FormControl isInvalid={!!errors.zip} mb={3}>
-              <FormLabel htmlFor="zip">Zip Code</FormLabel>
-              <Input id="zip" type="number" placeholder="12345" {...register("zip", { valueAsNumber: true })} />
-              <FormErrorMessage>{errors.zip?.message as string}</FormErrorMessage>
-            </FormControl> */}
-          </Grid>
-        )}
-
-        {step === 3 && (
-          <VStack align="stretch" spacing={4}>
-            {/* Services Offered */}
-            <FormControl>
-              <FormLabel>Services Offered</FormLabel>
-              <Controller
-                control={control}
-                name="services"
-                render={({ field }) => (
-                  <CheckboxGroup
-                    value={field.value || []}
-                    onChange={field.onChange}
-                  >
-                    <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={2}>
-                      {SERVICES_OPTIONS.map((opt) => (
-                        <Checkbox key={opt} value={opt} size="md">
-                          {opt}
-                        </Checkbox>
-                      ))}
-                    </SimpleGrid>
-                  </CheckboxGroup>
-                )}
+              <Input
+                id="city"
+                autoComplete="address-level2"
+                {...register("city")}
               />
+              <FormErrorMessage>{errors.city?.message}</FormErrorMessage>
             </FormControl>
 
-            {/* Website URL */}
-            <FormControl isInvalid={!!errors.url}>
-              <FormLabel htmlFor="url">Website URL</FormLabel>
+            <HStack align="start">
+              <FormControl isInvalid={!!errors.state} isRequired>
+                <FormLabel htmlFor="state">State</FormLabel>
+                <Select id="state" placeholder="--" {...register("state")}>
+                  {StatesEnum.options.map((state) => (
+                    <option value={state} key={state}>
+                      {state}
+                    </option>
+                  ))}
+                </Select>
+                <FormErrorMessage>{errors.state?.message}</FormErrorMessage>
+              </FormControl>
+              <FormControl isInvalid={!!errors.zip}>
+                <FormLabel htmlFor="zip">ZIP</FormLabel>
+                <Input
+                  id="zip"
+                  inputMode="numeric"
+                  maxLength={5}
+                  autoComplete="postal-code"
+                  {...register("zip")}
+                />
+                <FormErrorMessage>{errors.zip?.message}</FormErrorMessage>
+              </FormControl>
+            </HStack>
+
+            <Text
+              gridColumn={{ md: "span 2" }}
+              fontWeight="semibold"
+              mt={2}
+              fontSize="sm"
+            >
+              How can members reach you? (at least one)
+            </Text>
+
+            <FormControl isInvalid={!!errors.phone}>
+              <FormLabel htmlFor="phone">Phone</FormLabel>
+              <Input
+                id="phone"
+                type="tel"
+                autoComplete="tel"
+                placeholder="(202) 555-0123"
+                {...register("phone")}
+              />
+              <FormErrorMessage>{errors.phone?.message}</FormErrorMessage>
+            </FormControl>
+
+            <FormControl isInvalid={!!errors.email}>
+              <FormLabel htmlFor="email">Email</FormLabel>
+              <Input
+                id="email"
+                type="email"
+                autoComplete="email"
+                {...register("email")}
+              />
+              <FormErrorMessage>{errors.email?.message}</FormErrorMessage>
+            </FormControl>
+
+            <FormControl isInvalid={!!errors.url} gridColumn={{ md: "span 2" }}>
+              <FormLabel htmlFor="url">Website</FormLabel>
               <Input
                 id="url"
                 type="url"
-                placeholder="https://example.com"
+                inputMode="url"
+                placeholder="example.com"
                 {...register("url")}
               />
-              <FormErrorMessage>
-                {errors.url?.message as string}
-              </FormErrorMessage>
+              <FormErrorMessage>{errors.url?.message}</FormErrorMessage>
             </FormControl>
+          </Grid>
+        </Box>
 
-            {/* Social Links */}
+        <Box display={step === 3 ? "block" : "none"}>
+          <VStack align="stretch" spacing={4}>
+            <Text color="gray.600" fontSize="sm">
+              These details are optional. You can publish now and add them later
+              from your dashboard.
+            </Text>
+            <FormControl isInvalid={!!errors.keywords}>
+              <FormLabel htmlFor="keywords">Search keywords</FormLabel>
+              <Input
+                id="keywords"
+                placeholder="e.g. plumbing, water heaters, HVAC"
+                {...register("keywords")}
+              />
+              <FormHelperText>Comma separated. Up to 4.</FormHelperText>
+            </FormControl>
+            <FormControl>
+              <FormLabel htmlFor="businessHours">Hours</FormLabel>
+              <Textarea
+                id="businessHours"
+                rows={2}
+                placeholder="Mon–Fri 9am–5pm"
+                {...register("businessHours")}
+              />
+            </FormControl>
             <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
               <FormControl>
                 <FormLabel htmlFor="facebook">Facebook</FormLabel>
-                <Input
-                  id="facebook"
-                  placeholder="facebook.com/yourpage"
-                  {...register("social.facebook" as const)}
-                />
+                <Input id="facebook" {...register("social.facebook")} />
               </FormControl>
               <FormControl>
                 <FormLabel htmlFor="instagram">Instagram</FormLabel>
-                <Input
-                  id="instagram"
-                  placeholder="instagram.com/yourhandle"
-                  {...register("social.instagram" as const)}
-                />
+                <Input id="instagram" {...register("social.instagram")} />
               </FormControl>
               <FormControl>
-                <FormLabel htmlFor="twitter">Twitter/X</FormLabel>
-                <Input
-                  id="twitter"
-                  placeholder="twitter.com/yourhandle"
-                  {...register("social.twitter" as const)}
-                />
+                <FormLabel htmlFor="twitter">X / Twitter</FormLabel>
+                <Input id="twitter" {...register("social.twitter")} />
               </FormControl>
             </SimpleGrid>
           </VStack>
+        </Box>
+
+        {submitError && (
+          <Alert status="error" mt={4} borderRadius="md">
+            <AlertIcon />
+            {submitError}
+          </Alert>
         )}
 
-        {/* Navigation Buttons */}
         <HStack mt={6} justify="space-between">
           <Button
             onClick={() => setStep((s) => (s > 1 ? ((s - 1) as 1 | 2 | 3) : s))}
             variant="outline"
-            isDisabled={step === 1}
+            isDisabled={step === 1 || isSubmitting}
           >
             Back
           </Button>
           {step < 3 ? (
-            <Button
-              colorScheme="blue"
-              onClick={async () => {
-                // Validate current step fields before moving on
-                const step1Fields = [
-                  "name",
-                  "businessType",
-                  "description",
-                ] as const;
-                const step2Fields = [
-                  "contactName",
-                  "phone",
-                  // "email",
-                  "street",
-                  "city",
-                  "state",
-                  // "zip",
-                ] as const;
-                const toValidate = step === 1 ? step1Fields : step2Fields;
-                const ok = await trigger(toValidate as any);
-                if (ok) setStep((s) => (s + 1) as 1 | 2 | 3);
-                console.log(ok);
-              }}
-            >
+            <Button colorScheme="blue" onClick={goNext}>
               Next
             </Button>
           ) : (
-            <Button type="submit" colorScheme="blue" isLoading={isSubmitting}>
-              Submit
+            <Button
+              type="submit"
+              colorScheme="blue"
+              isLoading={isSubmitting}
+              isDisabled={!mapsLoaded}
+              loadingText="Publishing"
+            >
+              Publish listing
             </Button>
           )}
         </HStack>
-      </Form>
+      </form>
     </Box>
   );
 };

@@ -1,4 +1,4 @@
-import { FeatureCard } from "@/components";
+import FeatureCard from "@/components/FeatureCard";
 import {
   Box,
   Button,

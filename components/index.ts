@@ -42,6 +42,5 @@ export {
   MyNav,
   ProtectedRoute,
   SingleInfoContent,
-  UserDashboard
+  UserDashboard,
 };
-

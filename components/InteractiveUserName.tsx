@@ -43,7 +43,7 @@ export const InteractiveUserName = ({
                   size="xs"
                 ></Avatar>
               )}
-              <Text>@{user?.profile?.userName || user?.name || userName}</Text>
+              <Text>@{user?.profile?.nickName || user?.name || userName}</Text>
             </Flex>
           </Skeleton>
         </PopoverTrigger>

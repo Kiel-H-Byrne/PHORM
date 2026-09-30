@@ -2,6 +2,20 @@ import { Libraries } from "../types";
 
 export const MAX_AGE = 1 * 24 * 60 * 60;
 
+/** Absolute site origin for share links / Open Graph tags (no trailing slash). */
+export const SITE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL}`
+    : "")
+).replace(/\/$/, "");
+
+export const SITE_DESCRIPTION =
+  "Find and support businesses owned by Prince Hall Masons and the PHA family.";
+
+/** Public contact for listing reports and ownership requests. Hidden when unset. */
+export const SUPPORT_EMAIL = process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "";
+
 enum BRAND_COLORS {
   MASONIC_BLUE = "#2828C8",
   MWPGLDC_PURPLE = "#431250", //#8E0084

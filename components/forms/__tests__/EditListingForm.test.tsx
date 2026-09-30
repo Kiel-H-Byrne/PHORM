@@ -1,178 +1,140 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { EditListingForm } from '../';
-import { useAuth } from '@/contexts/AuthContext';
-import * as React from 'react';
-import useSWR from 'swr';
+import { useAuth } from "@/contexts/AuthContext";
+import authFetch from "@/util/authFetch";
+import { geocodeAddress } from "@/util/mapsLoader";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import useSWR from "swr";
+import { EditListingForm } from "../";
 
-// Mock the auth context
-jest.mock('@/contexts/AuthContext', () => ({
+jest.mock("@/contexts/AuthContext", () => ({
   useAuth: jest.fn(),
 }));
 
-// Mock SWR
-jest.mock('swr', () => ({
+const mockMutate = jest.fn();
+jest.mock("swr", () => ({
+  __esModule: true,
+  default: jest.fn(),
+  useSWRConfig: () => ({ mutate: mockMutate }),
+}));
+
+jest.mock("@/util/authFetch", () => ({
   __esModule: true,
   default: jest.fn(),
 }));
 
-// Mock the Google Maps API
-global.google = {
-  maps: {
-    Geocoder: jest.fn().mockImplementation(() => ({
-      geocode: jest.fn((request, callback) => {
-        callback([{
-          geometry: {
-            location: {
-              lat: () => 40.712776,
-              lng: () => -74.005974,
-            }
-          },
-          place_id: 'test-place-id'
-        }], 'OK');
-      })
-    }))
-  }
-} as any;
+jest.mock("@/util/mapsLoader", () => ({
+  useGoogleMaps: () => ({ isLoaded: true }),
+  geocodeAddress: jest.fn(),
+}));
 
-// Mock fetch
-global.fetch = jest.fn().mockImplementation(() => 
-  Promise.resolve({
-    ok: true,
-    json: () => Promise.resolve({ success: true }),
-  })
-) as jest.Mock;
+const listingId = "listing-1";
+const listing = {
+  id: listingId,
+  name: "Test Business",
+  description: "This is a test business",
+  street: "123 Test St",
+  city: "Washington",
+  state: "DC",
+  zip: "20001",
+  phone: "202-555-0100",
+  url: "https://example.com",
+  lat: 38.9,
+  lng: -77.03,
+  categories: ["Construction", "plumbing"],
+  creator: { id: "owner-id", name: "Owner" },
+};
 
-describe('EditListingForm', () => {
-  const mockOnClose = jest.fn();
-  const mockListingId = 'test-listing-id';
-  
-  const mockListing = {
-    id: mockListingId,
-    name: 'Test Business',
-    description: 'This is a test business',
-    street: '123 Test St',
-    city: 'Test City',
-    state: 'NY',
-    zip: 12345,
-    phone: '123-456-7890',
-    url: 'https://example.com',
-    lat: 40.712776,
-    lng: -74.005974,
-    creator: {
-      id: 'test-user-id',
-      name: 'Test User',
-      email: 'test@example.com',
-    },
-  };
-  
+describe("EditListingForm", () => {
+  const onClose = jest.fn();
+
   beforeEach(() => {
     jest.clearAllMocks();
-    
-    // Mock authenticated user
-    (useAuth as jest.Mock).mockReturnValue({
-      user: {
-        uid: 'test-user-id',
-        displayName: 'Test User',
-        email: 'test@example.com',
-        photoURL: 'https://example.com/photo.jpg',
-      }
+    (useAuth as jest.Mock).mockReturnValue({ user: { uid: "owner-id" } });
+    (useSWR as jest.Mock).mockReturnValue({ data: listing, isLoading: false });
+    (authFetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => ({ ...listing }),
     });
-    
-    // Mock SWR to return listing data
-    (useSWR as jest.Mock).mockReturnValue({
-      data: mockListing,
-      error: undefined,
-      isLoading: false,
+    (geocodeAddress as jest.Mock).mockResolvedValue({
+      lat: 1,
+      lng: 2,
+      place_id: "p",
     });
   });
-  
-  it('renders the form with listing data when authorized', () => {
-    render(<EditListingForm listingId={mockListingId} onClose={mockOnClose} />);
-    
-    // Check that the form title is rendered
-    expect(screen.getByText('Edit Business Listing')).toBeInTheDocument();
-    
-    // Check that form fields are populated with listing data
-    expect(screen.getByLabelText('Business Name')).toHaveValue('Test Business');
-    expect(screen.getByLabelText('Description')).toHaveValue('This is a test business');
-    expect(screen.getByLabelText('Street Address')).toHaveValue('123 Test St');
-    expect(screen.getByLabelText('City')).toHaveValue('Test City');
-    expect(screen.getByLabelText('State')).toHaveValue('NY');
-    expect(screen.getByLabelText('Zip Code')).toHaveValue(12345);
-    
-    // Check that buttons are rendered
-    expect(screen.getByText('Cancel')).toBeInTheDocument();
-    expect(screen.getByText('Update Listing')).toBeInTheDocument();
+
+  it("loads the listing from the API and fills the form", async () => {
+    render(<EditListingForm listingId={listingId} onClose={onClose} />);
+    expect(useSWR).toHaveBeenCalledWith(`/api/listings/${listingId}`);
+    expect(
+      await screen.findByDisplayValue("Test Business")
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText(/category/i)).toHaveValue("Construction");
+    expect(screen.getByLabelText(/search keywords/i)).toHaveValue("plumbing");
+    expect(screen.getByLabelText(/^city/i)).toHaveValue("Washington");
   });
-  
-  it('shows loading state when data is loading', () => {
-    // Mock loading state
+
+  it("shows a loading state", () => {
+    (useSWR as jest.Mock).mockReturnValue({ data: undefined, isLoading: true });
+    render(<EditListingForm listingId={listingId} onClose={onClose} />);
+    expect(screen.queryByLabelText(/business name/i)).not.toBeInTheDocument();
+  });
+
+  it("shows not found when the listing doesn't exist", () => {
     (useSWR as jest.Mock).mockReturnValue({
       data: undefined,
-      error: undefined,
-      isLoading: true,
-    });
-    
-    render(<EditListingForm listingId={mockListingId} onClose={mockOnClose} />);
-    
-    // Check that skeletons are rendered for loading state
-    expect(screen.getAllByTestId('skeleton')).toHaveLength(7);
-  });
-  
-  it('shows error message when data fails to load', () => {
-    // Mock error state
-    (useSWR as jest.Mock).mockReturnValue({
-      data: undefined,
-      error: new Error('Failed to load listing'),
       isLoading: false,
     });
-    
-    render(<EditListingForm listingId={mockListingId} onClose={mockOnClose} />);
-    
-    // Check that error message is shown
-    expect(screen.getByText('Error Loading Listing')).toBeInTheDocument();
-    expect(screen.getByText('Failed to load listing')).toBeInTheDocument();
+    render(<EditListingForm listingId={listingId} onClose={onClose} />);
+    expect(screen.getByText("Listing not found.")).toBeInTheDocument();
   });
-  
-  it('shows unauthorized message when user is not the creator', () => {
-    // Mock different user
-    (useAuth as jest.Mock).mockReturnValue({
-      user: {
-        uid: 'different-user-id',
-        displayName: 'Different User',
-        email: 'different@example.com',
-      }
-    });
-    
-    render(<EditListingForm listingId={mockListingId} onClose={mockOnClose} />);
-    
-    // Check that unauthorized message is shown
-    expect(screen.getByText('Unauthorized')).toBeInTheDocument();
-    expect(screen.getByText('You are not authorized to edit this listing.')).toBeInTheDocument();
+
+  it("blocks users who don't own the listing", () => {
+    (useAuth as jest.Mock).mockReturnValue({ user: { uid: "someone-else" } });
+    render(<EditListingForm listingId={listingId} onClose={onClose} />);
+    expect(
+      screen.getByText("Only the owner of this listing can edit it.")
+    ).toBeInTheDocument();
   });
-  
-  it('submits the form with updated data', async () => {
-    render(<EditListingForm listingId={mockListingId} onClose={mockOnClose} />);
-    
-    // Update a field
-    fireEvent.change(screen.getByLabelText('Business Name'), {
-      target: { value: 'Updated Business Name' }
+
+  it("saves changes with an authenticated PUT without re-geocoding", async () => {
+    render(<EditListingForm listingId={listingId} onClose={onClose} />);
+    const name = await screen.findByDisplayValue("Test Business");
+    fireEvent.change(name, { target: { value: "Renamed Business" } });
+
+    const save = screen.getByRole("button", { name: /save changes/i });
+    await waitFor(() => expect(save).toBeEnabled());
+    fireEvent.click(save);
+
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
+    expect(geocodeAddress).not.toHaveBeenCalled();
+    expect(authFetch).toHaveBeenCalledWith(
+      `/api/listings/${listingId}`,
+      expect.objectContaining({ method: "PUT" })
+    );
+    const body = JSON.parse((authFetch as jest.Mock).mock.calls[0][1].body);
+    expect(body).toMatchObject({
+      name: "Renamed Business",
+      categories: ["Construction", "plumbing"],
     });
-    
-    // Submit the form
-    fireEvent.click(screen.getByText('Update Listing'));
-    
-    // Wait for the form submission to complete
-    await waitFor(() => {
-      expect(fetch).toHaveBeenCalledWith(`/api/listings/${mockListingId}`, {
-        method: 'PUT',
-        body: expect.any(String),
-      });
+    expect(mockMutate).toHaveBeenCalled();
+  });
+
+  it("re-geocodes when the address changes", async () => {
+    render(<EditListingForm listingId={listingId} onClose={onClose} />);
+    const city = await screen.findByDisplayValue("Washington");
+    fireEvent.change(city, { target: { value: "Silver Spring" } });
+    fireEvent.change(screen.getByLabelText(/^state/i), {
+      target: { value: "MD" },
     });
-    
-    // Check that the modal was closed
-    await waitFor(() => {
-      expect(mockOnClose).toHaveBeenCalled();
+    fireEvent.change(screen.getByLabelText(/^zip/i), {
+      target: { value: "20910" },
     });
+    fireEvent.click(screen.getByRole("button", { name: /save changes/i }));
+
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
+    expect(geocodeAddress).toHaveBeenCalledWith(
+      "123 Test St, Silver Spring, MD 20910"
+    );
+    const body = JSON.parse((authFetch as jest.Mock).mock.calls[0][1].body);
+    expect(body).toMatchObject({ lat: 1, lng: 2 });
   });
 });

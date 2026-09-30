@@ -1,5 +1,7 @@
 import MemberCard from "@/components/MemberCard";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import { useFetchUser } from "@/util/userHooks";
+import { Center, Spinner } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 
 const MemberPage = () => {
@@ -7,7 +9,11 @@ const MemberPage = () => {
     query: { uid },
   } = useRouter();
   const user = useFetchUser(uid);
-  return user ? <MemberCard user={user} /> : <>No UsEr INFo</>;
+  return (
+    <ProtectedRoute>
+      <Center py={10}>{user ? <MemberCard user={user} /> : <Spinner />}</Center>
+    </ProtectedRoute>
+  );
 };
 
 export default MemberPage;

@@ -1,14 +1,14 @@
-"use client";
-
-import { Layout } from "@/components";
+import Layout from "@/components/Layout";
 import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Analytics } from "@vercel/analytics/react";
-import type { AppProps /*, AppContext */ } from "next/app";
+import type { AppProps } from "next/app";
+import { useEffect } from "react";
 import { SWRConfig } from "swr";
 import { BRAND_THEME } from "../util/constants";
+import { initAnalytics } from "../util/analytics";
 import fetcher from "../util/fetch";
 
 const swr_config_options = {
@@ -19,6 +19,9 @@ const swr_config_options = {
 
 const theme = extendTheme(BRAND_THEME);
 export default function MyApp({ Component, pageProps }: AppProps) {
+  useEffect(() => {
+    initAnalytics();
+  }, []);
   return (
     <ChakraProvider theme={theme}>
       <AuthProvider>

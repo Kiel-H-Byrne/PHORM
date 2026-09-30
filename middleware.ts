@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-// Define which routes require authentication
+// UX-only gate: redirects signed-out visitors to login. Real authorization
+// happens in the API routes, which verify Firebase ID tokens.
 const protectedPaths = [
   "/dashboard",
   "/member-directory",
@@ -38,22 +39,8 @@ export async function middleware(request: NextRequest) {
   // If it's a protected path and user is not authenticated, redirect to login
   if (isProtectedPath && !isAuthenticated) {
     const url = new URL("/auth/login", request.url);
-    url.searchParams.set("callbackUrl", pathname);
+    url.searchParams.set("returnUrl", pathname);
     return NextResponse.redirect(url);
-  }
-
-  // If it's an API route that requires authentication
-  if (pathname.startsWith("/api/users") && !isAuthenticated) {
-    return NextResponse.json(
-      { success: false, message: "Authentication required" },
-      { status: 401 }
-    );
-  }
-
-  // For API listings, we don't block but might want to limit results
-  if (pathname.startsWith("/api/listings")) {
-    // Allow access but might limit results based on auth status
-    // This would be handled in the API route itself
   }
 
   // Continue with the request

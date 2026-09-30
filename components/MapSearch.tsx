@@ -1,4 +1,4 @@
-import { searchListings } from "@/db/listings";
+import { trackEvent } from "@/util/analytics";
 import { IListing } from "@/types";
 import {
   BUSINESS_CATEGORIES,
@@ -33,7 +33,13 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FaFilter, FaMapMarkerAlt, FaPlus, FaSearch, FaTimes } from "react-icons/fa";
+import {
+  FaFilter,
+  FaMapMarkerAlt,
+  FaPlus,
+  FaSearch,
+  FaTimes,
+} from "react-icons/fa";
 
 interface MapSearchProps {
   onSelectListing: (listing: IListing) => void;
@@ -110,7 +116,18 @@ const MapSearch = ({
       setError(null);
       try {
         // Apply filters to search
-        const searchResults = await searchListings(term, 10);
+        const res = await fetch(
+          `/api/listings?pageSize=10&searchQuery=${encodeURIComponent(term)}`
+        );
+        if (!res.ok) throw new Error("Search failed");
+        const searchResults: IListing[] = await res.json();
+        if (term.length >= 3) {
+          trackEvent(searchResults.length ? "search" : "search_no_results", {
+            term,
+            source: "typeahead",
+            results: searchResults.length,
+          });
+        }
 
         // Apply client-side filtering
         let filteredResults = searchResults;
@@ -365,7 +382,9 @@ const MapSearch = ({
       top={layout === "overlay" ? "16px" : undefined}
       left={layout === "overlay" ? "50%" : undefined}
       transform={layout === "overlay" ? "translateX(-50%)" : undefined}
-      width={layout === "overlay" ? { base: "92%", sm: "80%", md: "460px" } : "100%"}
+      width={
+        layout === "overlay" ? { base: "92%", sm: "80%", md: "460px" } : "100%"
+      }
       zIndex={15}
       mx={layout === "inline" ? "auto" : undefined}
       my={layout === "inline" ? 4 : undefined}
@@ -446,9 +465,7 @@ const MapSearch = ({
               <MenuItemOption value="restaurant">Restaurant</MenuItemOption>
               <MenuItemOption value="retail">Retail</MenuItemOption>
               <MenuItemOption value="service">Service</MenuItemOption>
-              <MenuItemOption value="professional">
-                Professional
-              </MenuItemOption>
+              <MenuItemOption value="professional">Professional</MenuItemOption>
             </MenuOptionGroup>
 
             <MenuOptionGroup
@@ -553,7 +570,13 @@ const MapSearch = ({
 
           {/* Loading Indicator */}
           {isLoading && (
-            <Flex align="center" justify="center" p={4} color="gray.500" gap={2}>
+            <Flex
+              align="center"
+              justify="center"
+              p={4}
+              color="gray.500"
+              gap={2}
+            >
               <Spinner size="sm" color="blue.500" />
               <Text fontSize="sm">Searching businesses...</Text>
             </Flex>
@@ -578,7 +601,9 @@ const MapSearch = ({
                   const isHighlighted = highlightedIndex === index;
                   return (
                     <ListItem
-                      key={listing.id || `${listing.lat}-${listing.lng}-${index}`}
+                      key={
+                        listing.id || `${listing.lat}-${listing.lng}-${index}`
+                      }
                       id={`map-search-item-${index}`}
                       role="option"
                       aria-selected={isHighlighted}

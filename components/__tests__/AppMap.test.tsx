@@ -1,19 +1,24 @@
-import { render } from "@testing-library/react";
+import { ChakraProvider } from "@chakra-ui/react";
+import { render, screen } from "@testing-library/react";
 import AppMap, { default_props } from "../AppMap";
 
-default_props;
-const props = {
-  client_location: default_props.center,
-  setMapInstance: () => void 0,
-  mapInstance: null,
-};
-describe("AppMap Tests", () => {
-  xit("renders without errors", () => {
-    render(<AppMap {...props} />);
-  });
+// The Google Maps script never loads in jsdom; we only verify the loading
+// state renders without crashing.
+jest.mock("@/util/mapsLoader", () => ({
+  useGoogleMaps: () => ({ isLoaded: false }),
+}));
 
-  it("matches snapshot", () => {
-    const { asFragment } = render(<AppMap {...props} />);
-    expect(asFragment()).toMatchSnapshot();
+describe("AppMap", () => {
+  it("shows a progress bar while Google Maps loads", () => {
+    render(
+      <ChakraProvider>
+        <AppMap
+          client_location={default_props.center}
+          setMapInstance={() => undefined}
+          mapInstance={null}
+        />
+      </ChakraProvider>
+    );
+    expect(screen.getByRole("progressbar")).toBeInTheDocument();
   });
 });

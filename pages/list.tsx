@@ -7,4 +7,3 @@ import AppList from "@/components/AppList";
 export default function ListPage() {
   return <AppList />;
 }
-

@@ -1,16 +1,22 @@
 "use client";
 
 import { useAuth } from "@/contexts/AuthContext";
-import { listingsFetch } from "@/db/listings";
-import { ListingsSchema } from "@/db/schemas";
+import { ListingInputSchema } from "@/db/schemas";
+import { IListing, StatesEnum } from "@/types";
+import { trackEvent } from "@/util/analytics";
+import authFetch from "@/util/authFetch";
+import { BUSINESS_CATEGORIES } from "@/util/constants";
+import { geocodeAddress, useGoogleMaps } from "@/util/mapsLoader";
 import {
+  Alert,
+  AlertIcon,
   Box,
   Button,
   FormControl,
   FormErrorMessage,
   FormLabel,
   Grid,
-  Heading,
+  HStack,
   Input,
   Select,
   Skeleton,
@@ -19,406 +25,308 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { geohashForLocation } from "geofire-common";
-import { memo, useCallback, useEffect, useState } from "react";
-import { Form, useForm } from "react-hook-form";
-import useSWR from "swr";
-import { IListing, StatesEnum } from "../../types";
+import { memo, useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import useSWR, { useSWRConfig } from "swr";
+import * as z from "zod";
 
 interface EditListingFormProps {
   listingId: string;
   onClose: () => void;
+  onDeleted?: () => void;
 }
 
-const EditListingForm = ({ listingId, onClose }: EditListingFormProps) => {
-  const { user } = useAuth();
-  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+const EditFormSchema = ListingInputSchema.omit({
+  lat: true,
+  lng: true,
+  place_id: true,
+  imageUri: true,
+  categories: true,
+})
+  .extend({
+    category: z.string().min(1, "Choose a category"),
+    keywords: z.string().max(200).optional(),
+  })
+  .refine((d) => !!(d.phone || d.email || d.url), {
+    message: "Add at least one way to contact the business",
+    path: ["phone"],
+  });
 
-  // Fetch the listing data
-  const {
-    data: listing,
-    error,
-    isLoading,
-  } = useSWR<IListing>(
-    listingId ? `/api/listings/${listingId}` : null,
-    async () => {
-      const result = await listingsFetch(listingId);
-      return result as IListing;
-    }
+type EditFormValues = z.input<typeof EditFormSchema>;
+type EditFormOutput = z.output<typeof EditFormSchema>;
+
+const EditListingForm = ({
+  listingId,
+  onClose,
+  onDeleted,
+}: EditListingFormProps) => {
+  const { user } = useAuth();
+  const toast = useToast();
+  const { mutate } = useSWRConfig();
+  const { isLoaded: mapsLoaded } = useGoogleMaps();
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const { data: listing, isLoading } = useSWR<IListing>(
+    listingId ? `/api/listings/${listingId}` : null
   );
 
   const {
     register,
     reset,
     handleSubmit,
-    formState: { errors, isSubmitting, isSubmitSuccessful },
-    control,
-  } = useForm<IListing>({
-    resolver: zodResolver(ListingsSchema),
-    mode: "all",
+    formState: { errors, isSubmitting, isDirty },
+  } = useForm<EditFormValues, unknown, EditFormOutput>({
+    resolver: zodResolver(EditFormSchema),
+    mode: "onTouched",
   });
 
-  // Toast notifications
-  const submitToast = useToast({
-    colorScheme: "yellow",
-    status: "info",
-    title: "Updating",
-    description: `Updating listing information...`,
-    duration: 3000,
-    isClosable: true,
-  });
-
-  const successToast = useToast({
-    colorScheme: "green",
-    status: "success",
-    title: "Listing Updated",
-    description: `Successfully updated the listing.`,
-    duration: 5000,
-    isClosable: true,
-  });
-
-  const errorToast = useToast({
-    colorScheme: "red",
-    status: "error",
-    title: "Update Error",
-    description: `Failed to update the listing.`,
-    duration: 5000,
-    isClosable: true,
-  });
-
-  // Check if user is authorized to edit this listing
   useEffect(() => {
-    if (listing && user) {
-      const isCreator = listing.creator?.id === user.uid;
-      setIsAuthorized(isCreator);
-    }
-  }, [listing, user]);
-
-  // Set form values when listing data is loaded
-  useEffect(() => {
-    if (listing) {
-      reset(listing);
-    }
+    if (!listing) return;
+    const [category = "", ...keywords] = listing.categories || [];
+    reset({
+      name: listing.name || "",
+      category,
+      keywords: keywords.join(", "),
+      description: listing.description || "",
+      street: listing.street || "",
+      city: listing.city || "",
+      state: listing.state,
+      zip: listing.zip ? String(listing.zip) : "",
+      phone: listing.phone || "",
+      email: listing.email || "",
+      url: listing.url || "",
+      businessHours: listing.businessHours || "",
+    });
   }, [listing, reset]);
 
-  // Handle form submission
-  const onSubmit = useCallback(
-    async (data: IListing) => {
-      try {
-        submitToast();
+  const refreshListings = () =>
+    mutate(
+      (key) => typeof key === "string" && key.startsWith("/api/listings"),
+      undefined,
+      { revalidate: true }
+    );
 
-        if (!user) {
-          throw new Error("You must be logged in to edit a listing");
-        }
+  const onSubmit = async (values: EditFormOutput) => {
+    if (!listing) return;
+    setSubmitError(null);
+    try {
+      const { category, keywords, ...rest } = values;
+      const addressChanged =
+        rest.street !== (listing.street || "") ||
+        rest.city !== listing.city ||
+        rest.state !== listing.state ||
+        (rest.zip || "") !== String(listing.zip || "");
+      const geo = addressChanged
+        ? await geocodeAddress(
+            [rest.street, rest.city, `${rest.state} ${rest.zip || ""}`]
+              .filter(Boolean)
+              .join(", ")
+          )
+        : {};
+      const extra = (keywords || "")
+        .split(",")
+        .map((k) => k.trim())
+        .filter(Boolean);
+      const categories = Array.from(new Set([category, ...extra])).slice(0, 5);
 
-        if (!isAuthorized) {
-          throw new Error("You are not authorized to edit this listing");
-        }
+      const res = await authFetch(`/api/listings/${listingId}`, {
+        method: "PUT",
+        body: JSON.stringify({ ...rest, ...geo, categories }),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.error || "Failed to update listing");
 
-        // Extract address components
-        const { city, state, zip, street } = data;
-        const address = `${street} ${city} ${state} ${zip}`;
+      trackEvent("edit_listing_complete");
+      toast({ title: "Listing updated", status: "success", duration: 3000 });
+      refreshListings();
+      onClose();
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error ? error.message : "Failed to update listing"
+      );
+    }
+  };
 
-        // Get geocoding details if address changed
-        let geoData = {};
-        if (
-          listing &&
-          (listing.street !== street ||
-            listing.city !== city ||
-            listing.state !== state ||
-            listing.zip !== zip)
-        ) {
-          try {
-            const geocoder = new google.maps.Geocoder();
-            const geocodeResponse =
-              await new Promise<google.maps.GeocoderResponse>(
-                (resolve, reject) => {
-                  geocoder.geocode({ address }, (results, status) => {
-                    if (status === "OK" && results && results.length > 0) {
-                      resolve({ results } as google.maps.GeocoderResponse);
-                    } else {
-                      reject(
-                        new Error(
-                          `Geocode was not successful: ${status}. Please check the address.`
-                        )
-                      );
-                    }
-                  });
-                }
-              );
-
-            const {
-              geometry: { location },
-              place_id,
-            } = geocodeResponse.results[0];
-            const lat = location.lat();
-            const lng = location.lng();
-            const geoHash = geohashForLocation([lat, lng]);
-            geoData = { lat, lng, geoHash, place_id };
-          } catch (error) {
-            console.error("Error getting place details:", error);
-            throw error;
-          }
-        }
-
-        // Combine all data
-        const updateData = {
-          ...data,
-          ...geoData,
-          updated: new Date(),
-        };
-
-        // Submit to API
-        const response = await fetch(`/api/listings/${listingId}`, {
-          method: "PUT",
-          body: JSON.stringify(updateData),
-        });
-
-        if (!response.ok) {
-          throw new Error(`Error updating listing: ${response.statusText}`);
-        }
-
-        successToast();
-        onClose();
-        return await response.json();
-      } catch (error) {
-        console.error("Error updating listing:", error);
-        errorToast({
-          description:
-            error instanceof Error ? error.message : "Failed to update listing",
-        });
-        throw error;
+  const handleDelete = async () => {
+    if (
+      !window.confirm(
+        "Remove this listing from PHORM? Members will no longer be able to find it."
+      )
+    ) {
+      return;
+    }
+    setIsDeleting(true);
+    try {
+      const res = await authFetch(`/api/listings/${listingId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || "Failed to remove listing");
       }
-    },
-    [
-      user,
-      isAuthorized,
-      listing,
-      listingId,
-      submitToast,
-      successToast,
-      errorToast,
-      onClose,
-    ]
-  );
+      toast({ title: "Listing removed", status: "success", duration: 3000 });
+      refreshListings();
+      if (onDeleted) onDeleted();
+      else onClose();
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error ? error.message : "Failed to remove listing"
+      );
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
-  // Show loading state
-  if (isLoading) {
-    return (
-      <Box p={6}>
-        <Skeleton height="40px" mb={4} data-testid="skeleton" />
-        <Skeleton height="20px" mb={2} data-testid="skeleton" />
-        <Skeleton height="40px" mb={4} data-testid="skeleton" />
-        <Skeleton height="20px" mb={2} data-testid="skeleton" />
-        <Skeleton height="40px" mb={4} data-testid="skeleton" />
-        <Skeleton height="20px" mb={2} data-testid="skeleton" />
-        <Skeleton height="40px" mb={4} data-testid="skeleton" />
-      </Box>
-    );
-  }
-
-  // Show error state
-  if (error || !listing) {
-    return (
-      <Box textAlign="center" p={6}>
-        <Heading as="h3" size="md" mb={4} color="red.500">
-          Error Loading Listing
-        </Heading>
-        <Text>
-          {error instanceof Error
-            ? error.message
-            : "Failed to load the listing. Please try again."}
-        </Text>
-        <Button mt={4} onClick={onClose}>
-          Close
-        </Button>
-      </Box>
-    );
-  }
-
-  // Show unauthorized state
-  if (isAuthorized === false) {
-    return (
-      <Box textAlign="center" p={6}>
-        <Heading as="h3" size="md" mb={4} color="red.500">
-          Unauthorized
-        </Heading>
-        <Text>You are not authorized to edit this listing.</Text>
-        <Button mt={4} onClick={onClose}>
-          Close
-        </Button>
-      </Box>
-    );
+  if (isLoading) return <Skeleton height="400px" />;
+  if (!listing) return <Text>Listing not found.</Text>;
+  const ownerId =
+    typeof listing.creator === "object" ? listing.creator?.id : listing.creator;
+  if (!user || ownerId !== user.uid) {
+    return <Text>Only the owner of this listing can edit it.</Text>;
   }
 
   return (
-    <Box
-      borderWidth="1px"
-      rounded="lg"
-      shadow="1px 1px 3px rgba(0,0,0,0.3)"
-      maxWidth={800}
-      p={6}
-      m="10px auto"
-    >
-      <Heading as="h2" size="md" mb={4} textAlign="center">
-        Edit Business Listing
-      </Heading>
+    <Box as="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+      <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
+        <FormControl
+          isInvalid={!!errors.name}
+          isRequired
+          gridColumn={{ md: "span 2" }}
+        >
+          <FormLabel htmlFor="edit-name">Business name</FormLabel>
+          <Input id="edit-name" {...register("name")} />
+          <FormErrorMessage>{errors.name?.message}</FormErrorMessage>
+        </FormControl>
 
-      <Form
-        onSubmit={handleSubmit(onSubmit)}
-        encType={"application/json"}
-        control={control}
-      >
-        <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
-          {/* Business Name */}
-          <FormControl isInvalid={!!errors.name} mb={3}>
-            <FormLabel htmlFor="name">Business Name</FormLabel>
-            <Input
-              id="name"
-              placeholder="Enter business name"
-              autoComplete={"true"}
-              {...register("name")}
-            />
-            <FormErrorMessage>
-              {errors.name?.message as string}
-            </FormErrorMessage>
-          </FormControl>
-
-          {/* Description */}
-          <FormControl
-            isInvalid={!!errors.description}
-            mb={3}
-            gridColumn={{ md: "span 2" }}
+        <FormControl isInvalid={!!errors.category} isRequired>
+          <FormLabel htmlFor="edit-category">Category</FormLabel>
+          <Select
+            id="edit-category"
+            placeholder="Select a category"
+            {...register("category")}
           >
-            <FormLabel htmlFor="description">Description</FormLabel>
-            <Textarea
-              id="description"
-              placeholder="Enter a brief description of the business"
-              {...register("description")}
-              rows={3}
-            />
-            <FormErrorMessage>
-              {errors.description?.message as string}
-            </FormErrorMessage>
-          </FormControl>
+            {BUSINESS_CATEGORIES.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </Select>
+          <FormErrorMessage>{errors.category?.message}</FormErrorMessage>
+        </FormControl>
 
-          {/* Address Section */}
-          <Heading
-            as="h3"
-            size="sm"
-            mb={2}
-            mt={2}
-            gridColumn={{ md: "span 2" }}
-          >
-            Business Address
-          </Heading>
+        <FormControl>
+          <FormLabel htmlFor="edit-keywords">Search keywords</FormLabel>
+          <Input
+            id="edit-keywords"
+            placeholder="comma separated"
+            {...register("keywords")}
+          />
+        </FormControl>
 
-          {/* Street */}
-          <FormControl
-            isInvalid={!!errors.street}
-            mb={3}
-            gridColumn={{ md: "span 2" }}
-          >
-            <FormLabel htmlFor="street">Street Address</FormLabel>
-            <Input
-              id="street"
-              placeholder="123 Main St"
-              {...register("street")}
-            />
-            <FormErrorMessage>
-              {errors.street?.message as string}
-            </FormErrorMessage>
-          </FormControl>
+        <FormControl
+          isInvalid={!!errors.description}
+          gridColumn={{ md: "span 2" }}
+        >
+          <FormLabel htmlFor="edit-description">What do you do?</FormLabel>
+          <Textarea
+            id="edit-description"
+            rows={3}
+            maxLength={500}
+            {...register("description")}
+          />
+          <FormErrorMessage>{errors.description?.message}</FormErrorMessage>
+        </FormControl>
 
-          {/* City */}
-          <FormControl isInvalid={!!errors.city} mb={3}>
-            <FormLabel htmlFor="city">City</FormLabel>
-            <Input id="city" placeholder="City name" {...register("city")} />
-            <FormErrorMessage>
-              {errors.city?.message as string}
-            </FormErrorMessage>
-          </FormControl>
+        <FormControl isInvalid={!!errors.street} gridColumn={{ md: "span 2" }}>
+          <FormLabel htmlFor="edit-street">Street address (optional)</FormLabel>
+          <Input id="edit-street" {...register("street")} />
+        </FormControl>
 
-          {/* State */}
-          <FormControl isInvalid={!!errors.state} mb={3}>
-            <FormLabel htmlFor="state">State</FormLabel>
-            <Select
-              id="state"
-              placeholder="Select state"
-              {...register("state")}
-            >
+        <FormControl isInvalid={!!errors.city} isRequired>
+          <FormLabel htmlFor="edit-city">City</FormLabel>
+          <Input id="edit-city" {...register("city")} />
+          <FormErrorMessage>{errors.city?.message}</FormErrorMessage>
+        </FormControl>
+
+        <HStack align="start">
+          <FormControl isInvalid={!!errors.state} isRequired>
+            <FormLabel htmlFor="edit-state">State</FormLabel>
+            <Select id="edit-state" placeholder="--" {...register("state")}>
               {StatesEnum.options.map((state) => (
                 <option value={state} key={state}>
                   {state}
                 </option>
               ))}
             </Select>
-            <FormErrorMessage>
-              {errors.state?.message as string}
-            </FormErrorMessage>
+            <FormErrorMessage>{errors.state?.message}</FormErrorMessage>
           </FormControl>
-
-          {/* Zip */}
-          <FormControl isInvalid={!!errors.zip} mb={3}>
-            <FormLabel htmlFor="zip">Zip Code</FormLabel>
+          <FormControl isInvalid={!!errors.zip}>
+            <FormLabel htmlFor="edit-zip">ZIP</FormLabel>
             <Input
-              id="zip"
-              type="number"
-              placeholder="12345"
-              {...register("zip", {
-                valueAsNumber: true,
-              })}
+              id="edit-zip"
+              inputMode="numeric"
+              maxLength={5}
+              {...register("zip")}
             />
-            <FormErrorMessage>{errors.zip?.message as string}</FormErrorMessage>
+            <FormErrorMessage>{errors.zip?.message}</FormErrorMessage>
           </FormControl>
+        </HStack>
 
-          {/* Phone */}
-          <FormControl isInvalid={!!errors.phone} mb={3}>
-            <FormLabel htmlFor="phone">Phone Number</FormLabel>
-            <Input
-              id="phone"
-              type="tel"
-              placeholder="(123) 456-7890"
-              {...register("phone")}
-            />
-            <FormErrorMessage>
-              {errors.phone?.message as string}
-            </FormErrorMessage>
-          </FormControl>
+        <FormControl isInvalid={!!errors.phone}>
+          <FormLabel htmlFor="edit-phone">Phone</FormLabel>
+          <Input id="edit-phone" type="tel" {...register("phone")} />
+          <FormErrorMessage>{errors.phone?.message}</FormErrorMessage>
+        </FormControl>
 
-          {/* Website */}
-          <FormControl isInvalid={!!errors.url} mb={3}>
-            <FormLabel htmlFor="url">Website URL</FormLabel>
-            <Input
-              id="url"
-              type="url"
-              placeholder="https://example.com"
-              {...register("url")}
-            />
-            <FormErrorMessage>{errors.url?.message as string}</FormErrorMessage>
-          </FormControl>
-        </Grid>
+        <FormControl isInvalid={!!errors.email}>
+          <FormLabel htmlFor="edit-email">Email</FormLabel>
+          <Input id="edit-email" type="email" {...register("email")} />
+          <FormErrorMessage>{errors.email?.message}</FormErrorMessage>
+        </FormControl>
 
-        <Box display="flex" justifyContent="space-between" mt={6}>
-          <Button
-            onClick={onClose}
-            colorScheme="gray"
-            variant="outline"
-            width="48%"
-          >
+        <FormControl isInvalid={!!errors.url} gridColumn={{ md: "span 2" }}>
+          <FormLabel htmlFor="edit-url">Website</FormLabel>
+          <Input id="edit-url" inputMode="url" {...register("url")} />
+          <FormErrorMessage>{errors.url?.message}</FormErrorMessage>
+        </FormControl>
+
+        <FormControl gridColumn={{ md: "span 2" }}>
+          <FormLabel htmlFor="edit-hours">Hours</FormLabel>
+          <Textarea id="edit-hours" rows={2} {...register("businessHours")} />
+        </FormControl>
+      </Grid>
+
+      {submitError && (
+        <Alert status="error" mt={4} borderRadius="md">
+          <AlertIcon />
+          {submitError}
+        </Alert>
+      )}
+
+      <HStack mt={6} justify="space-between">
+        <Button
+          colorScheme="red"
+          variant="ghost"
+          onClick={handleDelete}
+          isLoading={isDeleting}
+        >
+          Remove listing
+        </Button>
+        <HStack>
+          <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
           <Button
             type="submit"
             colorScheme="blue"
             isLoading={isSubmitting}
-            isDisabled={Object.keys(errors).length > 0}
-            width="48%"
+            isDisabled={!isDirty || !mapsLoaded}
           >
-            Update Listing
+            Save changes
           </Button>
-        </Box>
-      </Form>
+        </HStack>
+      </HStack>
     </Box>
   );
 };

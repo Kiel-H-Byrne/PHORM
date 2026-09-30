@@ -53,6 +53,13 @@ const FloatingButtons = (props: ILocateMe) => {
     };
   }, [geoWatchId, clientLocation]);
 
+  const locationErrorToast = useToast({
+    status: "warning",
+    title: "Couldn't find your location",
+    description:
+      "Allow location access in your browser to see nearby businesses.",
+  });
+
   const searchingToast = useToast({
     colorScheme: "yellow",
     status: "info",
@@ -66,6 +73,7 @@ const FloatingButtons = (props: ILocateMe) => {
     //zoom to position
     //calculate closest listing(s)
     //when user clicks again, turn tracking off.
+    if (!mapInstance) return;
     let oldMarker: google.maps.Marker;
     if (!geoWatchId || !clientLocation) {
       searchingToast();
@@ -102,6 +110,7 @@ const FloatingButtons = (props: ILocateMe) => {
               clientMarker.setMap(mapInstance);
               clientMarker.setPosition(positionObject);
             }
+            searchingToast.closeAll();
             setClientLocation(positionObject);
             targetClient(mapInstance, positionObject);
 
@@ -124,10 +133,9 @@ const FloatingButtons = (props: ILocateMe) => {
           },
           (error) => {
             console.warn(error);
-            setClientLocation({
-              latitude: null,
-              longitude: null,
-            });
+            searchingToast.closeAll();
+            locationErrorToast();
+            setClientLocation(null);
           },
           {
             enableHighAccuracy: true,
@@ -141,7 +149,7 @@ const FloatingButtons = (props: ILocateMe) => {
       }
     }
     //center marker in window
-    clientLocation && targetClient(mapInstance, clientLocation);
+    mapInstance && clientLocation && targetClient(mapInstance, clientLocation);
     //toggle some view
     !toggleDisplay ? setToggleDisplay(true) : setToggleDisplay(false);
   }, [
@@ -149,6 +157,7 @@ const FloatingButtons = (props: ILocateMe) => {
     clientMarker,
     closestMarker,
     geoWatchId,
+    locationErrorToast,
     mapInstance,
     searchingToast,
     setClientLocation,
@@ -196,7 +205,7 @@ const FloatingButtons = (props: ILocateMe) => {
               <Heading textAlign="center" size="lg">
                 Sign In to Add Your Business
               </Heading>
-              <Button onClick={() => router.push("/auth/login")}>
+              <Button onClick={() => router.push("/auth/login?returnUrl=/map")}>
                 Sign In
               </Button>
             </VStack>
@@ -227,7 +236,7 @@ function FloatingPopoverButton({
       <PopoverTrigger>
         <IconButton
           borderRadius="50%"
-          aria-label="My Location"
+          aria-label={popOverText}
           onClick={handleClick}
           colorScheme={colorScheme}
         >

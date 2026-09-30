@@ -1,62 +1,59 @@
-import { Map, initialize, mockInstances } from "@googlemaps/jest-mocks";
-import "@testing-library/jest-dom/extend-expect";
-import { fireEvent, render } from "@testing-library/react";
-import React from "react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import FloatingButtons from "../LocateMeButton";
 
-beforeEach(() => {
-  initialize();
-});
+jest.mock("@/contexts/AuthContext", () => ({
+  useAuth: () => ({ user: null, loading: false }),
+}));
 
-// Mock the necessary dependencies and props
-// jest.mock('google.maps.Marker', () => jest.fn());
-// jest.mock('google.maps.Circle', () => jest.fn());
-
-const mockSetClientLocation = jest.fn(); // Mock the setClientLocation prop
+const mapInstance = { panTo: jest.fn(), setZoom: jest.fn() } as any;
 
 describe("LocateMeButton", () => {
-  it("should render the component correctly", () => {
-    const { container } = render(
+  beforeEach(() => jest.clearAllMocks());
+
+  it("renders the add-business and locate buttons", () => {
+    render(
       <FloatingButtons
-        mapInstance={mockInstances.get(Map)[0]}
-        setClientLocation={mockSetClientLocation}
+        mapInstance={mapInstance}
+        setClientLocation={jest.fn()}
         clientLocation={null}
       />
     );
-
-    expect(container).toMatchSnapshot();
+    expect(screen.getAllByRole("button").length).toBeGreaterThanOrEqual(2);
+    expect(screen.getByText("Find My Location")).toBeInTheDocument();
   });
 
-  it('should call handleClick when the "My Location" button is clicked', () => {
-    const { getByLabelText } = render(
+  it("clears the location and doesn't crash when permission is denied", () => {
+    const setClientLocation = jest.fn();
+    (navigator as any).geolocation = {
+      watchPosition: jest.fn((_ok, fail) => {
+        fail({ code: 1, message: "denied" });
+        return 1;
+      }),
+      clearWatch: jest.fn(),
+    };
+    render(
       <FloatingButtons
-        mapInstance={mockInstances.get(Map)[0]}
-        setClientLocation={mockSetClientLocation}
+        mapInstance={mapInstance}
+        setClientLocation={setClientLocation}
         clientLocation={null}
       />
     );
-
-    const myLocationButton = getByLabelText("My Location");
-    fireEvent.click(myLocationButton);
-
-    // Add your assertions here to check if the necessary functions have been called
-    expect(mockSetClientLocation).toHaveBeenCalledTimes(1);
-    // ...
+    // The locate button is the second floating button.
+    fireEvent.click(screen.getAllByRole("button")[1]);
+    expect(setClientLocation).toHaveBeenCalledWith(null);
   });
 
-  it('should call handleOpen when the "Add Listing" button is clicked', () => {
-    const { getByLabelText } = render(
+  it("asks signed-out users to sign in before adding a business", () => {
+    render(
       <FloatingButtons
-        mapInstance={mockInstances.get(Map)[0]}
-        setClientLocation={mockSetClientLocation}
+        mapInstance={mapInstance}
+        setClientLocation={jest.fn()}
         clientLocation={null}
       />
     );
-
-    const addListingButton = getByLabelText("Add Listing");
-    fireEvent.click(addListingButton);
-
-    // Add your assertions here to check if the necessary functions have been called
-    // ...
+    fireEvent.click(screen.getAllByRole("button")[0]);
+    expect(
+      screen.getByText("Sign In to Add Your Business")
+    ).toBeInTheDocument();
   });
 });

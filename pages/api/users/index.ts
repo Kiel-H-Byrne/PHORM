@@ -1,88 +1,50 @@
-import { appFsdb } from "@/db/firebase";
-import { IUser } from "@/types";
 import {
-  CollectionReference,
-  QueryConstraint,
-  collection,
-  getDocs,
-  query,
-  where,
-} from "firebase/firestore";
+  isListedInDirectory,
+  toPublicMember,
+  usersCollection,
+} from "@/db/usersAdmin";
+import { requireUser } from "@/util/apiAuth";
 import { NextApiRequest, NextApiResponse } from "next";
 
-const maxAge = 1 * 24 * 60 * 60;
-
 const userHandler = async (req: NextApiRequest, res: NextApiResponse) => {
-  const {
-    //can send query params to sort & limit results
-    query: { id, name, by, limit, from, occupation, location },
-    method,
-  } = req;
-  switch (method) {
-    case "GET":
-      if (appFsdb) {
-        let membersRef = collection(appFsdb, "users");
-        const queries: QueryConstraint[] = [];
+  if (req.method !== "GET") {
+    res.setHeader("Allow", ["GET"]);
+    return res.status(405).end(`Method ${req.method} Not Allowed`);
+  }
+  const authUser = await requireUser(req, res);
+  if (!authUser) return;
 
-        if (id) {
-          queries.push(where("id", "==", id));
-        }
+  try {
+    const { name, occupation, location } = req.query as Record<
+      string,
+      string | undefined
+    >;
+    const snap = await usersCollection().limit(1000).get();
+    const contains = (value: unknown, term?: string) =>
+      !term ||
+      String(value ?? "")
+        .toLowerCase()
+        .includes(term.toLowerCase());
 
-        if (name) {
-          queries.push(
-            where("firstName", ">=", name),
-            where("firstName", "<=", name + "~")
-          );
-        }
-
-        if (location) {
-          queries.push(where("location", "==", location));
-        }
-
-        if (occupation) {
-          queries.push(where("occupation", "==", occupation));
-        }
-
-        if (queries.length > 0) {
-          const q = query(membersRef, ...queries) as CollectionReference<IUser>;
-          membersRef = q;
-        }
-
-        const membersSnapshot = await getDocs(membersRef);
-        const members: IUser[] = [];
-
-        membersSnapshot.forEach((doc) => {
-          members.push({ id: doc.id, ...doc.data() } as IUser);
-        });
-        // console.log(res);
-        if (from && members.length > 0) {
-          // This is safe to cache because from defines
-          //  a concrete range of orders
-          res.setHeader("cache-control", `public, max-age=${maxAge}`);
-        }
-        res.status(200).json(members);
-      } else {
-        res.status(200).json("NO DB LOADED");
-      }
-      break;
-    case "POST":
-      // if (!req.user) {
-      //   return res.status(401).send('unauthenticated');
-      // }
-
-      if (!req.body) return res.status(400).send("You must write something");
-
-      // const order = await insertUser(db, req.body.data);
-      // return res.json({ order });
-      break;
-    default:
-      res.setHeader("Allow", ["GET", "POST"]);
-      res.status(405).end(`Method ${method} Not Allowed`);
+    const members = snap.docs
+      .filter((d) => isListedInDirectory(d.data()))
+      .map((d) => toPublicMember(d.id, d.data()))
+      .filter(
+        (m) =>
+          contains(
+            `${m.profile.firstName ?? ""} ${m.profile.lastName ?? ""} ${
+              m.name
+            }`,
+            name
+          ) &&
+          contains(m.profile.occupation, occupation) &&
+          contains(m.profile.location, location)
+      );
+    return res.status(200).json(members);
+  } catch (error) {
+    console.error("/api/users error:", error);
+    return res.status(500).json({ error: "Failed to fetch members" });
   }
 };
-
-// handler.post(async (req: Request | any, res: Response | any) => {
-//
-// });
 
 export default userHandler;

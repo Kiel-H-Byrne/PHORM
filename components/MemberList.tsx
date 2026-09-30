@@ -1,37 +1,31 @@
 import { IUser } from "@/types";
-import { AddIcon } from "@chakra-ui/icons";
-import { Button, Card, Heading, Icon, Stack, VStack } from "@chakra-ui/react";
-import { useRouter } from "next/router";
-import { BsCollection } from "react-icons/bs";
+import { Button, Card, Heading, SimpleGrid, Text } from "@chakra-ui/react";
+import NextLink from "next/link";
 import MemberCard from "./MemberCard";
 
 export default function MemberList({ members }: { members: IUser[] }) {
-  const router = useRouter();
   return !members || members.length === 0 ? (
-    <Card align="center" p={3}>
-      <Heading pb={3}>No Members Yet...</Heading>
+    <Card align="center" p={6} textAlign="center">
+      <Heading size="md" pb={2}>
+        No members found
+      </Heading>
+      <Text color="gray.600" pb={4}>
+        Only members who choose to be listed appear here.
+      </Text>
       <Button
-        variant={"solid"}
-        colorScheme={"mwphgldc.blue"}
-        onClick={() => router.push("/auth/login")}
-        size={"sm"}
-        mr={4}
-        leftIcon={<AddIcon />}
+        as={NextLink}
+        href="/dashboard?editProfile=1"
+        colorScheme="blue"
+        size="sm"
       >
-        Be The First!
+        Add yourself to the directory
       </Button>
     </Card>
   ) : (
-    <VStack spacing={3} marginBlock={3}>
-      <Heading fontSize="2xl" mb={4}>
-        <Icon as={BsCollection} marginInline={5} />
-        Member Directory
-      </Heading>
-      <Stack spacing={4} direction={{ base: "column", sm: "row" }}>
-        {members.map((member) => (
-          <MemberCard user={member} key={member.id} />
-        ))}
-      </Stack>
-    </VStack>
+    <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} spacing={4} w="100%">
+      {members.map((member) => (
+        <MemberCard user={member} key={member.id} />
+      ))}
+    </SimpleGrid>
   );
 }

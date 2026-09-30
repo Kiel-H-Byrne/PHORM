@@ -1,156 +1,118 @@
-import { appFsdb } from "@/db/firebase";
-import { IListing } from "@/types";
+import { adminDb } from "@/db/admin";
 import {
-  addDoc,
-  collection,
-  getCountFromServer,
-  getDocs,
-  limit,
-  orderBy,
-  query,
-  startAfter,
-  where,
-} from "firebase/firestore";
+  ListingCreateSchema,
+  buildAddress,
+  geoFields,
+  getVisibleListings,
+  listingOwnerId,
+  matchesSearch,
+  toPublicListing,
+  withDistance,
+} from "@/db/listingsAdmin";
+import { IListing } from "@/types";
+import { requireUser } from "@/util/apiAuth";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  if (!appFsdb) {
-    return res.status(500).json({ error: "Firestore is not configured" });
-  }
-
-  const listingsRef = collection(appFsdb, "listings");
-
   switch (req.method) {
     case "GET":
       try {
         const {
           searchQuery,
           page = "1",
-          pageSize = "10",
+          pageSize = "12",
           category,
           creator,
           includeCount,
           all,
-        } = req.query as {
-          searchQuery?: string;
-          page?: string;
-          pageSize?: string;
-          category?: string;
-          creator?: string;
-          includeCount?: string;
-          all?: string;
-        };
+          near,
+        } = req.query as Record<string, string | undefined>;
 
-        // Base query (with optional category or creator filter)
-        let base = creator
-          ? query(listingsRef, where("creator.id", "==", creator))
-          : query(listingsRef, orderBy("createdAt", "desc"));
-        if (category) {
-          base = query(base, where("categories", "array-contains", category));
-        }
-
-        // If requesting all, stream through pages server-side (safe for dev datasets)
-        if (all === "true") {
-          const items: IListing[] = [];
-          let last: any = undefined;
-          const size = parseInt(pageSize || "50", 10);
-          const MAX = 1000; // safety cap
-          while (items.length < MAX) {
-            let pageQ = query(base, limit(size));
-            if (last) pageQ = query(pageQ, startAfter(last));
-            const snap = await getDocs(pageQ);
-            if (snap.empty) break;
-            snap.docs.forEach((d) =>
-              items.push({ id: d.id, ...(d.data() as any) } as IListing)
-            );
-            last = snap.docs[snap.docs.length - 1];
-            if (snap.size < size) break;
-          }
-          return res.status(200).json(items);
-        }
-
-        // Paged request
-        let q = query(base, limit(parseInt(pageSize || "10", 10)));
-        if (parseInt(page || "1", 10) > 1) {
-          const backfill = await getDocs(
-            query(
-              base,
-              limit(
-                (parseInt(page || "1", 10) - 1) * parseInt(pageSize || "10", 10)
-              )
-            )
-          );
-          if (!backfill.empty) {
-            q = query(q, startAfter(backfill.docs[backfill.docs.length - 1]));
-          }
-        }
-
-        const snapshot = await getDocs(q);
-        let listings = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...(doc.data() as any),
-        })) as IListing[];
-
-        // In-memory fuzzy search by name/address if searchQuery present
-        if (searchQuery) {
-          const term = searchQuery.toString().toLowerCase();
-          listings = listings.filter(
-            (l) =>
-              (l.name || "").toLowerCase().includes(term) ||
-              (l.address || "").toLowerCase().includes(term) ||
-              (Array.isArray(l.categories) &&
-                l.categories.join(" ").toLowerCase().includes(term))
-          );
-        }
+        let listings: IListing[] = await getVisibleListings();
 
         if (creator) {
-          listings = listings.filter(
-            (l) =>
-              (l as any).creator?.id === creator ||
-              (l as any).creator === creator ||
-              (l as any).createdBy === creator
+          listings = listings.filter((l) => listingOwnerId(l) === creator);
+        }
+        if (category) {
+          const c = category.toLowerCase();
+          listings = listings.filter((l) =>
+            (l.categories || []).some((x) => x.toLowerCase() === c)
+          );
+        }
+        if (searchQuery?.trim()) {
+          listings = listings.filter((l) => matchesSearch(l, searchQuery));
+        }
+
+        const [lat, lng] = (near || "").split(",").map(Number);
+        if (near && Number.isFinite(lat) && Number.isFinite(lng)) {
+          listings = withDistance(listings, [lat, lng]);
+        } else {
+          listings.sort((a: any, b: any) =>
+            (b.createdAt || "").localeCompare(a.createdAt || "")
           );
         }
 
+        if (all === "true") return res.status(200).json(listings);
+
+        const size = Math.min(Math.max(parseInt(pageSize, 10) || 12, 1), 100);
+        const total = listings.length;
+        const totalPages = Math.max(1, Math.ceil(total / size));
+        const pg = Math.min(Math.max(parseInt(page, 10) || 1, 1), totalPages);
+        const data = listings.slice((pg - 1) * size, pg * size);
+
         if (includeCount === "true") {
-          const countSnap = await getCountFromServer(base);
-          const total = countSnap.data().count || 0;
-          const size = parseInt(pageSize || "10", 10);
-          const pg = parseInt(page || "1", 10);
-          const totalPages = Math.max(1, Math.ceil(total / size));
           return res
             .status(200)
-            .json({
-              data: listings,
-              page: pg,
-              pageSize: size,
-              total,
-              totalPages,
-            });
+            .json({ data, page: pg, pageSize: size, total, totalPages });
         }
-
-        return res.status(200).json(listings);
+        return res.status(200).json(data);
       } catch (error) {
         console.error("List Listings Error:", error);
         return res.status(500).json({ error: "Failed to fetch listings" });
       }
 
-    case "POST":
+    case "POST": {
+      const user = await requireUser(req, res);
+      if (!user) return;
       try {
-        const listingData = {
-          ...req.body,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+        const body =
+          typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+        const parsed = ListingCreateSchema.safeParse(body);
+        if (!parsed.success) {
+          return res.status(400).json({
+            error: parsed.error.issues[0]?.message || "Invalid listing",
+            issues: parsed.error.issues,
+          });
+        }
+        const input = parsed.data;
+        const now = new Date().toISOString();
+        const docRef = adminDb().collection("listings").doc();
+        const listing = {
+          ...input,
+          ...geoFields(input.lat, input.lng),
+          address: buildAddress(input),
+          id: docRef.id,
+          creator: {
+            id: user.uid,
+            name: user.name || null,
+            email: user.email || null,
+          },
+          status: "active",
+          isPremium: false,
+          claimsCount: 0,
+          createdAt: now,
+          updatedAt: now,
         };
-        const docRef = await addDoc(listingsRef, listingData);
-        return res.status(201).json({ id: docRef.id, ...listingData });
+        await docRef.set(listing);
+        return res.status(201).json(toPublicListing(docRef.id, listing));
       } catch (error) {
         console.error("Create Listing Error:", error);
         return res.status(500).json({ error: "Failed to create listing" });
       }
+    }
 
     default:
       res.setHeader("Allow", ["GET", "POST"]);

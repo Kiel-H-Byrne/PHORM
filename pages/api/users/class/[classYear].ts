@@ -1,4 +1,9 @@
-import { findUsersByClassYear } from "@/db/users";
+import {
+  isListedInDirectory,
+  toPublicMember,
+  usersCollection,
+} from "@/db/usersAdmin";
+import { requireUser } from "@/util/apiAuth";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(
@@ -14,31 +19,25 @@ export default async function handler(
     res.setHeader("Allow", ["GET"]);
     return res.status(405).end(`Method ${method} Not Allowed`);
   }
+  const authUser = await requireUser(req, res);
+  if (!authUser) return;
 
-  if (!classYear || typeof classYear !== "string") {
-    return res.status(400).json({ error: "Class year is required" });
-  }
-
-  const classYearNumber = parseInt(classYear, 10);
+  const classYearNumber = parseInt(String(classYear), 10);
   if (isNaN(classYearNumber)) {
     return res.status(400).json({ error: "Invalid class year" });
   }
 
   try {
-    const users = await findUsersByClassYear(classYearNumber);
-    
-    // Set cache headers (cache for 1 hour)
-    res.setHeader(
-      "Cache-Control",
-      "public, s-maxage=3600, stale-while-revalidate=86400"
-    );
-    
+    const snap = await usersCollection()
+      .where("profile.classYear", "==", classYearNumber)
+      .get();
+    const users = snap.docs
+      .filter((d) => isListedInDirectory(d.data()))
+      .map((d) => toPublicMember(d.id, d.data()));
+    res.setHeader("Cache-Control", "private, max-age=300");
     return res.status(200).json({ users });
   } catch (error) {
     console.error(`Error fetching users for class year ${classYear}:`, error);
-    return res.status(500).json({
-      error: "Failed to fetch users",
-      details: error instanceof Error ? error.message : "Unknown error",
-    });
+    return res.status(500).json({ error: "Failed to fetch users" });
   }
 }

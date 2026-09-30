@@ -1,4 +1,5 @@
 import { StatesEnum } from "@/types";
+import { STATE_ABBREVIATIONS } from "@/util/constants";
 import * as z from "zod";
 
 const SocialSchema = z.object({
@@ -34,6 +35,8 @@ export const ProfileSchema = z.object({
   socialLinks: z.array(z.string()).optional().default([]),
   orgs: z.array(OrgSchema).optional().default([]),
   classYear: z.number().optional(),
+  // Member directory is opt-in: only members who set this appear to others.
+  listInDirectory: z.boolean().optional(),
   nickName: z.string().optional(),
   profilePhoto: z.string().optional(),
   occupation: z.string().optional(),
@@ -79,11 +82,27 @@ export const ListingsSchema = z
     claims: z.array(ClaimSchema),
     claimsCount: z.number(),
     imageUri: z.string(),
-    creator: z.string(),
+    creator: z.union([
+      z.string(),
+      z
+        .object({
+          id: z.string().nullable(),
+          name: z.string().nullable(),
+          email: z.string().nullable(),
+        })
+        .partial(),
+    ]),
+    createdAt: z.string().nullable(),
+    updatedAt: z.string().nullable(),
+    updated: z.date(),
+    geoHash: z.string(),
+    status: z.enum(["active", "hidden"]),
+    deleted: z.boolean(),
+    distanceKm: z.number(),
     phone: z.string(),
     url: z.string().url(),
     isPremium: z.boolean(),
-    zip: z.number().min(10000).max(99999), //5 digits max,
+    zip: z.union([z.number(), z.string()]),
     // country: z.string(), // verifiers: z.array(z.string()),// verifierCount: z.number(),// deVerifiers: z.array(z.string()),// deVerifierCount: z.number(),geoHash: z.string(), // places_details: z.object()
     description: z.string(),
     businessHours: z.string(),
@@ -124,3 +143,56 @@ export const CouponSchema = z
     updatedAt: z.string().optional(),
   })
   .partial();
+
+// == Listing input (shared by the add/edit forms and the API) == //
+
+const optionalText = (max: number) =>
+  z.string().trim().max(max).optional().or(z.literal(""));
+
+const optionalUrl = z
+  .string()
+  .trim()
+  .max(300)
+  .transform((v) => (v && !/^https?:\/\//i.test(v) ? `https://${v}` : v))
+  .pipe(z.string().url().or(z.literal("")))
+  .optional();
+
+/** Fields a listing owner may set. Everything else is server-controlled. */
+export const ListingInputSchema = z.object({
+  name: z.string().trim().min(2, "Business name is required").max(100),
+  description: optionalText(500),
+  street: optionalText(150),
+  city: z.string().trim().min(2, "City is required").max(80),
+  state: z.enum(STATE_ABBREVIATIONS),
+  zip: z
+    .union([z.string(), z.number()])
+    .transform((v) => String(v ?? "").trim())
+    .refine((v) => v === "" || /^\d{5}$/.test(v), "ZIP must be 5 digits")
+    .optional(),
+  phone: optionalText(30),
+  email: z.string().trim().email().max(120).optional().or(z.literal("")),
+  url: optionalUrl,
+  categories: z.array(z.string().trim().min(1).max(40)).max(5).default([]),
+  businessHours: optionalText(300),
+  imageUri: optionalUrl,
+  place_id: optionalText(300),
+  lat: z.number().min(-90).max(90),
+  lng: z.number().min(-180).max(180),
+  social: z
+    .object({
+      facebook: optionalText(200),
+      instagram: optionalText(200),
+      twitter: optionalText(200),
+    })
+    .partial()
+    .optional(),
+});
+
+export const ListingCreateSchema = ListingInputSchema.refine(
+  (d) => !!(d.phone || d.email || d.url),
+  { message: "Add at least one way to contact the business", path: ["phone"] }
+);
+
+export const ListingUpdateSchema = ListingInputSchema.partial();
+
+export type ListingInput = z.infer<typeof ListingInputSchema>;

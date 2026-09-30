@@ -14,7 +14,7 @@ import {
 } from "@chakra-ui/react";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
-import { memo, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 import AddListingDrawer from "./AddListingDrawer";
 import MyAvatar from "./MyAvatar";
 import { AvatarDropdown } from "./AvatarDropdown";
@@ -51,22 +51,19 @@ const MyNav = () => {
   } = useDisclosure();
   const firstField = useRef().current;
 
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
-  const isPrivateLink = (link: { isPrivate: boolean }) => link.isPrivate;
+  useEffect(() => {
+    onDropdownClose();
+  }, [router.asPath, onDropdownClose]);
   const isLoggedIn = !!user;
-  const isLoading = loading;
-
-  const isMapView =
-    router?.pathname === "/map" || router?.query?.viewType === "map";
 
   const navLinks: INAVLINKS = [
     { path: "/", label: "Home", isPrivate: false },
-    { path: "/about", label: "About", isPrivate: false },
+    { path: "/list", label: "Browse", isPrivate: false },
+    { path: "/map", label: "Map", isPrivate: false },
     { path: "/coupons", label: "Deals", isPrivate: false },
-    isMapView
-      ? { path: "/list", label: "List View", isPrivate: false }
-      : { path: "/map", label: "Map View", isPrivate: false },
+    { path: "/about", label: "About", isPrivate: false },
     { path: "/member-directory", label: "Member Directory", isPrivate: true },
   ];
   return (
@@ -85,7 +82,7 @@ const MyNav = () => {
             display={{ md: "none" }}
             onClick={dropdownIsOpen ? onDropdownClose : onDropdownOpen}
           />
-          <HStack spacing={8} alignItems={"center"}>
+          <HStack spacing={{ base: 2, md: 8 }} alignItems={"center"}>
             <Link as={NextLink} href="/">
               <Image
                 height={14}
@@ -110,13 +107,20 @@ const MyNav = () => {
               color="#fff"
               onClick={() =>
                 //logged in? add form else go to login page
-                isLoggedIn ? onDrawerOpen() : router.push("/auth/login")
+                isLoggedIn
+                  ? onDrawerOpen()
+                  : router.push("/auth/login?returnUrl=/dashboard")
               }
               size={"sm"}
-              mr={4}
+              mr={{ base: 2, md: 4 }}
               leftIcon={<AddIcon />}
             >
-              Add Your Business {/** Get Listed */}
+              <Box as="span" display={{ base: "none", sm: "inline" }}>
+                Add Your Business
+              </Box>
+              <Box as="span" display={{ base: "inline", sm: "none" }}>
+                Add
+              </Box>
             </Button>
             <Menu>
               <MyAvatar />

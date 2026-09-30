@@ -2,33 +2,39 @@ import AddListingDrawer from "@/components/AddListingDrawer";
 import BusinessCard from "@/components/ListingCard2";
 import { useAuth } from "@/contexts/AuthContext";
 import { IListing } from "@/types";
-import fetcher from "@/util/fetch";
+import { BUSINESS_CATEGORIES } from "@/util/constants";
 import {
   Box,
   Button,
   Container,
-  Grid,
-  GridItem,
+  Flex,
   HStack,
   Heading,
   Icon,
   Image,
+  Input,
+  InputGroup,
+  InputLeftElement,
+  SimpleGrid,
+  Skeleton,
   Stack,
   Text,
   VStack,
+  Wrap,
+  WrapItem,
   useColorModeValue,
   useDisclosure,
 } from "@chakra-ui/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useRef, useState } from "react";
-import { FaBuilding, FaPlus } from "react-icons/fa";
+import { FormEvent, useRef, useState } from "react";
+import { FaBuilding, FaPlus, FaSearch } from "react-icons/fa";
 import { MdList, MdMap } from "react-icons/md";
-import SWR from "swr";
+import useSWR from "swr";
 
 /**
  * Homepage
- * A friendly landing page for members to find businesses and add their own.
+ * Search first, then browse, then add your own business.
  */
 export default function IndexPage() {
   const router = useRouter();
@@ -40,168 +46,133 @@ export default function IndexPage() {
     onClose: onDrawerClose,
   } = useDisclosure();
   const firstField = useRef().current;
+  const emptyBg = useColorModeValue("gray.50", "gray.800");
+  const emptyBorder = useColorModeValue("gray.200", "gray.700");
 
-  const { data: featured, isLoading } = SWR<IListing[]>(
-    "/api/listings",
-    fetcher
+  const { data: featured, isLoading } = useSWR<IListing[]>(
+    "/api/listings?pageSize=6"
   );
-  const handleSearch = (e?: React.FormEvent) => {
-    e?.preventDefault();
+
+  const handleSearch = (e: FormEvent) => {
+    e.preventDefault();
     const q = query.trim();
     router.push(q ? `/list?searchQuery=${encodeURIComponent(q)}` : "/list");
   };
 
   const handleAddBusiness = () => {
-    if (user) {
-      onDrawerOpen();
-    } else {
-      router.push("/auth/login");
-    }
+    if (user) onDrawerOpen();
+    else router.push("/auth/login?returnUrl=/dashboard");
   };
 
   return (
-    <Container maxW="6xl" py={{ base: 8, md: 12 }}>
-      {/* About */}
-      <VStack spacing={3} p={{ base: 0, small: 5 }} mb={{ base: 8, md: 12 }}>
-        <Heading
-          textAlign="center"
-          as={"h1"}
-          fontSize={{ base: "xl", md: "2xl" }}
-          width="full"
-        >
-          Welcome to The{" "}
+    <Container maxW="6xl" py={{ base: 6, md: 12 }} px={{ base: 0, md: 4 }}>
+      <VStack spacing={4} mb={{ base: 8, md: 12 }} textAlign="center">
+        <Image
+          src="/img/Logo1.png"
+          height={{ base: 20, md: 28 }}
+          alt="PHORM logo"
+        />
+        <Heading as="h1" size={{ base: "lg", md: "xl" }}>
+          Find businesses owned by our{" "}
           <Text as="span" color="royalblue">
-            P
+            PHAmily
           </Text>
-          rince{" "}
-          <Text as="span" color="royalblue">
-            H
-          </Text>
-          all{" "}
-          <Text as="span" color="royalblue">
-            O
-          </Text>
-          nline{" "}
-          <Text as="span" color="royalblue">
-            R
-          </Text>
-          egistry of{" "}
-          <Text as="span" color="royalblue">
-            M
-          </Text>
-          erchants
         </Heading>
-        <Heading
-          size="sm"
-          color="gray.500"
-          fontStyle={"oblique"}
-          mb={2}
-          textAlign={"center"}
-        >
-          Connecting Communities, Empowering Entrepreneurs, Strengthening our
-          Brotherhood
-        </Heading>
-        <Stack
-          direction={{ base: "column", md: "row" }}
-          px={{ base: 3, sm: 10 }}
-          spacing={10}
-          alignItems={"center"}
-        >
-          <Image
-            src={"/img/Logo1.png"}
-            aspectRatio={0.787}
-            height={{ base: 24, md: 172 }}
-            alt="logo"
-          />
-          <Text fontSize="lg" fontFamily={"body"}>
-            Welcome to{" "}
-            <Text as="span" fontWeight="bold" color="blue.600">
-              The PHORM
-            </Text>
-            , the premier online directory dedicated to promoting and supporting
-            businesses owned by individuals affiliated with Prince Hall
-            Freemasonry. Immerse yourself in <i>the</i> platform that celebrates
-            our shared bond while showcasing the talents and offerings of our
-            esteemed PHAmily.
-          </Text>
-        </Stack>
-      </VStack>
-
-      {/* Hero */}
-      <VStack spacing={4} align="stretch" mb={{ base: 8, md: 12 }}>
-        <Heading as="h1" size="xl" textAlign="center">
-          Find Your Community Business
-        </Heading>
-        <Text
-          fontSize={{ base: "md", md: "lg" }}
-          textAlign="center"
-          color="gray.600"
-        >
-          Welcome to PHORM — a directory of Prince Hall–owned and supported
-          businesses.
+        <Text fontSize={{ base: "md", md: "lg" }} color="gray.600" maxW="2xl">
+          The Prince Hall Online Registry of Merchants. Search for a service,
+          call or visit in one tap, and share with your lodge.
         </Text>
 
-        {/* Search */}
-        <Box
+        <Flex
           as="form"
           onSubmit={handleSearch}
-          mx="auto"
-          w={{ base: "100%", md: "70%" }}
+          w={{ base: "100%", md: "75%" }}
+          gap={2}
+          direction={{ base: "column", sm: "row" }}
+          pt={2}
         >
-          {/* <MapSearch
-            layout="overlay"
-            onSelectListing={(listing) => {
-              const q = new URLSearchParams({ viewType: "map" });
-              if (listing.lat && listing.lng)
-                q.set("center", `${listing.lat},${listing.lng}`);
-              router.push(`/?${q.toString()}`);
-            }}
-          /> */}
-          <HStack mt={4} justify="center" spacing={4}>
-            <Button
-              as={Link}
-              href="/map"
-              size="lg"
-              leftIcon={<Icon as={MdMap} />}
-              colorScheme="blue"
-            >
-              View Map
-            </Button>
-            <Button
-              as={Link}
-              href={
-                query
-                  ? `/list?searchQuery=${encodeURIComponent(query)}`
-                  : "/list"
-              }
-              size="lg"
-              leftIcon={<Icon as={MdList} />}
-              variant="outline"
-            >
-              View List
-            </Button>
-          </HStack>
-        </Box>
+          <InputGroup size="lg">
+            <InputLeftElement pointerEvents="none">
+              <Icon as={FaSearch} color="gray.400" />
+            </InputLeftElement>
+            <Input
+              type="search"
+              enterKeyHint="search"
+              placeholder="What do you need? e.g. plumber, attorney"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              aria-label="Search businesses"
+              bg="white"
+            />
+          </InputGroup>
+          <Button type="submit" size="lg" colorScheme="blue" px={8}>
+            Search
+          </Button>
+        </Flex>
+
+        <Wrap justify="center" spacing={2}>
+          {BUSINESS_CATEGORIES.slice(0, 8).map((c) => (
+            <WrapItem key={c}>
+              <Button
+                as={Link}
+                href={`/list?category=${encodeURIComponent(c)}`}
+                size="sm"
+                borderRadius="full"
+                variant="outline"
+                colorScheme="blue"
+              >
+                {c}
+              </Button>
+            </WrapItem>
+          ))}
+        </Wrap>
+
+        <HStack spacing={3} pt={2}>
+          <Button as={Link} href="/map" leftIcon={<Icon as={MdMap} />}>
+            Map
+          </Button>
+          <Button
+            as={Link}
+            href="/list"
+            leftIcon={<Icon as={MdList} />}
+            variant="outline"
+          >
+            Browse all
+          </Button>
+          <Button
+            leftIcon={<Icon as={FaPlus} />}
+            variant="ghost"
+            colorScheme="blue"
+            onClick={handleAddBusiness}
+          >
+            Add yours
+          </Button>
+        </HStack>
       </VStack>
 
-      {/* Featured */}
       <VStack align="stretch" spacing={4}>
-        <Heading as="h2" size="lg">
-          Featured Businesses
+        <Heading as="h2" size="md">
+          Recently added
         </Heading>
-        {featured?.length === 0 ? (
+        {isLoading ? (
+          <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} spacing={6}>
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} height="260px" borderRadius="lg" />
+            ))}
+          </SimpleGrid>
+        ) : !featured?.length ? (
           <Box
             textAlign="center"
             py={10}
             px={6}
-            bg={useColorModeValue("gray.50", "gray.850")}
+            bg={emptyBg}
             borderRadius="lg"
             borderWidth="1px"
-            borderColor={useColorModeValue("gray.200", "gray.700")}
+            borderColor={emptyBorder}
           >
             <Icon as={FaBuilding} boxSize={12} color="blue.400" mb={4} />
             <Heading size="md" mb={2}>
-              No Businesses Listed Yet
+              No businesses listed yet
             </Heading>
             <Text color="gray.600" maxW="450px" mx="auto" mb={6}>
               Be the first to list your business on PHORM and reach the
@@ -212,26 +183,39 @@ export default function IndexPage() {
               leftIcon={<Icon as={FaPlus} />}
               onClick={handleAddBusiness}
             >
-              Add Your Business
+              Add your business
             </Button>
           </Box>
         ) : (
-          <Grid
-            templateColumns={{
-              base: "1fr",
-              sm: "repeat(2, 1fr)",
-              md: "repeat(3, 1fr)",
-            }}
-            gap={6}
-          >
-            {featured?.slice(0, 6).map((listing) => (
-              <GridItem key={listing.id ?? listing.name}>
-                <BusinessCard activeListing={listing} />
-              </GridItem>
+          <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} spacing={6}>
+            {featured.map((listing) => (
+              <BusinessCard key={listing.id} activeListing={listing} />
             ))}
-          </Grid>
+          </SimpleGrid>
         )}
       </VStack>
+
+      <Stack
+        mt={12}
+        p={6}
+        borderRadius="lg"
+        bg="mwphgldc.blue.50"
+        direction={{ base: "column", md: "row" }}
+        align="center"
+        justify="space-between"
+        spacing={4}
+      >
+        <Box>
+          <Heading size="md">Own a business?</Heading>
+          <Text color="gray.600">
+            List it for free in about two minutes. Members across the
+            jurisdiction can find you.
+          </Text>
+        </Box>
+        <Button colorScheme="blue" size="lg" onClick={handleAddBusiness}>
+          Add your business
+        </Button>
+      </Stack>
 
       <AddListingDrawer
         drawerIsOpen={drawerIsOpen}

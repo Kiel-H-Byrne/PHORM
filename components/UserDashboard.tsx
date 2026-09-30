@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { findUserById } from "@/db/users";
+import { authFetcher } from "@/util/authFetch";
 import { ICoupon, IListing, IUser } from "@/types";
 import { formatPhoneNum } from "@/utils/helpers";
 import {
@@ -36,6 +36,7 @@ import {
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
+import useSWR from "swr";
 import {
   FaBriefcase,
   FaBuilding,
@@ -68,13 +69,19 @@ const UserDashboard = ({ userId }: UserDashboardProps) => {
   const { user } = useAuth();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
-  const [userListings, setUserListings] = useState<IListing[]>([]);
   const [userCoupons, setUserCoupons] = useState<ICoupon[]>([]);
-  const [favoriteListings, setFavoriteListings] = useState<IListing[]>([]);
   const [userData, setUserData] = useState<IUser | null>(null);
   const [classYear, setClassYear] = useState<number | null>(null);
+  // SWR so listings added/edited elsewhere (which revalidate /api/listings keys) show up here.
+  const { data: userListings = [], isLoading: listingsLoading } = useSWR<
+    IListing[]
+  >(user?.uid ? `/api/listings?all=true&creator=${user.uid}` : null);
 
-  const { isOpen, onToggle, onClose } = useDisclosure();
+  const { isOpen, onToggle, onClose, onOpen } = useDisclosure();
+  // /dashboard?editProfile=1 (linked from the Member Directory) opens the editor.
+  useEffect(() => {
+    if (router.query.editProfile) onOpen();
+  }, [router.query.editProfile, onOpen]);
   const {
     isOpen: drawerIsOpen,
     onOpen: onDrawerOpen,
@@ -113,23 +120,13 @@ const UserDashboard = ({ userId }: UserDashboardProps) => {
         setIsLoading(true);
 
         // Fetch user profile data
-        const userData = await findUserById(user.uid);
+        const userData: IUser | null = await authFetcher(
+          `/api/users/${user.uid}`
+        ).catch(() => null);
         setUserData(userData as IUser);
 
         if (userData?.profile?.classYear) {
           setClassYear(userData.profile.classYear);
-        }
-
-        // Fetch user's listings
-        const listingsResponse = await fetch(
-          `/api/listings?creator=${user.uid}`
-        );
-        if (listingsResponse.ok) {
-          const listingsData = await listingsResponse.json();
-          const items = Array.isArray(listingsData)
-            ? listingsData
-            : listingsData.listings || listingsData.data || [];
-          setUserListings(items);
         }
 
         // Fetch user's coupons
@@ -143,11 +140,6 @@ const UserDashboard = ({ userId }: UserDashboardProps) => {
             : couponsData.data || [];
           setUserCoupons(couponItems);
         }
-
-        // Fetch user's favorites
-        // In a real app, you would fetch this from your API
-        // For now, we'll use an empty array
-        setFavoriteListings([]);
 
         setIsLoading(false);
       } catch (error) {
@@ -248,7 +240,7 @@ const UserDashboard = ({ userId }: UserDashboardProps) => {
             <Stat px={2}>
               <StatLabel>Listings</StatLabel>
               <StatNumber>
-                {isLoading ? (
+                {listingsLoading ? (
                   <Skeleton height="1.5rem" width="3rem" mx="auto" />
                 ) : (
                   userListings.length
@@ -262,16 +254,6 @@ const UserDashboard = ({ userId }: UserDashboardProps) => {
                   <Skeleton height="1.5rem" width="3rem" mx="auto" />
                 ) : (
                   userCoupons.length
-                )}
-              </StatNumber>
-            </Stat>
-            <Stat px={2}>
-              <StatLabel>Favorites</StatLabel>
-              <StatNumber>
-                {isLoading ? (
-                  <Skeleton height="1.5rem" width="3rem" mx="auto" />
-                ) : (
-                  favoriteListings.length
                 )}
               </StatNumber>
             </Stat>
@@ -597,13 +579,12 @@ const UserDashboard = ({ userId }: UserDashboardProps) => {
           <TabList>
             <Tab fontWeight="semibold">My Listings</Tab>
             <Tab fontWeight="semibold">My Coupons ({userCoupons.length})</Tab>
-            <Tab fontWeight="semibold">Favorites</Tab>
           </TabList>
 
           <TabPanels>
             {/* My Listings Tab */}
             <TabPanel>
-              {isLoading ? (
+              {listingsLoading ? (
                 <Grid
                   templateColumns={{
                     base: "1fr",
@@ -636,7 +617,7 @@ const UserDashboard = ({ userId }: UserDashboardProps) => {
                     No Listings Yet
                   </Heading>
                   <Text color="gray.500" mb={6}>
-                    You haven't added any business listings yet.
+                    You haven&apos;t added any business listings yet.
                   </Text>
                   <Button
                     colorScheme="blue"
@@ -702,27 +683,35 @@ const UserDashboard = ({ userId }: UserDashboardProps) => {
                           {coupon.value ? ` • ${coupon.value}` : ""}
                           {coupon.memberOnly ? " • Members only" : ""}
                         </Text>
-                        {Array.isArray(coupon.tags) && coupon.tags.length > 0 && (
-                          <Flex wrap="wrap" gap={1} mt={2}>
-                            {coupon.tags.map((t) => (
-                              <Tag key={t} size="sm">
-                                {t}
-                              </Tag>
-                            ))}
-                          </Flex>
-                        )}
+                        {Array.isArray(coupon.tags) &&
+                          coupon.tags.length > 0 && (
+                            <Flex wrap="wrap" gap={1} mt={2}>
+                              {coupon.tags.map((t) => (
+                                <Tag key={t} size="sm">
+                                  {t}
+                                </Tag>
+                              ))}
+                            </Flex>
+                          )}
                       </CardBody>
                     </Card>
                   ))}
                 </Grid>
               ) : (
                 <Box textAlign="center" py={10}>
-                  <Icon as={MdLocalOffer} boxSize={12} color="gray.300" mb={4} />
+                  <Icon
+                    as={MdLocalOffer}
+                    boxSize={12}
+                    color="gray.300"
+                    mb={4}
+                  />
                   <Heading size="md" mb={2}>
                     No Coupons or Deals Yet
                   </Heading>
                   <Text color="gray.500" mb={6}>
-                    You haven't created any member deals or coupons yet. Add a special offer to attract customers from the PHORM network!
+                    You haven&apos;t created any member deals or coupons yet.
+                    Add a special offer to attract customers from the PHORM
+                    network!
                   </Text>
                   <Button
                     colorScheme="blue"
@@ -730,50 +719,6 @@ const UserDashboard = ({ userId }: UserDashboardProps) => {
                     onClick={onCouponModalOpen}
                   >
                     Create Your First Coupon
-                  </Button>
-                </Box>
-              )}
-            </TabPanel>
-
-            {/* Favorites Tab */}
-            <TabPanel>
-              {isLoading ? (
-                <Grid
-                  templateColumns={{
-                    base: "1fr",
-                    md: "repeat(2, 1fr)",
-                    lg: "repeat(3, 1fr)",
-                  }}
-                  gap={6}
-                >
-                  {[1, 2, 3].map((i) => (
-                    <Skeleton key={i} height="300px" borderRadius="lg" />
-                  ))}
-                </Grid>
-              ) : favoriteListings.length > 0 ? (
-                <Grid
-                  templateColumns={{
-                    base: "1fr",
-                    md: "repeat(2, 1fr)",
-                    lg: "repeat(3, 1fr)",
-                  }}
-                  gap={6}
-                >
-                  {favoriteListings.map((listing) => (
-                    <ListingCard key={listing.id} activeListing={listing} />
-                  ))}
-                </Grid>
-              ) : (
-                <Box textAlign="center" py={10}>
-                  <Icon as={FaHeart} boxSize={12} color="gray.300" mb={4} />
-                  <Heading size="md" mb={2}>
-                    No Favorites Yet
-                  </Heading>
-                  <Text color="gray.500" mb={6}>
-                    You haven't saved any favorite businesses yet.
-                  </Text>
-                  <Button colorScheme="blue" onClick={() => router.push("/")}>
-                    Explore Businesses
                   </Button>
                 </Box>
               )}

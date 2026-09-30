@@ -13,7 +13,8 @@
     "format": "prettier --write --ignore-path=.gitignore .",
     "format:check": "prettier --check --ignore-path=.gitignore .",
     "deploy:vercel": "vercel",
-    "db-init": "node scripts/db-init.js"
+    "db-init": "node scripts/db-init.js",
+    "import-listings": "node scripts/import-listings.js"
   },
   "dependencies": {
     "@chakra-ui/icons": "^2.0.0",

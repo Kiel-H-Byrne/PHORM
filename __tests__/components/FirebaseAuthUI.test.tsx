@@ -1,5 +1,5 @@
 import FirebaseAuthUI from "@/components/FirebaseAuthUI";
-import * as fbAuth from "@/pages/api/auth/fbAuth";
+import * as fbAuth from "@/util/firebaseUI";
 import { render, screen } from "@testing-library/react";
 import { useRouter } from "next/router";
 
@@ -9,7 +9,7 @@ jest.mock("next/router", () => ({
 }));
 
 // Mock the Firebase auth functions
-jest.mock("@/pages/api/auth/fbAuth", () => ({
+jest.mock("@/util/firebaseUI", () => ({
   startFirebaseUILogin: jest.fn(),
 }));
 
