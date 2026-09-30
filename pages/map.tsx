@@ -1,4 +1,5 @@
-import { AppMap, LocateMeButton } from "@/components";
+import AppMap from "@/components/AppMap";
+import LocateMeButton from "@/components/LocateMeButton";
 import { useState } from "react";
 
 /**
@@ -10,7 +11,7 @@ export default function MapPage() {
     lat: number;
     lng: number;
   } | null>(null);
-  const [mapInstance, setMapInstance] = useState({} as google.maps.Map);
+  const [mapInstance, setMapInstance] = useState<google.maps.Map | null>(null);
 
   return (
     <>
@@ -27,4 +28,3 @@ export default function MapPage() {
     </>
   );
 }
-

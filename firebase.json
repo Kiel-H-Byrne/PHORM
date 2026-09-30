@@ -1,0 +1,9 @@
+{
+  "firestore": [
+    {
+      "database": "phorm-db-prod",
+      "rules": "firestore.rules",
+      "indexes": "firestore.indexes.json"
+    }
+  ]
+}

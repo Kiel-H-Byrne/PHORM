@@ -14,13 +14,17 @@ export default function ProtectedRoute({
 
   useEffect(() => {
     if (!loading && !user) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to access this page",
-        status: "warning",
-        duration: 5000,
-        isClosable: true,
-      });
+      // Fixed id so re-renders during the redirect don't stack duplicates.
+      if (!toast.isActive("auth-required")) {
+        toast({
+          id: "auth-required",
+          title: "Authentication required",
+          description: "Please sign in to access this page",
+          status: "warning",
+          duration: 5000,
+          isClosable: true,
+        });
+      }
       router.push({
         pathname: "/auth/login",
         query: { returnUrl: router.asPath },

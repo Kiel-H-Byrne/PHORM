@@ -1,0 +1,16 @@
+rules_version = '2';
+
+// PHORM: all reads and writes go through the Next.js API routes, which use the
+// Firebase Admin SDK (bypasses these rules) after verifying the caller's ID
+// token and enforcing ownership. Direct client access is therefore denied.
+//
+// If you later add client-side Firestore access, open ONLY the specific paths
+// needed, e.g.:
+//   match /users/{uid} { allow read: if request.auth.uid == uid; }
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

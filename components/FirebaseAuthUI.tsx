@@ -1,9 +1,10 @@
 "use client";
 
 import { appAuth } from "@/db/firebase";
-import { findOrCreateUser } from "@/db/users";
-import { startFirebaseUILogin } from "@/pages/api/auth/fbAuth";
-import { setAuthCookie } from "@/util/authCookies";
+import { trackEvent } from "@/util/analytics";
+import authFetch from "@/util/authFetch";
+import { startFirebaseUILogin } from "@/util/firebaseUI";
+import { safeReturnUrl, setAuthCookie } from "@/util/authCookies";
 import { Box, Heading, Text, useToast } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useEffect, useRef } from "react";
@@ -23,6 +24,15 @@ const FirebaseAuthUI = ({
   const router = useRouter();
   const toast = useToast();
   const authContainerRef = useRef<HTMLDivElement>(null);
+  // `router` gets a new identity on every route event, so keep the latest
+  // router/toast in refs and subscribe exactly once. Depending on them made the
+  // effect re-subscribe after each redirect; Firebase fires immediately for a
+  // signed-in user, which re-toasted and re-redirected in a loop.
+  const routerRef = useRef(router);
+  const toastRef = useRef(toast);
+  routerRef.current = router;
+  toastRef.current = toast;
+  const handledSignIn = useRef(false);
 
   useEffect(() => {
     // Only initialize FirebaseUI if we're in the browser
@@ -33,36 +43,22 @@ const FirebaseAuthUI = ({
 
         // Add event listener for auth state changes
         const unsubscribe = appAuth?.onAuthStateChanged(async (user) => {
-          if (user) {
+          if (user && !handledSignIn.current) {
+            handledSignIn.current = true;
             try {
               // User is signed in
-              // Set auth cookie
               setAuthCookie(user);
-              console.log(user);
-              // Create or find user in the users collection
-              // This ensures phone auth users have a record in the users table
-              const userData = {
-                id: user.uid,
-                name: user.displayName || user.phoneNumber || "New Member",
-                email: user.email || "",
-                image: user.photoURL || "",
-                emailVerified: user.emailVerified || false,
-                profile: {
-                  firstName: user.displayName?.split(" ")[0] || "",
-                  lastName:
-                    user.displayName?.split(" ").slice(1).join(" ") || "",
-                  contact: {
-                    email: user.email || "",
-                    phone: user.phoneNumber || "",
-                  },
-                  orgs: [],
-                },
-              };
+              // Creates the member record on first sign-in. Best effort:
+              // a failure here must not block the redirect.
+              await authFetch(`/api/users/${user.uid}`).catch((e) =>
+                console.error("Error creating user record:", e)
+              );
+              trackEvent("login", {
+                method: user.providerData[0]?.providerId ?? "unknown",
+              });
 
-              // Find or create the user
-              await findOrCreateUser(user.uid, userData);
-
-              toast({
+              toastRef.current({
+                id: "sign-in-success",
                 title: "Sign in successful",
                 description: `Welcome ${
                   user.displayName ||
@@ -75,10 +71,9 @@ const FirebaseAuthUI = ({
                 isClosable: true,
               });
 
-              // Redirect to dashboard or home page
-              router.push("/dashboard");
+              routerRef.current.replace(safeReturnUrl(routerRef.current.query));
             } catch (error) {
-              console.error("Error creating user record:", error);
+              console.error("Error completing sign in:", error);
             }
           }
         });
@@ -89,7 +84,7 @@ const FirebaseAuthUI = ({
         };
       } catch (error) {
         console.error("Error initializing Firebase UI:", error);
-        toast({
+        toastRef.current({
           title: "Authentication Error",
           description:
             "There was a problem initializing the authentication system. Please try again later.",
@@ -99,7 +94,7 @@ const FirebaseAuthUI = ({
         });
       }
     }
-  }, [router, toast]);
+  }, []);
 
   return (
     <Box textAlign="center" p={5}>

@@ -1,7 +1,9 @@
 import { Box, Container, Flex } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { ReactNode, memo } from "react";
-import { CustomHead, MyFooter, MyNav } from "./";
+import CustomHead from "./CustomHead";
+import MyFooter from "./MyFooter";
+import MyNav from "./MyNav";
 
 type Props = {
   children?: ReactNode;
@@ -21,9 +23,10 @@ const Layout = ({ children, title }: Props) => {
   return (
     <Flex
       direction="column"
-      h={isMapPage ? "100vh" : undefined}
-      minH="100vh"
-      maxH={isMapPage ? "100vh" : undefined}
+      // dvh tracks the visible viewport on mobile (excludes browser chrome)
+      h={isMapPage ? "100dvh" : undefined}
+      minH="100dvh"
+      maxH={isMapPage ? "100dvh" : undefined}
       overflow={isMapPage ? "hidden" : undefined}
     >
       <CustomHead title={title || "The P.H.O.R.M"} />
@@ -47,9 +50,11 @@ const Layout = ({ children, title }: Props) => {
           </Container>
         )}
       </Box>
-      <Box as="footer" flexShrink={0} zIndex={1}>
-        <MyFooter />
-      </Box>
+      {!isMapPage && (
+        <Box flexShrink={0} zIndex={1}>
+          <MyFooter />
+        </Box>
+      )}
     </Flex>
   );
 };

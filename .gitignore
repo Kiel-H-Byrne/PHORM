@@ -43,3 +43,7 @@ next-env.d.ts
 momb-1b026-1564fbaaba3c.json
 # Local Netlify folder
 .netlify
+
+# listing import files contain owner contact info; only the template is tracked
+data/*.csv
+!data/listings.template.csv

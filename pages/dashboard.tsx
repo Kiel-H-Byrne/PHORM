@@ -1,4 +1,5 @@
-import { ProtectedRoute, UserDashboard } from "@/components";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import UserDashboard from "@/components/UserDashboard";
 import { Container } from "@chakra-ui/react";
 import Head from "next/head";
 

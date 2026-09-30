@@ -1,11 +1,17 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { ProfileSchema } from "@/db/schemas";
-import { findUserById } from "@/db/users";
+import authFetch, { authFetcher } from "@/util/authFetch";
+import {
+  EXPERIENCE_LEVELS,
+  ProfileSchema,
+  normalizeExperience,
+} from "@/db/schemas";
 import { IUser } from "@/types";
 import {
   Box,
   Button,
+  Checkbox,
   FormControl,
+  FormHelperText,
   FormErrorMessage,
   FormLabel,
   Grid,
@@ -53,10 +59,10 @@ export default function EditProfileForm({
     error: fetchError,
     isLoading,
     mutate,
-  } = useSWR<IUser | null>(`/api/users/${user?.uid}`, async () => {
-    if (!user?.uid) return;
-    return await findUserById(user.uid);
-  });
+  } = useSWR<IUser | null>(
+    user?.uid ? `/api/users/${user.uid}` : null,
+    authFetcher
+  );
 
   // Setup form with validation
   const {
@@ -65,6 +71,7 @@ export default function EditProfileForm({
     reset,
     setValue,
     getValues,
+    watch,
     formState: { errors },
   } = useForm<ProfileFormData>({
     resolver: zodResolver(ProfileSchema),
@@ -78,10 +85,11 @@ export default function EditProfileForm({
       bio: "",
       location: "",
       specialties: [],
-      experienceLevel: "intermediate",
+      experienceLevel: undefined,
       availability: "",
       socialLinks: [],
       orgs: [],
+      listInDirectory: false,
     },
   });
 
@@ -92,9 +100,8 @@ export default function EditProfileForm({
     string,
     ProfileFormData
   >(`/api/users/${user?.uid}`, async (url, { arg }) => {
-    const res = await fetch(url, {
+    const res = await authFetch(url, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(arg),
     });
 
@@ -119,11 +126,12 @@ export default function EditProfileForm({
         bio: userData.profile.bio || "",
         location: userData.profile.location || "",
         specialties: userData.profile.specialties || [],
-        experienceLevel: userData.profile.experienceLevel || "intermediate",
+        experienceLevel: normalizeExperience(userData.profile.experienceLevel),
         availability: userData.profile.availability || "",
         socialLinks: userData.profile.socialLinks || [],
         orgs: userData.profile.orgs || [],
         classYear: userData.profile.classYear,
+        listInDirectory: userData.profile.listInDirectory === true,
       });
     }
   }, [userData, reset]);
@@ -283,9 +291,11 @@ export default function EditProfileForm({
             <FormLabel>Experience Level</FormLabel>
             <Select {...register("experienceLevel")}>
               <option value="">Select experience level</option>
-              <option value="entry">Entry Level</option>
-              <option value="intermediate">Intermediate</option>
-              <option value="expert">Expert</option>
+              {EXPERIENCE_LEVELS.map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
             </Select>
             <FormErrorMessage>
               {errors.experienceLevel?.message}
@@ -336,7 +346,7 @@ export default function EditProfileForm({
               </InputRightElement>
             </InputGroup>
             <HStack spacing={2} mt={2} wrap="wrap">
-              {getValues("specialties")?.map((specialty: string) => (
+              {watch("specialties")?.map((specialty: string) => (
                 <Tag
                   key={specialty}
                   size="md"
@@ -359,6 +369,17 @@ export default function EditProfileForm({
           <FormLabel>Bio</FormLabel>
           <Textarea {...register("bio")} rows={4} />
           <FormErrorMessage>{errors.bio?.message}</FormErrorMessage>
+        </FormControl>
+
+        <FormControl>
+          <Checkbox {...register("listInDirectory")} colorScheme="blue">
+            Show me in the Member Directory
+          </Checkbox>
+          <FormHelperText>
+            Other signed-in members will see your name, photo, location,
+            occupation, lodge, class year and bio. Your email and phone number
+            are never shown.
+          </FormHelperText>
         </FormControl>
 
         <Button

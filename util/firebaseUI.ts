@@ -28,7 +28,6 @@ export const getUiConfig = () => {
   if (typeof window === "undefined") return {};
 
   return {
-    signInSuccessUrl: "/dashboard", // Redirect URL after successful login
     signInOptions: [
       // Add phone authentication provider
       {
@@ -55,8 +54,8 @@ export const getUiConfig = () => {
       signInSuccessWithAuthResult: (authResult: any) => {
         // User successfully signed in
         console.log("User signed in successfully:", authResult.user);
-        // Don't redirect automatically, we'll handle it
-        return true;
+        // FirebaseAuthUI handles the redirect (honoring returnUrl).
+        return false;
       },
     },
   };
@@ -152,28 +151,4 @@ export function startFirebaseUILogin(containerId: string) {
 
     throw error; // Re-throw to allow component to handle it
   }
-}
-
-// Function to log out the user
-export async function logoutUser() {
-  try {
-    if (firebase.auth()) {
-      await firebase.auth().signOut();
-      console.log("User logged out successfully");
-    }
-  } catch (error) {
-    console.error("Error logging out:", error);
-  }
-}
-
-// Function to get the currently logged-in user
-// export function getCurrentUser() {
-//     return firebase.auth ? firebase.auth().currentUser : null;
-// }
-
-// Function to get the current Firebase user state
-export function onAuthStateChanged(callback: (user: any) => void) {
-  if (!firebase.auth()) return () => {};
-
-  return firebase.auth().onAuthStateChanged(callback);
 }

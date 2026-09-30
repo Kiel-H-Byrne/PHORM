@@ -1,4 +1,4 @@
-require("dotenv").config({ path: ".env.local" });
+require("@next/env").loadEnvConfig(require("path").resolve(__dirname, ".."));
 
 /*
   Database initialization/seed script for PHORM

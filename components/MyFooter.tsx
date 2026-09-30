@@ -17,8 +17,7 @@ import {
 
 interface Props {}
 
-const SHARE_TEXT =
-  "Check out PHORM — Prince Hall Online Registry of Merchants";
+const SHARE_TEXT = "Check out PHORM — Prince Hall Online Registry of Merchants";
 
 const MyFooter = (props: Props) => {
   const [homeUrl, setHomeUrl] = useState("https://phorm.app");
@@ -62,11 +61,7 @@ const MyFooter = (props: Props) => {
   ) => {
     e.preventDefault();
     if (typeof window !== "undefined") {
-      window.open(
-        url,
-        "_blank",
-        "noopener,noreferrer,width=600,height=500"
-      );
+      window.open(url, "_blank", "noopener,noreferrer,width=600,height=500");
     }
   };
 
@@ -91,7 +86,11 @@ const MyFooter = (props: Props) => {
         px={0}
         {...props}
       >
-        <Box textAlign={{ base: "center", sm: "left" }} color="gray.600" lineHeight="normal">
+        <Box
+          textAlign={{ base: "center", sm: "left" }}
+          color="gray.600"
+          lineHeight="normal"
+        >
           <Text as="span">
             © Copyright{" "}
             <Link isExternal href="https://tenksolutions.com">

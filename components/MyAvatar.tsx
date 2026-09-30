@@ -28,52 +28,48 @@ const MyAvatar = () => {
     push("/");
   };
   const isLoggedIn = !!user;
+  if (!isLoggedIn) {
+    return loading ? (
+      <CircularProgress isIndeterminate size="32px">
+        <CircularProgressLabel>
+          <Icon as={TbProgress} />
+        </CircularProgressLabel>
+      </CircularProgress>
+    ) : (
+      <Button as={NextLink} href="/auth/login" size="sm" variant="outline">
+        Sign in
+      </Button>
+    );
+  }
   return (
-    <Popover placement="top-start">
+    <Popover placement="bottom-end">
       <PopoverTrigger>
-        <Box>
-          {isLoggedIn && user?.photoURL ? (
-            <Avatar loading="lazy" src={user.photoURL} />
-          ) : loading ? (
-            <CircularProgress isIndeterminate>
-              <CircularProgressLabel>
-                <Icon as={TbProgress} />
-              </CircularProgressLabel>
-            </CircularProgress>
-          ) : (
-            <Avatar
-              src={`https://api.dicebear.com/7.x/shapes/svg?backgroundType=gradientLinear,solid&radius=50&seed=${Math.random().toPrecision(
-                20
-              )}}`}
-            />
-          )}
+        <Box as="button" aria-label="Account menu">
+          <Avatar
+            size="sm"
+            loading="lazy"
+            src={user?.photoURL || undefined}
+            name={user?.displayName || user?.email || undefined}
+          />
         </Box>
       </PopoverTrigger>
       <PopoverContent>
         <PopoverHeader fontWeight="semibold" textAlign={"center"}>
-          Status
+          {user?.displayName || user?.email || user?.phoneNumber || "Account"}
         </PopoverHeader>
         <PopoverArrow />
         <PopoverCloseButton />
         <PopoverBody>
           <HStack justify="space-evenly">
-            {isLoggedIn ? (
-              <>
-                <Button onClick={handleSignOut}>Sign Out</Button>
-                <Button as={NextLink} href="/dashboard">
-                  Dashboard
-                </Button>
-              </>
-            ) : (
-              <Button onClick={() => push("/auth/login")}>Sign In</Button>
-            )}
+            <Button as={NextLink} href="/dashboard" colorScheme="blue">
+              My dashboard
+            </Button>
+            <Button onClick={handleSignOut}>Sign out</Button>
           </HStack>
         </PopoverBody>
       </PopoverContent>
     </Popover>
-  ); // <Button leftIcon={<CheckCircleIcon />} onClick={() => signIn()}>
-  //   Login
-  // </Button>
+  );
 };
 
 export default memo(MyAvatar);

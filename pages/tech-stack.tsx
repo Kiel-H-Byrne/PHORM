@@ -192,7 +192,7 @@ export function Section({
   );
 }
 
-export function TechList({ techs }: { techs: (As | string | any)[][] }) {
+export function TechList({ techs }: { techs: any[][] }) {
   return (
     <UnorderedList>
       {techs.map((tech, i) => (

@@ -1,7 +1,15 @@
-import { listingsFetch, listingUpdate } from "@/db/listings";
-import { MAX_AGE } from "@/util/constants";
+import { adminDb } from "@/db/admin";
+import {
+  ListingUpdateSchema,
+  buildAddress,
+  geoFields,
+  getListing,
+  isVisible,
+  listingOwnerId,
+  toPublicListing,
+} from "@/db/listingsAdmin";
+import { isAdmin, requireUser } from "@/util/apiAuth";
 import { NextApiRequest, NextApiResponse } from "next";
-import { IListing } from "@/types";
 
 export default async function handler(
   req: NextApiRequest,
@@ -12,122 +20,73 @@ export default async function handler(
     method,
   } = req;
 
-  // Validate listingId
   if (!listingId || typeof listingId !== "string") {
     return res.status(400).json({ error: "Invalid listing ID" });
   }
 
-  switch (method) {
-    case "GET":
-      try {
-        const listing = await listingsFetch(listingId);
-        
-        if (!listing) {
-          return res.status(404).json({ error: "Listing not found" });
-        }
-        
-        res.setHeader(
-          "Cache-Control",
-          `public, max-age=${MAX_AGE}, s-maxage=${2 * MAX_AGE}`
-        );
-        
-        return res.status(200).json(listing);
-      } catch (error) {
-        console.error(`Error fetching listing ${listingId}:`, error);
-        return res.status(500).json({ 
-          error: "Failed to fetch listing",
-          details: error instanceof Error ? error.message : "Unknown error"
-        });
-      }
-      break;
+  try {
+    const existing = await getListing(listingId);
 
-    case "PUT":
-      try {
-        // Check if listing exists
-        const existingListing = await listingsFetch(listingId);
-        
-        if (!existingListing) {
-          return res.status(404).json({ error: "Listing not found" });
-        }
-        
-        // TODO: Add authentication check here
-        // if (!req.user || req.user.uid !== existingListing.creator?.id) {
-        //   return res.status(403).json({ error: "Not authorized to edit this listing" });
-        // }
-        
-        // Parse and validate request body
-        if (!req.body) {
-          return res.status(400).json({ error: "Request body is required" });
-        }
-        
-        const updateData = JSON.parse(req.body) as Partial<IListing>;
-        
-        // Add updated timestamp
-        updateData.updated = new Date();
-        
-        // Update the listing
-        const success = await listingUpdate(listingId, updateData);
-        
-        if (!success) {
-          return res.status(500).json({ error: "Failed to update listing" });
-        }
-        
-        // Return success response
-        return res.status(200).json({ 
-          success: true, 
-          message: "Listing updated successfully",
-          listingId
-        });
-      } catch (error) {
-        console.error(`Error updating listing ${listingId}:`, error);
-        return res.status(500).json({ 
-          error: "Failed to update listing",
-          details: error instanceof Error ? error.message : "Unknown error"
-        });
+    if (method === "GET") {
+      if (!existing || !isVisible(existing.data)) {
+        return res.status(404).json({ error: "Listing not found" });
       }
-      break;
+      return res.status(200).json(toPublicListing(existing.id, existing.data));
+    }
 
-    case "DELETE":
-      try {
-        // Check if listing exists
-        const existingListing = await listingsFetch(listingId);
-        
-        if (!existingListing) {
-          return res.status(404).json({ error: "Listing not found" });
-        }
-        
-        // TODO: Add authentication check here
-        // if (!req.user || req.user.uid !== existingListing.creator?.id) {
-        //   return res.status(403).json({ error: "Not authorized to delete this listing" });
-        // }
-        
-        // Mark listing as deleted (soft delete)
-        const success = await listingUpdate(listingId, { 
-          deleted: true,
-          deletedAt: new Date()
-        });
-        
-        if (!success) {
-          return res.status(500).json({ error: "Failed to delete listing" });
-        }
-        
-        // Return success response
-        return res.status(200).json({ 
-          success: true, 
-          message: "Listing deleted successfully",
-          listingId
-        });
-      } catch (error) {
-        console.error(`Error deleting listing ${listingId}:`, error);
-        return res.status(500).json({ 
-          error: "Failed to delete listing",
-          details: error instanceof Error ? error.message : "Unknown error"
-        });
-      }
-      break;
-
-    default:
+    if (method !== "PUT" && method !== "DELETE") {
       res.setHeader("Allow", ["GET", "PUT", "DELETE"]);
-      res.status(405).end(`Method ${method} Not Allowed`);
+      return res.status(405).end(`Method ${method} Not Allowed`);
+    }
+
+    const user = await requireUser(req, res);
+    if (!user) return;
+
+    if (!existing || existing.data.deleted === true) {
+      return res.status(404).json({ error: "Listing not found" });
+    }
+    if (listingOwnerId(existing.data) !== user.uid && !isAdmin(user)) {
+      return res
+        .status(403)
+        .json({ error: "Only the listing owner can change this listing" });
+    }
+
+    const ref = adminDb().collection("listings").doc(listingId);
+    const now = new Date().toISOString();
+
+    if (method === "DELETE") {
+      await ref.update({ deleted: true, deletedAt: now, updatedAt: now });
+      return res.status(200).json({ success: true, listingId });
+    }
+
+    const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+    const parsed = ListingUpdateSchema.safeParse(body);
+    if (!parsed.success) {
+      return res.status(400).json({
+        error: parsed.error.issues[0]?.message || "Invalid listing",
+        issues: parsed.error.issues,
+      });
+    }
+    const merged = { ...existing.data, ...parsed.data };
+    if (!merged.phone && !merged.email && !merged.url) {
+      return res
+        .status(400)
+        .json({ error: "Add at least one way to contact the business" });
+    }
+    const update: Record<string, any> = {
+      ...parsed.data,
+      address: buildAddress(merged),
+      updatedAt: now,
+    };
+    if (typeof merged.lat === "number" && typeof merged.lng === "number") {
+      Object.assign(update, geoFields(merged.lat, merged.lng));
+    }
+    await ref.update(update);
+    return res
+      .status(200)
+      .json(toPublicListing(listingId, { ...existing.data, ...update }));
+  } catch (error) {
+    console.error(`Listing ${method} ${listingId} error:`, error);
+    return res.status(500).json({ error: "Something went wrong" });
   }
 }

@@ -35,18 +35,19 @@ import {
   useBreakpointValue,
   useDisclosure,
 } from "@chakra-ui/react";
-import {
-  GoogleMap,
-  MarkerClusterer,
-  useJsApiLoader,
-} from "@react-google-maps/api";
-import { Clusterer, MarkerExtended } from "@react-google-maps/marker-clusterer";
-import { FaDirections, FaHeart, FaShare } from "react-icons/fa";
+import { GoogleMap, MarkerClusterer } from "@react-google-maps/api";
+import { Clusterer } from "@react-google-maps/marker-clusterer";
+import { FaDirections, FaInfoCircle, FaShare } from "react-icons/fa";
 import { MdInfoOutline } from "react-icons/md";
+import NextLink from "next/link";
+import { useRouter } from "next/router";
 import SWR from "swr";
+import { trackEvent } from "@/util/analytics";
+import { useGoogleMaps } from "@/util/mapsLoader";
+import { directionsUrl, listingPath, shareListing } from "@/util/share";
 import { IAppMap, IListing } from "../types";
 import { CLUSTER_STYLE, GEOCENTER, MAP_STYLES } from "../util/constants";
-import { MyMarker } from "./";
+import MyMarker from "./MyMarker";
 import ListingCard from "./ListingCard";
 import MapSearch from "./MapSearch";
 
@@ -94,10 +95,17 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
     ? `/api/listings?all=true&lat=${client_location.lat}&lng=${client_location.lng}`
     : "/api/listings?all=true";
 
-  const { isLoaded } = useJsApiLoader({
-    id: "google-map-script",
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY!,
-  });
+  const { isLoaded } = useGoogleMaps();
+  const router = useRouter();
+  // Deep link from a listing page: /map?center=lat,lng
+  const focus = useMemo(() => {
+    const [lat, lng] = String(router.query.center || "")
+      .split(",")
+      .map(Number);
+    return Number.isFinite(lat) && Number.isFinite(lng) && lat !== 0
+      ? { lat, lng }
+      : null;
+  }, [router.query.center]);
 
   const {
     isOpen: isDrawerOpen,
@@ -110,12 +118,9 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
     onClose: setWindowClosed,
   } = useDisclosure();
   // We'll use the position of the first marker in activeData for the info window
-  const [activeData, setActiveData] = useState(
-    [] as IListing[] & MarkerExtended[]
-  );
+  const [activeData, setActiveData] = useState<IListing[]>([]);
   const [mapRef, setMapRef] = useState<google.maps.Map | null>(null);
   const [selectedListing, setSelectedListing] = useState<IListing | null>(null);
-  const [isFavorite, setIsFavorite] = useState(false);
   const [userLocation, setUserLocation] = useState<{
     lat: number;
     lng: number;
@@ -151,64 +156,29 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
   const handleSelectListing = useCallback(
     (listing: IListing) => {
       setSelectedListing(listing);
-      setActiveData([listing as IListing & MarkerExtended]);
+      setActiveData([listing]);
       toggleDrawer();
     },
     [toggleDrawer]
   );
 
-  // Handle favorite toggle
-  const handleFavoriteToggle = useCallback(() => {
-    setIsFavorite(!isFavorite);
-    toast({
-      title: isFavorite ? "Removed from favorites" : "Added to favorites",
-      status: "success",
-      duration: 2000,
-      isClosable: true,
-    });
-  }, [isFavorite, toast]);
-
   // Handle share
-  const handleShare = useCallback(() => {
-    if (selectedListing) {
-      if (navigator.share) {
-        navigator
-          .share({
-            title: selectedListing.name,
-            text: `Check out ${selectedListing.name} on PHORM!`,
-            url: `${window.location.origin}/listing/${selectedListing.place_id}`,
-          })
-          .catch(console.error);
-      } else {
-        // Fallback for browsers that don't support navigator.share
-        navigator.clipboard.writeText(
-          `${window.location.origin}/listing/${selectedListing.place_id}`
-        );
-        toast({
-          title: "Link copied to clipboard",
-          status: "success",
-          duration: 2000,
-          isClosable: true,
-        });
-      }
+  const handleShare = useCallback(async () => {
+    if (!selectedListing) return;
+    if ((await shareListing(selectedListing)) === "copied") {
+      toast({ title: "Link copied", status: "success", duration: 2000 });
     }
   }, [selectedListing, toast]);
 
   // Handle get directions
   const handleGetDirections = useCallback(() => {
-    if (selectedListing?.lat && selectedListing?.lng) {
-      window.open(
-        `https://www.google.com/maps/dir/?api=1&destination=${selectedListing.lat},${selectedListing.lng}`,
-        "_blank"
-      );
-    } else if (selectedListing?.address) {
-      window.open(
-        `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-          selectedListing.address
-        )}`,
-        "_blank"
-      );
-    }
+    if (!selectedListing) return;
+    trackEvent("contact_click", {
+      method: "directions",
+      listingId: selectedListing.id,
+      source: "map",
+    });
+    window.open(directionsUrl(selectedListing), "_blank", "noopener");
   }, [selectedListing]);
 
   // Update selected listing when active data changes
@@ -278,7 +248,7 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
           );
           if (closest) {
             setSelectedListing(closest);
-            setActiveData([closest as IListing & MarkerExtended]);
+            setActiveData([closest]);
             toggleDrawer();
           }
         }
@@ -303,8 +273,8 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
           bottom: 0,
           right: 0,
         }}
-        center={client_location || center}
-        zoom={client_location ? 16 : zoom}
+        center={client_location || focus || center}
+        zoom={client_location || focus ? 16 : zoom}
         options={options}
       >
         {/* Map Search Component */}
@@ -403,17 +373,19 @@ const AppMap = ({ client_location, setMapInstance }: IAppMap) => {
                   >
                     Directions
                   </Button>
-                  <Button
-                    leftIcon={<Icon as={FaHeart} />}
-                    colorScheme={isFavorite ? "red" : "gray"}
-                    variant={isFavorite ? "solid" : "outline"}
-                    size="sm"
-                    onClick={handleFavoriteToggle}
-                    flex={1}
-                    mr={2}
-                  >
-                    {isFavorite ? "Saved" : "Save"}
-                  </Button>
+                  {selectedListing?.id && (
+                    <Button
+                      as={NextLink}
+                      href={listingPath(selectedListing)}
+                      leftIcon={<Icon as={FaInfoCircle} />}
+                      variant="outline"
+                      size="sm"
+                      flex={1}
+                      mr={2}
+                    >
+                      Details
+                    </Button>
+                  )}
                   <Button
                     leftIcon={<Icon as={FaShare} />}
                     colorScheme="gray"

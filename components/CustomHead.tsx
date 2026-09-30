@@ -1,4 +1,5 @@
 import Head from "next/head";
+import { SITE_DESCRIPTION, SITE_URL } from "@/util/constants";
 import { memo } from "react";
 
 interface Props {
@@ -8,15 +9,13 @@ interface Props {
 const CustomHead = ({ title }: Props) => {
   return (
     <Head>
-      <title>{title}</title>
+      <title key="title">{title}</title>
       <meta charSet="utf-8" />
 
       <meta
         name="viewport"
-        // content="width=device-width, initial-scale=0.86, maximum-scale=1, minimum-scale=0.86"
-        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui"
+        content="width=device-width, initial-scale=1, viewport-fit=cover"
       />
-      <meta name="format-detection" content="telephone=no" />
       <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
 
       <meta name="HandheldFriendly" content="true" />
@@ -25,39 +24,23 @@ const CustomHead = ({ title }: Props) => {
       <meta name="apple-mobile-web-app-status-bar-style" content="black" />
       <meta name="apple-mobile-web-app-title" content="PHORM" />
 
-      <meta property="og:title" content="PHORM: " />
-      <meta property="og:type" content="website" />
-      <meta
-        property="og:image"
-        content="https://phorm.kielbyrne.com/img/Logo_TWPx1024.jpg"
-      />
-      <meta
-        property="og:image:secure_url"
-        content="https://phorm.kielbyrne.com/img/Logo_TWPx1024.jpg"
-      />
-      <meta property="og:image:type" content="image/jpeg" />
-      <meta property="og:image:width" content="1024" />
-      <meta property="og:image:height" content="1024" />
-      <meta property="og:image:alt" content="The PHORM.com Logo" />
-      <meta property="og:url" content="https://phorm.kielbyrne.com" />
+      <meta property="og:title" content={title} key="og:title" />
+      <meta property="og:type" content="website" key="og:type" />
+      {SITE_URL && (
+        <meta
+          property="og:image"
+          content={`${SITE_URL}/img/Logo1.png`}
+          key="og:image"
+        />
+      )}
+      <meta name="description" content={SITE_DESCRIPTION} key="description" />
       <meta
         property="og:description"
-        content="Real Investment Decisions by Real People"
+        content={SITE_DESCRIPTION}
+        key="og:description"
       />
-      <meta property="og:determiner" content="the" />
       <meta property="og:locale" content="en_US" />
       <meta property="og:site_name" content="PHORM" />
-      {/* <meta property="fb:app_id" content="235091633613282" />
-      <meta
-        name="google-site-verification"
-        content="OJEUZfTeTwEUiclFV1wP8-_pr29LuzIbx1ldaX5jdK4"
-      /> */}
-      <meta
-        name="google-signin-client_id"
-        content={process.env.NEXT_PUBLIC_TEST_client_id}
-      />
-      <meta name="google-signin-cookiepolicy" content="single_host_origin" />
-      <meta name="google-signin-scope" content="profile email" />
 
       <meta name="theme-color" content="#edf2ff" />
       <meta name="msapplication-config" content="/browserconfig.xml" />

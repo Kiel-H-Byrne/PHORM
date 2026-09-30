@@ -86,16 +86,24 @@ export default function CouponsPage() {
   params.set("pageSize", String(pageSize));
   const data_uri = `/api/coupons?${params.toString()}`;
 
-  const { data, mutate: mutateCoupons } = useSWR<CouponsPageResponse>(data_uri, fetcher, {
-    revalidateOnFocus: false,
-  });
+  const { data, mutate: mutateCoupons } = useSWR<CouponsPageResponse>(
+    data_uri,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+    }
+  );
 
   const items = data?.data ?? [];
   const total = data?.total ?? 0;
   const totalPages = data?.totalPages ?? 1;
 
   const pushQuery = (patch: Record<string, any>) => {
-    router.push({ pathname: router.pathname, query: { ...router.query, ...patch } }, undefined, { shallow: true });
+    router.push(
+      { pathname: router.pathname, query: { ...router.query, ...patch } },
+      undefined,
+      { shallow: true }
+    );
   };
 
   const handleAddCouponClick = () => {
@@ -110,12 +118,24 @@ export default function CouponsPage() {
   const emptyBorder = useColorModeValue("gray.200", "gray.700");
 
   return (
-    <Stack spacing={8} px={{ base: 4, md: 8 }} py={{ base: 6, md: 10 }} maxW="1200px" mx="auto">
-      <Flex direction={{ base: "column", sm: "row" }} justify="space-between" align={{ base: "flex-start", sm: "center" }} gap={4}>
+    <Stack
+      spacing={8}
+      px={{ base: 4, md: 8 }}
+      py={{ base: 6, md: 10 }}
+      maxW="1200px"
+      mx="auto"
+    >
+      <Flex
+        direction={{ base: "column", sm: "row" }}
+        justify="space-between"
+        align={{ base: "flex-start", sm: "center" }}
+        gap={4}
+      >
         <Box>
           <Heading size="xl">Member Deals & Coupons</Heading>
           <Text color="gray.600" mt={1}>
-            Explore discounts and special offers from businesses in the PHORM network.
+            Explore discounts and special offers from businesses in the PHORM
+            network.
           </Text>
         </Box>
         <Button
@@ -155,8 +175,9 @@ export default function CouponsPage() {
             No Deals or Coupons Found
           </Heading>
           <Text color="gray.600" maxW="500px" mx="auto" mb={6}>
-            There are currently no active deals or coupons available in the network.
-            Be the first to share an exclusive discount or offer with the PHORM community!
+            There are currently no active deals or coupons available in the
+            network. Be the first to share an exclusive discount or offer with
+            the PHORM community!
           </Text>
           <Button
             colorScheme="blue"
@@ -175,21 +196,51 @@ export default function CouponsPage() {
             </Text>
             <HStack>
               <Text fontSize="sm">Page size:</Text>
-              <Select size="sm" value={String(pageSize)} onChange={(e) => pushQuery({ pageSize: e.target.value, page: 1 })} w="auto">
+              <Select
+                size="sm"
+                value={String(pageSize)}
+                onChange={(e) =>
+                  pushQuery({ pageSize: e.target.value, page: 1 })
+                }
+                w="auto"
+              >
                 {[12, 20, 50].map((n) => (
-                  <option key={n} value={n}>{n}</option>
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
                 ))}
               </Select>
               <HStack>
-                <Button size="sm" onClick={() => pushQuery({ page: Math.max(1, page - 1) })} isDisabled={page <= 1}>Prev</Button>
-                <Button size="sm" onClick={() => pushQuery({ page: Math.min(totalPages, page + 1) })} isDisabled={page >= totalPages}>Next</Button>
+                <Button
+                  size="sm"
+                  onClick={() => pushQuery({ page: Math.max(1, page - 1) })}
+                  isDisabled={page <= 1}
+                >
+                  Prev
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() =>
+                    pushQuery({ page: Math.min(totalPages, page + 1) })
+                  }
+                  isDisabled={page >= totalPages}
+                >
+                  Next
+                </Button>
               </HStack>
               <HStack>
                 <Text fontSize="sm">Go to:</Text>
-                <NumberInput size="sm" value={page} min={1} max={totalPages} onChange={(_, v) => {
-                  const next = Math.min(totalPages, Math.max(1, v || 1));
-                  if (next !== page) pushQuery({ page: next });
-                }} w="80px">
+                <NumberInput
+                  size="sm"
+                  value={page}
+                  min={1}
+                  max={totalPages}
+                  onChange={(_, v) => {
+                    const next = Math.min(totalPages, Math.max(1, v || 1));
+                    if (next !== page) pushQuery({ page: next });
+                  }}
+                  w="80px"
+                >
                   <NumberInputField />
                 </NumberInput>
               </HStack>
@@ -206,4 +257,3 @@ export default function CouponsPage() {
     </Stack>
   );
 }
-

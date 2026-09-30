@@ -23,11 +23,11 @@ export type Libraries = (
 
 export interface IAppMap {
   client_location: GLocation | null;
-  setMapInstance: () => void;
-  mapInstance: google.maps.Map;
+  setMapInstance: (map: google.maps.Map) => void;
+  mapInstance: google.maps.Map | null;
 }
 export interface ILocateMe {
-  mapInstance: google.maps.Map | google.maps.StreetViewPanorama;
+  mapInstance: google.maps.Map | null;
   setClientLocation: any; //a usestate fxn returning {latlng};
   clientLocation: GLocation | null;
 }
@@ -78,5 +78,6 @@ export const PHA_LODGES: GenericRecord = {
 // };
 export type IMemberQuery = Partial<IUser["profile"]>;
 export type MemberQuery = Partial<
-  IUser["profile"] & Pick<IUser, "name" | "email">
+  IUser["profile"] &
+    Pick<IUser, "name" | "email"> & { specialty: string; experience: string }
 >;

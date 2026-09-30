@@ -1,4 +1,5 @@
 import { MemberQuery } from "@/types";
+import { EXPERIENCE_LEVELS } from "@/db/schemas";
 import { debounce } from "@/utils/helpers";
 import {
   Button,
@@ -100,9 +101,11 @@ export default function MemberFilter({
             aria-label="Filter by experience"
           >
             <option value="">Any Experience</option>
-            <option value="entry">Entry Level</option>
-            <option value="intermediate">Intermediate</option>
-            <option value="expert">Expert</option>
+            {EXPERIENCE_LEVELS.map(({ value, label }) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
           </Select>
         </FormControl>
 

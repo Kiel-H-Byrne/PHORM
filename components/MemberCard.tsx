@@ -27,7 +27,9 @@ function MemberCard({ user }: { user: IUser }) {
           <Avatar src={profilePhoto} />
           <Box ml={3}>
             <Heading size="md">
-              {firstName || "Jimothy"} {lastName || "LaCraQuis"}
+              {[firstName, lastName].filter(Boolean).join(" ") ||
+                user.name ||
+                "Member"}
             </Heading>
             {/* {lodgeOrChapterNumber && (
               <Text>

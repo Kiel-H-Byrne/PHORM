@@ -1,22 +1,27 @@
-import { appFsdb } from "@/db/firebase";
+import { adminDb } from "@/db/admin";
+import { getListing, listingOwnerId } from "@/db/listingsAdmin";
+import { CouponSchema } from "@/db/schemas";
 import { ICoupon } from "@/types";
-import {
-  addDoc,
-  collection,
-  getDocs,
-  getCountFromServer,
-  limit,
-  orderBy,
-  query,
-  startAfter,
-  where,
-} from "firebase/firestore";
+import { requireUser } from "@/util/apiAuth";
 import { NextApiRequest, NextApiResponse } from "next";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (!appFsdb) return res.status(500).json({ error: "Firestore is not configured" });
+const CouponInputSchema = CouponSchema.omit({
+  id: true,
+  createdBy: true,
+  createdAt: true,
+  updatedAt: true,
+  validFrom: true,
+  validUntil: true,
+}).extend({
+  validFrom: CouponSchema.shape.createdAt,
+  validUntil: CouponSchema.shape.createdAt,
+});
 
-  const couponsRef = collection(appFsdb, "coupons");
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  const couponsRef = adminDb().collection("coupons");
 
   switch (req.method) {
     case "GET":
@@ -33,115 +38,98 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           activeOnly = "true",
         } = req.query as Record<string, string | undefined>;
 
+        const snap = await couponsRef.limit(2000).get();
+        let coupons = snap.docs.map(
+          (d) => ({ ...(d.data() as ICoupon), id: d.id } as ICoupon)
+        );
         const creatorId = createdBy || creator;
-        let base = creatorId
-          ? query(couponsRef, where("createdBy", "==", creatorId))
-          : query(couponsRef, orderBy("createdAt", "desc"));
-        if (activeOnly === "true") base = query(base, where("active", "==", true));
-        if (listingId) base = query(base, where("listingId", "==", listingId));
-
-        // Fetch all items (safe for dev-scale datasets)
-        if (all === "true") {
-          const items: ICoupon[] = [];
-          let last: any = undefined;
-          const size = parseInt(pageSize || "50", 10);
-          const MAX = 1000;
-          while (items.length < MAX) {
-            let pageQ = query(base, limit(size));
-            if (last) pageQ = query(pageQ, startAfter(last));
-            const snap = await getDocs(pageQ);
-            if (snap.empty) break;
-            snap.docs.forEach((d) => items.push({ id: d.id, ...(d.data() as any) } as ICoupon));
-            last = snap.docs[snap.docs.length - 1];
-            if (snap.size < size) break;
-          }
-
-          // In-memory search
-          if (searchQuery) {
-            const term = searchQuery.toLowerCase();
-            return res.status(200).json(
-              items.filter(
-                (c) =>
-                  (c.title || "").toLowerCase().includes(term) ||
-                  (c.description || "").toLowerCase().includes(term) ||
-                  (Array.isArray(c.tags) && c.tags.join(" ").toLowerCase().includes(term))
-              )
-            );
-          }
-          return res.status(200).json(items);
-        }
-
-        // Paged request
-        let q = query(base, limit(parseInt(pageSize || "12", 10)));
-        if (parseInt(page || "1", 10) > 1) {
-          const backfill = await getDocs(
-            query(base, limit((parseInt(page || "1", 10) - 1) * parseInt(pageSize || "12", 10)))
-          );
-          if (!backfill.empty) q = query(q, startAfter(backfill.docs[backfill.docs.length - 1]));
-        }
-
-        const snapshot = await getDocs(q);
-        let coupons = snapshot.docs.map((d) => ({ id: d.id, ...(d.data() as any) })) as ICoupon[];
-        if (creatorId) {
-          coupons.sort((a, b) => ((b.createdAt || "") > (a.createdAt || "") ? 1 : -1));
-        }
-
+        if (creatorId)
+          coupons = coupons.filter((c) => c.createdBy === creatorId);
+        if (activeOnly === "true") coupons = coupons.filter((c) => c.active);
+        if (listingId)
+          coupons = coupons.filter((c) => c.listingId === listingId);
         if (searchQuery) {
           const term = searchQuery.toLowerCase();
           coupons = coupons.filter(
             (c) =>
               (c.title || "").toLowerCase().includes(term) ||
               (c.description || "").toLowerCase().includes(term) ||
-              (Array.isArray(c.tags) && c.tags.join(" ").toLowerCase().includes(term))
+              (c.tags || []).join(" ").toLowerCase().includes(term)
           );
         }
+        coupons.sort((a, b) =>
+          (b.createdAt || "").localeCompare(a.createdAt || "")
+        );
 
+        if (all === "true") return res.status(200).json(coupons);
+
+        const size = Math.min(Math.max(parseInt(pageSize, 10) || 12, 1), 100);
+        const total = coupons.length;
+        const totalPages = Math.max(1, Math.ceil(total / size));
+        const pg = Math.min(Math.max(parseInt(page, 10) || 1, 1), totalPages);
+        const data = coupons.slice((pg - 1) * size, pg * size);
         if (includeCount === "true") {
-          const countSnap = await getCountFromServer(base);
-          const total = countSnap.data().count || 0;
-          const size = parseInt(pageSize || "12", 10);
-          const pg = parseInt(page || "1", 10);
-          const totalPages = Math.max(1, Math.ceil(total / size));
-          return res.status(200).json({ data: coupons, page: pg, pageSize: size, total, totalPages });
+          return res
+            .status(200)
+            .json({ data, page: pg, pageSize: size, total, totalPages });
         }
-
-        return res.status(200).json(coupons);
+        return res.status(200).json(data);
       } catch (e) {
         console.error("Coupons GET error", e);
         return res.status(500).json({ error: "Failed to fetch coupons" });
       }
 
-    case "POST":
+    case "POST": {
+      const user = await requireUser(req, res);
+      if (!user) return;
       try {
-        const body = req.body as Partial<ICoupon>;
+        const body =
+          typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+        const parsed = CouponInputSchema.safeParse(body);
+        if (!parsed.success || !parsed.data.title) {
+          return res.status(400).json({
+            error: parsed.success
+              ? "Title is required"
+              : parsed.error.issues[0]?.message,
+          });
+        }
+        const input = parsed.data;
+        if (input.listingId) {
+          const listing = await getListing(input.listingId);
+          if (!listing || listingOwnerId(listing.data) !== user.uid) {
+            return res.status(403).json({
+              error: "You can only add deals to your own listings",
+            });
+          }
+        }
         const now = new Date().toISOString();
-        const coupon: any = {
-          title: body.title || "",
-          description: body.description || "",
-          discountType: body.discountType || "percent",
-          value: body.value ?? null,
-          code: body.code || "",
-          memberOnly: body.memberOnly !== false,
-          terms: body.terms || "",
-          validFrom: body.validFrom || null,
-          validUntil: body.validUntil || null,
-          tags: Array.isArray(body.tags) ? body.tags : [],
-          listingId: body.listingId || null,
-          createdBy: body.createdBy || "anonymous",
-          active: body.active !== false,
+        const coupon = {
+          title: input.title,
+          description: input.description || "",
+          discountType: input.discountType || "percent",
+          value: input.value ?? null,
+          code: input.code || "",
+          memberOnly: input.memberOnly !== false,
+          terms: input.terms || "",
+          validFrom: input.validFrom || null,
+          validUntil: input.validUntil || null,
+          tags: input.tags || [],
+          listingId: input.listingId || null,
+          createdBy: user.uid,
+          active: input.active !== false,
           createdAt: now,
           updatedAt: now,
         };
-        const docRef = await addDoc(couponsRef, coupon);
+        const docRef = await couponsRef.add(coupon);
         return res.status(201).json({ id: docRef.id, ...coupon });
       } catch (e) {
         console.error("Coupons POST error", e);
         return res.status(500).json({ error: "Failed to create coupon" });
       }
+    }
 
     default:
       res.setHeader("Allow", ["GET", "POST"]);
       return res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }
-

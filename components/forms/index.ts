@@ -4,4 +4,10 @@ import AddListingForm from "./AddListingForm";
 import EditListingForm from "./EditListingForm";
 import EditListingModal from "./EditListingModal";
 
-export { AddCouponForm, AddCouponModal, AddListingForm, EditListingForm, EditListingModal };
+export {
+  AddCouponForm,
+  AddCouponModal,
+  AddListingForm,
+  EditListingForm,
+  EditListingModal,
+};
