@@ -15,7 +15,36 @@ const OrgSchema = z.object({
   number: z.string(),
   state: z.string(),
 });
-const experience_levels = ["apprentice", "intermediate", "master"] as const;
+// Single source of truth for the experience dropdowns (profile form, member filter).
+export const EXPERIENCE_LEVELS = [
+  { value: "entry", label: "Entry Level" },
+  { value: "intermediate", label: "Intermediate" },
+  { value: "expert", label: "Expert" },
+] as const;
+const experience_levels = ["entry", "intermediate", "expert"] as const;
+export type ExperienceLevel = (typeof experience_levels)[number];
+// Values saved before the dropdown and schema were aligned.
+const LEGACY_EXPERIENCE: Record<string, ExperienceLevel> = {
+  apprentice: "entry",
+  master: "expert",
+};
+
+/** Maps legacy/blank values to a valid experience level (or undefined). */
+export const normalizeExperience = (
+  v: unknown
+): ExperienceLevel | undefined => {
+  if (typeof v !== "string" || v === "") return undefined;
+  const mapped = LEGACY_EXPERIENCE[v] ?? v;
+  return (experience_levels as readonly string[]).includes(mapped)
+    ? (mapped as ExperienceLevel)
+    : undefined;
+};
+
+// Blank selects/number inputs submit "" or NaN; treat those as "not set".
+const blankToUndefined = (v: unknown) =>
+  v === "" || v === null || (typeof v === "number" && Number.isNaN(v))
+    ? undefined
+    : v;
 export const ProfileSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
@@ -30,11 +59,23 @@ export const ProfileSchema = z.object({
   bio: z.string().optional().or(z.literal("")),
   location: z.string().optional().or(z.literal("")),
   specialties: z.array(z.string()).optional().default([]),
-  experienceLevel: z.enum(experience_levels).optional(),
+  experienceLevel: z.preprocess(
+    (v) =>
+      v === "" || v == null ? undefined : LEGACY_EXPERIENCE[v as string] ?? v,
+    z.enum(experience_levels).optional()
+  ),
   availability: z.string().optional().or(z.literal("")),
   socialLinks: z.array(z.string()).optional().default([]),
   orgs: z.array(OrgSchema).optional().default([]),
-  classYear: z.number().optional(),
+  classYear: z.preprocess(
+    blankToUndefined,
+    z.coerce
+      .number()
+      .int("Enter a year like 2010")
+      .min(1900, "Enter a year like 2010")
+      .max(new Date().getFullYear(), "Year can't be in the future")
+      .optional()
+  ),
   // Member directory is opt-in: only members who set this appear to others.
   listInDirectory: z.boolean().optional(),
   nickName: z.string().optional(),

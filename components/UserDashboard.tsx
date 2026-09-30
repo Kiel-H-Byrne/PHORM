@@ -1,4 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
+import { EXPERIENCE_LEVELS, normalizeExperience } from "@/db/schemas";
 import { authFetcher } from "@/util/authFetch";
 import { ICoupon, IListing, IUser } from "@/types";
 import { formatPhoneNum } from "@/utils/helpers";
@@ -72,6 +73,7 @@ const UserDashboard = ({ userId }: UserDashboardProps) => {
   const [userCoupons, setUserCoupons] = useState<ICoupon[]>([]);
   const [userData, setUserData] = useState<IUser | null>(null);
   const [classYear, setClassYear] = useState<number | null>(null);
+  const experience = normalizeExperience(userData?.profile?.experienceLevel);
   // SWR so listings added/edited elsewhere (which revalidate /api/listings keys) show up here.
   const { data: userListings = [], isLoading: listingsLoading } = useSWR<
     IListing[]
@@ -404,15 +406,15 @@ const UserDashboard = ({ userId }: UserDashboardProps) => {
                         </Text>
                         <Badge
                           colorScheme={
-                            userData.profile.experienceLevel === "master"
+                            experience === "expert"
                               ? "green"
-                              : userData.profile.experienceLevel ===
-                                "intermediate"
+                              : experience === "intermediate"
                               ? "blue"
                               : "purple"
                           }
                         >
-                          {userData.profile.experienceLevel}
+                          {EXPERIENCE_LEVELS.find((l) => l.value === experience)
+                            ?.label ?? userData.profile.experienceLevel}
                         </Badge>
                       </Text>
                     </Flex>

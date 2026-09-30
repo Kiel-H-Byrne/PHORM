@@ -24,6 +24,15 @@ const FirebaseAuthUI = ({
   const router = useRouter();
   const toast = useToast();
   const authContainerRef = useRef<HTMLDivElement>(null);
+  // `router` gets a new identity on every route event, so keep the latest
+  // router/toast in refs and subscribe exactly once. Depending on them made the
+  // effect re-subscribe after each redirect; Firebase fires immediately for a
+  // signed-in user, which re-toasted and re-redirected in a loop.
+  const routerRef = useRef(router);
+  const toastRef = useRef(toast);
+  routerRef.current = router;
+  toastRef.current = toast;
+  const handledSignIn = useRef(false);
 
   useEffect(() => {
     // Only initialize FirebaseUI if we're in the browser
@@ -34,7 +43,8 @@ const FirebaseAuthUI = ({
 
         // Add event listener for auth state changes
         const unsubscribe = appAuth?.onAuthStateChanged(async (user) => {
-          if (user) {
+          if (user && !handledSignIn.current) {
+            handledSignIn.current = true;
             try {
               // User is signed in
               setAuthCookie(user);
@@ -47,7 +57,8 @@ const FirebaseAuthUI = ({
                 method: user.providerData[0]?.providerId ?? "unknown",
               });
 
-              toast({
+              toastRef.current({
+                id: "sign-in-success",
                 title: "Sign in successful",
                 description: `Welcome ${
                   user.displayName ||
@@ -60,7 +71,7 @@ const FirebaseAuthUI = ({
                 isClosable: true,
               });
 
-              router.replace(safeReturnUrl(router.query));
+              routerRef.current.replace(safeReturnUrl(routerRef.current.query));
             } catch (error) {
               console.error("Error completing sign in:", error);
             }
@@ -73,7 +84,7 @@ const FirebaseAuthUI = ({
         };
       } catch (error) {
         console.error("Error initializing Firebase UI:", error);
-        toast({
+        toastRef.current({
           title: "Authentication Error",
           description:
             "There was a problem initializing the authentication system. Please try again later.",
@@ -83,7 +94,7 @@ const FirebaseAuthUI = ({
         });
       }
     }
-  }, [router, toast]);
+  }, []);
 
   return (
     <Box textAlign="center" p={5}>

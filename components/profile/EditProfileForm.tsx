@@ -1,6 +1,10 @@
 import { useAuth } from "@/contexts/AuthContext";
 import authFetch, { authFetcher } from "@/util/authFetch";
-import { ProfileSchema } from "@/db/schemas";
+import {
+  EXPERIENCE_LEVELS,
+  ProfileSchema,
+  normalizeExperience,
+} from "@/db/schemas";
 import { IUser } from "@/types";
 import {
   Box,
@@ -81,7 +85,7 @@ export default function EditProfileForm({
       bio: "",
       location: "",
       specialties: [],
-      experienceLevel: "intermediate",
+      experienceLevel: undefined,
       availability: "",
       socialLinks: [],
       orgs: [],
@@ -122,7 +126,7 @@ export default function EditProfileForm({
         bio: userData.profile.bio || "",
         location: userData.profile.location || "",
         specialties: userData.profile.specialties || [],
-        experienceLevel: userData.profile.experienceLevel || "intermediate",
+        experienceLevel: normalizeExperience(userData.profile.experienceLevel),
         availability: userData.profile.availability || "",
         socialLinks: userData.profile.socialLinks || [],
         orgs: userData.profile.orgs || [],
@@ -287,9 +291,11 @@ export default function EditProfileForm({
             <FormLabel>Experience Level</FormLabel>
             <Select {...register("experienceLevel")}>
               <option value="">Select experience level</option>
-              <option value="entry">Entry Level</option>
-              <option value="intermediate">Intermediate</option>
-              <option value="expert">Expert</option>
+              {EXPERIENCE_LEVELS.map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
             </Select>
             <FormErrorMessage>
               {errors.experienceLevel?.message}
